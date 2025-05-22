@@ -1,0 +1,87 @@
+:py:mod:`visualizers.viser_app.tasks.acrobot`
+=============================================
+
+.. py:module:: visualizers.viser_app.tasks.acrobot
+
+
+Module Contents
+---------------
+
+.. py:data:: XML_PATH
+
+   
+
+.. py:class:: AcrobotConfig
+
+
+   Bases: :py:obj:`jacta.visualizers.viser_app.tasks.task.TaskConfig`
+
+   
+   Reward configuration for the acrobot task.
+   .. py:attribute:: default_command
+      :type: Optional[numpy.ndarray]
+
+      
+
+   .. py:attribute:: w_vertical
+      :type: float
+      :value: 10.0
+
+      
+
+   .. py:attribute:: w_velocity
+      :type: float
+      :value: 0.1
+
+      
+
+   .. py:attribute:: w_control
+      :type: float
+      :value: 0.1
+
+      
+
+   .. py:attribute:: p_vertical
+      :type: float
+      :value: 0.01
+
+      
+
+   .. py:attribute:: cutoff_time
+      :type: float
+      :value: 0.15
+
+      
+
+
+.. py:class:: Acrobot
+
+
+   Bases: :py:obj:`jacta.visualizers.viser_app.tasks.mujoco_task.MujocoTask`\ [\ :py:obj:`AcrobotConfig`\ ]
+
+   
+   Defines the acrobot balancing task.
+   .. py:method:: reward(states: numpy.ndarray, sensors: numpy.ndarray, controls: numpy.ndarray, config: AcrobotConfig, additional_info: dict[str, Any]) -> numpy.ndarray
+
+      
+      Implements the acrobot reward from MJPC.
+
+      Maps a list of states, list of controls, to a batch of rewards (summed over time) for each rollout.
+
+      The acrobot reward has four terms:
+
+      ::
+
+         * `vertical_rew`, penalizing the distance between the pole angle and vertical.
+         * `velocity_rew` penalizing squared linear and angular velocity.
+         * `control_rew` penalizing any actuation.
+
+
+      Since we return rewards, each penalty term is returned as negative. The max reward is zero.
+
+   .. py:method:: reset() -> None
+
+      
+      Resets the model to a default (random) state.
+
+

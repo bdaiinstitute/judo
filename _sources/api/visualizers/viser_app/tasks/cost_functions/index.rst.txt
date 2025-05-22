@@ -1,0 +1,15 @@
+:py:mod:`visualizers.viser_app.tasks.cost_functions`
+====================================================
+
+.. py:module:: visualizers.viser_app.tasks.cost_functions
+
+
+Module Contents
+---------------
+
+.. py:function:: smooth_l1_norm(input: numpy.ndarray, p: float) -> numpy.ndarray
+
+
+.. py:function:: quadratic_norm(input: numpy.ndarray) -> numpy.ndarray
+
+

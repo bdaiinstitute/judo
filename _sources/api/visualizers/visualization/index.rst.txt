@@ -1,0 +1,29 @@
+:py:mod:`visualizers.visualization`
+===================================
+
+.. py:module:: visualizers.visualization
+
+
+Module Contents
+---------------
+
+.. py:class:: Visualization
+
+
+   Bases: :py:obj:`Protocol`
+
+   
+   Container for updating the viser model with current state info.
+   .. py:method:: update_visualization() -> None
+      :abstractmethod:
+
+      
+      Update model state and traces.
+
+   .. py:method:: remove() -> None
+      :abstractmethod:
+
+      
+      Removes all model geometries from the GUI.
+
+

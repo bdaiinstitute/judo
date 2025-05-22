@@ -1,0 +1,16 @@
+:py:mod:`planner.experts.expert`
+================================
+
+.. py:module:: planner.experts.expert
+
+
+Module Contents
+---------------
+
+.. py:class:: Expert(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, graph: jacta.planner.core.graph.Graph, params: jacta.planner.core.parameter_container.ParameterContainer)
+
+
+   .. py:method:: expert_actions(node_ids: torch.IntTensor) -> torch.FloatTensor
+
+
+

@@ -1,0 +1,51 @@
+:py:mod:`planner.core.logger`
+=============================
+
+.. py:module:: planner.core.logger
+
+
+Module Contents
+---------------
+
+.. py:class:: Logger(graph: jacta.planner.core.graph.Graph, params: jacta.planner.core.parameter_container.ParameterContainer, search_index: int = 0, log_path: str = '/workspaces/bdai/projects/jacta/log/', log_file: Optional[str] = None)
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: get_log_name() -> Optional[str]
+
+      
+      Get where the log is stored
+
+   .. py:method:: log_params() -> None
+
+
+   .. py:method:: log_search(iteration_number: int) -> None
+
+
+   .. py:method:: log_node_selection(node_ids: torch.IntTensor, strategy: jacta.planner.core.types.SelectionType) -> None
+
+
+   .. py:method:: log_action_sampler(node_ids: torch.IntTensor, strategy: jacta.planner.core.types.ActionType) -> None
+
+
+   .. py:method:: log_node_extension(node_ids: torch.IntTensor, best_id: torch.IntTensor, dynamics_time: float) -> None
+
+
+   .. py:method:: log_node_pruning(node_id: int, strategy: str, num_removed_nodes: int) -> None
+
+
+   .. py:method:: create_distance_log() -> None
+
+
+   .. py:method:: create_reward_log() -> None
+
+
+   .. py:method:: simple_progress_statistics() -> None
+
+
+   .. py:method:: simple_path_statistics() -> Tuple[torch.FloatTensor, torch.FloatTensor]
+
+
+

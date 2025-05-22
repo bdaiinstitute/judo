@@ -1,0 +1,52 @@
+:py:mod:`visualizers.viser_app.controllers.sampling.cmaes`
+==========================================================
+
+.. py:module:: visualizers.viser_app.controllers.sampling.cmaes
+
+
+Module Contents
+---------------
+
+.. py:class:: CMAESConfig
+
+
+   Bases: :py:obj:`jacta.visualizers.viser_app.controllers.sampling_base.SamplingBaseConfig`
+
+   
+   Configuration for CMAES sampling.
+   .. py:attribute:: sigma_init
+      :type: float
+      :value: 0.05
+
+      
+
+   .. py:attribute:: max_iter
+      :type: int
+      :value: 20
+
+      
+
+
+.. py:class:: CMAES(task: jacta.visualizers.viser_app.tasks.task.Task, config: CMAESConfig, reward_config: jacta.visualizers.viser_app.tasks.task.TaskConfig)
+
+
+   Bases: :py:obj:`jacta.visualizers.viser_app.controllers.sampling_base.SamplingBase`
+
+   
+   CMAES planner.
+
+   :param config: configuration object with hyperparameters for planner.
+   :param model: mujoco model of system being controlled.
+   :param data: current configuration data for mujoco model.
+   :param reward_func: function mapping batches of states/controls to batches of rewards.
+   .. py:method:: update_action(curr_state: numpy.ndarray, curr_time: float, additional_info: dict[str, Any]) -> None
+
+      
+      Performs rollouts + reward computation from current state.
+
+   .. py:method:: action(time: float) -> numpy.ndarray
+
+      
+      Current best action of policy.
+
+

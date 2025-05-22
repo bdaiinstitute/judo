@@ -1,0 +1,55 @@
+:py:mod:`planner.core.action_sampler`
+=====================================
+
+.. py:module:: planner.core.action_sampler
+
+
+Module Contents
+---------------
+
+.. py:class:: ActionSampler(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, graph: jacta.planner.core.graph.Graph, params: jacta.planner.core.parameter_container.ParameterContainer)
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: initialize(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, graph: jacta.planner.core.graph.Graph, params: jacta.planner.core.parameter_container.ParameterContainer) -> None
+
+
+   .. py:method:: random_directions(node_ids: torch.IntTensor) -> torch.FloatTensor
+
+      
+      Generate a random direction.
+
+   .. py:method:: proximity_directions(node_ids: torch.IntTensor) -> torch.FloatTensor
+
+      
+      Generate a direction based on the proximity gradient.
+
+   .. py:method:: continuation_directions(node_ids: torch.IntTensor) -> torch.FloatTensor
+
+      
+      Generate same direction as in-edge action.
+
+   .. py:method:: gradient_actions(node_ids: torch.IntTensor) -> torch.FloatTensor
+
+      
+      Generates actions with dynamics gradients. We formulate a quadratic objective
+      From linearized dynamics, the action minimizing the distance to goal is calculated with optimization.
+
+   .. py:method:: directions_actions(node_ids: torch.IntTensor, directions: torch.FloatTensor) -> torch.FloatTensor
+
+      
+      Calculate a set of actions based on sampled directions and the node's last action
+
+      :param node: node we are looking to extend
+      :param directions: (k, nq) set of directions are looking to expand the node in
+
+      :returns: Set of trajectories expanded in the directions
+
+   .. py:method:: __call__(node_ids: torch.IntTensor) -> Tuple[torch.FloatTensor, int, jacta.planner.core.types.ActionType]
+
+      
+      Combines each method of sampling to select an action and potentially project it into the eigenspace
+
+

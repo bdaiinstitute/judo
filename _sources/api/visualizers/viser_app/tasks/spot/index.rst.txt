@@ -1,0 +1,19 @@
+:py:mod:`visualizers.viser_app.tasks.spot`
+==========================================
+
+.. py:module:: visualizers.viser_app.tasks.spot
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   spot_box/index.rst
+   spot_hand_navigation/index.rst
+   spot_navigation/index.rst
+   spot_tire/index.rst
+   spot_yellow_chair/index.rst
+
+

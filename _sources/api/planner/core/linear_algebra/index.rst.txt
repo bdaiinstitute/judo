@@ -1,0 +1,85 @@
+:py:mod:`planner.core.linear_algebra`
+=====================================
+
+.. py:module:: planner.core.linear_algebra
+
+
+Module Contents
+---------------
+
+.. py:function:: transformation_matrix(rot: numpy.ndarray | None = None, pos: numpy.ndarray | None = None) -> numpy.ndarray
+
+   
+   Returns a 4x4 transformation matrix given rotation matrix and translation vector.
+
+   :param rot: 3x3 rotation matrix.
+   :type rot: array-like
+   :param pos: Translation vector (3 elements).
+   :type pos: array-like
+
+   :returns: *numpy.ndarray* -- 4x4 transformation matrix.
+
+.. py:function:: truncpareto_cdf(x: torch.IntTensor, exponent: float, upper_bound: int) -> torch.FloatTensor
+
+
+.. py:function:: max_scaling(directions: torch.FloatTensor, action_range: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: normalize(direction: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: normalize_multiple(directions: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: project_v_on_u(v: torch.FloatTensor, u: torch.FloatTensor) -> torch.FloatTensor
+
+   
+   Calculates the projection of v on u.
+
+   :raises A ValueError if v and u are not vectors:
+
+.. py:function:: gram_schmidt(basis_vectors: torch.FloatTensor) -> torch.FloatTensor
+
+   
+   Returns an orthonormal basis spanning the same dimension as the linearly independent basis vectors.
+
+   This method assumes the basis vectors are linearly independent. If they aren't, you're going to have a bad time
+
+   :param basis_vectors: set of vectors that span a space. The columns are assumed to be individual vectors
+
+   :raises An ValueError if the basis vectors are not linearly independent:
+
+.. py:function:: project_vectors_on_eigenspace(vectors: torch.FloatTensor, orthonormal_basis: torch.FloatTensor) -> torch.FloatTensor
+
+   
+   Given an eigenspace, projects the vector on the space.
+
+   :param vectors: (k, n) vector
+   :param orthonormal: (m, n) sized orthonormal basis
+
+   :returns: (k, n) vectors projected on the orthonormal basis
+
+.. py:function:: einsum_ij_ij_i(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_ij_kj_ki(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_ijk_ik_ij(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_ikj_ik_ij(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_jk_ikl_ijl(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_ijk_ikl_ijl(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_ikj_ikl_ijl(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: einsum_ijk_ilk_ijl(A: torch.FloatTensor, B: torch.FloatTensor) -> torch.FloatTensor
+
+

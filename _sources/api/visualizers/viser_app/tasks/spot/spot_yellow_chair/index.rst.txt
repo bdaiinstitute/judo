@@ -1,0 +1,111 @@
+:py:mod:`visualizers.viser_app.tasks.spot.spot_yellow_chair`
+============================================================
+
+.. py:module:: visualizers.viser_app.tasks.spot.spot_yellow_chair
+
+
+Module Contents
+---------------
+
+.. py:data:: Z_AXIS
+
+   
+
+.. py:data:: RESET_OBJECT_POSE
+
+   
+
+.. py:data:: RADIUS_MIN
+   :value: 1.0
+
+   
+
+.. py:data:: RADIUS_MAX
+   :value: 2.0
+
+   
+
+.. py:class:: SpotYellowChairConfig
+
+
+   Bases: :py:obj:`jacta.visualizers.viser_app.tasks.spot_base.SpotBaseConfig`
+
+   
+   Config for the spot box manipulation task.
+   .. py:attribute:: default_command
+      :type: numpy.ndarray
+
+      
+
+   .. py:attribute:: goal_position
+      :type: numpy.ndarray
+
+      
+
+   .. py:attribute:: w_orientation
+      :type: float
+      :value: 100.0
+
+      
+
+   .. py:attribute:: w_torso_proximity
+      :type: float
+      :value: 0.1
+
+      
+
+   .. py:attribute:: w_gripper_proximity
+      :type: float
+      :value: 4.0
+
+      
+
+   .. py:attribute:: orientation_threshold
+      :type: float
+      :value: 0.1
+
+      
+
+   .. py:attribute:: w_controls
+      :type: float
+      :value: 2.0
+
+      
+
+   .. py:attribute:: w_object_velocity
+      :type: float
+      :value: 64.0
+
+      
+
+
+.. py:class:: SpotYellowChair
+
+
+   Bases: :py:obj:`jacta.visualizers.viser_app.tasks.spot_base.SpotBase`\ [\ :py:obj:`SpotYellowChairConfig`\ ]
+
+   
+   Task getting Spot to move a box to a desired goal location.
+   .. py:property:: nu
+      :type: int
+
+      
+      Number of controls for this task.
+
+   .. py:property:: actuator_ctrlrange
+      :type: numpy.ndarray
+
+      
+      Control bounds for this task.
+
+   .. py:method:: reward(states: numpy.ndarray, sensors: numpy.ndarray, controls: numpy.ndarray, config: SpotYellowChairConfig, additional_info: dict[str, Any]) -> numpy.ndarray
+
+      
+      Reward function for the Spot box moving task.
+
+   .. py:method:: reset() -> None
+
+      
+      Reset function for the spot box manipulation task .
+
+

@@ -1,0 +1,15 @@
+:py:mod:`visualizers.meshcat`
+=============================
+
+.. py:module:: visualizers.meshcat
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   visuals/index.rst
+
+

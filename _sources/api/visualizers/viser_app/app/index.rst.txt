@@ -1,0 +1,158 @@
+:py:mod:`visualizers.viser_app.app`
+===================================
+
+.. py:module:: visualizers.viser_app.app
+
+
+Module Contents
+---------------
+
+.. py:class:: SimulationProcess(task: jacta.visualizers.viser_app.tasks.task.Task, context: jacta.visualizers.viser_app.io.SimulationIOContext)
+
+
+   Bases: :py:obj:`multiprocessing.context.Process`
+
+   
+   Container for the simulation thread in the viser app.
+   .. py:method:: simulation_loop() -> None
+
+      
+      Main simulation loop for SimulationProcess.
+
+   .. py:method:: write_states() -> None
+
+      
+      Write current sim states to context.
+
+   .. py:method:: reset() -> None
+
+      
+      Resets the simulation to a new initial state.
+
+
+.. py:class:: ControlProcess(controller: jacta.visualizers.viser_app.controllers.controller.Controller, server: viser.ViserServer, context: jacta.visualizers.viser_app.io.IOContext, profiler: Optional[jacta.visualizers.viser_app.profiler.ViserProfiler] = None)
+
+
+   Bases: :py:obj:`multiprocessing.Process`
+
+   
+   Process that executes a controller at a fixed rate.
+   .. py:method:: run() -> None
+
+      
+      Main control flow for the ControllerProcess.
+
+      When running, the Process will try to run the control loop. If an exception is encountered,
+      the Process stores the exception in a Queue, prints the exception, and removes its GUI elements.
+
+   .. py:method:: remove() -> None
+
+      
+      Helper function to clean up GUI elements for this control instance.
+
+   .. py:method:: terminate() -> None
+
+      
+      Cleans up GUI elements on process termination.
+
+   .. py:method:: control_loop() -> Exception | None
+
+      
+      Main outer control loop. Run controller at fixed control frequency.
+
+   .. py:method:: set_profiler_recording(recording: bool = False) -> None
+
+      
+      Turns on/off profiler recording and updates inner control loop.
+
+   .. py:method:: write_controls() -> None
+
+      
+      Write control result out to buffer.
+
+   .. py:method:: write_traces() -> None
+
+      
+      Write traces out to buffer.
+
+
+.. py:class:: ViserApp(init_controller: str = 'predictive_sampling', init_task: str = 'cartpole', port: int = 8008, benchmark_dir: Optional[pathlib.Path] = PACKAGE_ROOT / 'log/controller')
+
+
+   
+   Main class for running the viser app.
+   .. py:method:: flip_profile_button_label() -> None
+
+      
+      Flips the button label for the disable/enable profile
+
+   .. py:method:: setup_task() -> None
+
+      
+      Task setup for task selected currently in GUI; spawns simulation, control, and visualization processes.
+
+   .. py:method:: setup_visualization() -> None
+
+      
+      Creates the visualization stack
+
+   .. py:method:: setup_context() -> None
+
+      
+      Set the context field and set the initial controller state.
+
+      This method can be overwritten for hardware deployment.
+
+   .. py:method:: setup_physics(task: jacta.visualizers.viser_app.tasks.task.Task) -> None
+
+      
+      Set the physics field.
+
+      This method can be overwritten for hardware deployment.
+
+   .. py:method:: setup_controller(control_config: jacta.visualizers.viser_app.controllers.controller.ControllerConfig | None = None, task_config: jacta.visualizers.viser_app.tasks.task.TaskConfig | None = None) -> None
+
+      
+      Spawns controller process for controller method currently selected in GUI.
+
+   .. py:method:: control_cycle_callback(_: viser.GuiEvent) -> None
+
+      
+      Logic for turning on/off the controller via GUI button.
+
+   .. py:method:: simulation_cycle_callback(_: viser.GuiEvent) -> None
+
+      
+      Logic for turning on/off the simulation via GUI button.
+
+   .. py:method:: simulation_reset_callback(_: viser.GuiEvent) -> None
+
+      
+      Resets the simulation via GUI button.
+
+   .. py:method:: control_selection_callback(event: viser.GuiEvent) -> None
+
+      
+      Callback for changing controllers. Does not reset sim/vis, but sets up new controller.
+
+   .. py:method:: task_selection_callback(event: viser.GuiEvent) -> None
+
+      
+      Callback for changing tasks. Changes target task and runs a clean task setup.
+
+   .. py:method:: enable_profiling_callback(event: viser.GuiEvent) -> None
+
+      
+      Callback to enabling/disabling the performance profiler. Initializes the function in the controller
+
+   .. py:method:: config_download_callback(event: viser.GuiEvent) -> None
+
+      
+      Callback for downloading the current controller/task configs.
+
+
+.. py:function:: main() -> None
+
+   
+   Helper main method to make app installable as script via pyproject.toml.
+

@@ -1,0 +1,144 @@
+:py:mod:`planner.core.graph`
+============================
+
+.. py:module:: planner.core.graph
+
+
+Module Contents
+---------------
+
+.. py:function:: sample_related_sub_goal_states(params: jacta.planner.core.parameter_container.ParameterContainer, goal_states: torch.FloatTensor, start_states: torch.FloatTensor, size: int = 1) -> torch.FloatTensor
+
+   
+   Generates related goal states based on the provided parameters.
+   :param params: The container holding parameters of sub goal bounds.
+   :type params: ParameterContainer
+   :param goal_states: The goal states to generate related goal states from.
+   :type goal_states: FloatTensor
+   :param start_states: The start states to generate related goal states from.
+   :type start_states: FloatTensor
+   :param size: Number of goal states to generate. Defaults to 1.
+   :type size: int, optional
+
+   :returns: Related goal states as a tensor.
+
+   .. note::
+      This function assumes a diagonal covariance matrix.
+      It relies on the fact that the entries are independent and identically distributed (i.i.d.) entries.
+
+.. py:function:: sample_feasible_states(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, bound_lower: torch.FloatTensor, bound_upper: torch.FloatTensor, size: int = 1) -> torch.FloatTensor
+
+
+.. py:function:: sample_random_states(bound_lower: torch.FloatTensor, bound_upper: torch.FloatTensor, size: int = 1) -> torch.FloatTensor
+
+
+.. py:function:: sample_random_start_states(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, params: jacta.planner.core.parameter_container.ParameterContainer, size: int = 1) -> torch.FloatTensor
+
+
+.. py:function:: sample_random_goal_states(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, params: jacta.planner.core.parameter_container.ParameterContainer, size: int = 1) -> torch.FloatTensor
+
+
+.. py:function:: sample_random_sub_goal_states(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, params: jacta.planner.core.parameter_container.ParameterContainer, size: int = 1) -> torch.FloatTensor
+
+
+.. py:class:: Graph(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, params: jacta.planner.core.parameter_container.ParameterContainer)
+
+
+   .. py:property:: node_id_to_search_index_map
+      :type: torch.IntTensor
+
+
+   .. py:method:: reset() -> None
+
+      
+      Fully resets the graph data for a new search.
+
+   .. py:method:: set_start_states(start_states: torch.FloatTensor) -> None
+
+
+   .. py:method:: set_goal_state(goal_state: torch.FloatTensor) -> None
+
+
+   .. py:method:: calculate_distance_rewards(ids: torch.IntTensor) -> torch.FloatTensor
+
+
+   .. py:method:: calculate_proximity_rewards(ids: torch.IntTensor) -> torch.FloatTensor
+
+
+   .. py:method:: calculate_reachability_rewards(ids: torch.IntTensor, delta_states: torch.FloatTensor, minimum_distance: float = 0.001) -> torch.FloatTensor
+
+
+   .. py:method:: add_total_rewards(ids: torch.IntTensor) -> torch.FloatTensor
+
+
+   .. py:method:: reachability_cache(ids: torch.IntTensor) -> Tuple[torch.FloatTensor, torch.FloatTensor]
+
+
+   .. py:method:: add_nodes(root_ids: torch.IntTensor, parent_ids: torch.IntTensor, states: torch.FloatTensor, start_actions: torch.FloatTensor, end_actions: torch.FloatTensor, relative_actions: torch.FloatTensor, is_main_node: bool = True) -> Tuple[int, bool]
+
+      
+      Adds a new node to the graph based on its state/distance from the goal and updates its reward.
+
+      When a new node is added to the graph, it gets evaluated in terms of reward and added to the graph.
+
+      :param parent_id: id to which the new node will be connected
+      :param state: the current state of the node, used to determine its distance to goal
+      :param action: the action used to reach the node
+
+      :returns: The new ids and a flag if the graph is full.
+
+   .. py:method:: reset_sub_goal_states() -> None
+
+      
+      Resets the sub goal states to the goal states.
+
+   .. py:method:: change_sub_goal_states(sub_goal_states: torch.FloatTensor) -> None
+
+
+   .. py:method:: deactivate_nodes(ids: torch.IntTensor) -> None
+
+
+   .. py:method:: activate_all_nodes() -> None
+
+      
+      Converts all sub nodes to main nodes and activates all inactive but used nodes
+
+   .. py:method:: sorted_progress_ids(reward_based: bool, search_index: int = 0) -> torch.IntTensor
+
+
+   .. py:method:: get_best_id(reward_based: bool = True, search_indices: Optional[torch.IntTensor] = None) -> int
+
+
+   .. py:method:: is_worse_than(ids: Union[int, torch.IntTensor], comparison_ids: int) -> Union[bool, torch.Tensor]
+
+
+   .. py:method:: is_better_than(ids: Union[int, torch.IntTensor], comparison_ids: int) -> Union[bool, torch.Tensor]
+
+
+   .. py:method:: number_of_nodes() -> int
+
+
+   .. py:method:: get_active_main_ids(search_index: Optional[int] = None) -> torch.IntTensor
+
+
+   .. py:method:: get_root_ids() -> torch.IntTensor
+
+
+   .. py:method:: shortest_path_to(idx: int, start_id: Optional[int] = None) -> torch.IntTensor
+
+
+   .. py:method:: save(filename: str, mask: torch.IntTensor = slice(None)) -> None
+
+
+   .. py:method:: load(filename: str) -> None
+
+
+   .. py:method:: add_child_ids_to_node() -> None
+
+
+   .. py:method:: destroy() -> None
+
+      
+      Used to destroy the graph and free up GPU memory.
+
+

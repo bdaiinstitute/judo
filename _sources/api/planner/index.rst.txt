@@ -1,0 +1,17 @@
+:py:mod:`planner`
+=================
+
+.. py:module:: planner
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   core/index.rst
+   dynamics/index.rst
+   experts/index.rst
+
+

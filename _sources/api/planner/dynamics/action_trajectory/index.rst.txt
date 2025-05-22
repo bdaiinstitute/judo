@@ -1,0 +1,43 @@
+:py:mod:`planner.dynamics.action_trajectory`
+============================================
+
+.. py:module:: planner.dynamics.action_trajectory
+
+
+Module Contents
+---------------
+
+.. py:function:: zero_order_hold_trajectory(end_actions, trajectory_steps, dim)
+
+
+.. py:function:: first_order_hold_trajectory(start_actions, end_actions, trajectory_steps, dim)
+
+
+.. py:function:: create_action_trajectory(type: jacta.planner.core.types.ControlType, start_actions: torch.FloatTensor, end_actions: torch.FloatTensor, trajectory_steps: int) -> torch.FloatTensor
+
+   
+   Creates a zero- or first-order hold array of action vectors with length trajectory_steps.
+
+   :param type: Create zero- or first-order hold action trajectory.
+   :param start_actions: A (na) array containing the start action vectors of the desired trajectories.
+   :param end_actions: A (na) array containing the end action vectors of the desired trajectories.
+                       For zero-order hold, only the end action vector will be used and held for the entire trajectory.
+                       For first-order hold, a linear interpolation between start and end action vector will be created.
+   :param trajectory_steps: The length of the resulting action vector array.
+
+   :returns: An action vector array (trajectory_steps, na).
+
+.. py:function:: create_action_trajectory_batch(type: jacta.planner.core.types.ControlType, start_actions: torch.FloatTensor, end_actions: torch.FloatTensor, trajectory_steps: int) -> torch.FloatTensor
+
+   
+   Creates a zero- or first-order hold arrays of action vectors with length trajectory_steps.
+
+   :param type: Create zero- or first-order hold action trajectory.
+   :param start_actions: A (n, na) array containing the start action vectors of the desired trajectories.
+   :param end_actions: A (n, na) array containing the end action vectors of the desired trajectories.
+                       For zero-order hold, only the end action vector will be used and held for the entire trajectory.
+                       For first-order hold, a linear interpolation between start and end action vector will be created.
+   :param trajectory_steps: The length of the resulting action vector array.
+
+   :returns: An action vector array (n, trajectory_steps, na).
+

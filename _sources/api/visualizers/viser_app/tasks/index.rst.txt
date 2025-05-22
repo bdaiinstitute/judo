@@ -1,0 +1,39 @@
+:py:mod:`visualizers.viser_app.tasks`
+=====================================
+
+.. py:module:: visualizers.viser_app.tasks
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   spot/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   acrobot/index.rst
+   cartpole/index.rst
+   cost_functions/index.rst
+   cylinder_push/index.rst
+   mujoco_task/index.rst
+   spot_base/index.rst
+   task/index.rst
+
+
+Package Contents
+----------------
+
+.. py:function:: get_registered_tasks() -> Dict[str, Tuple[Type[jacta.visualizers.viser_app.tasks.task.Task], Type[jacta.visualizers.viser_app.tasks.task.TaskConfig]]]
+
+
+.. py:function:: register_task(name: str, task_type: Type[jacta.visualizers.viser_app.tasks.task.Task], task_config_type: Type[jacta.visualizers.viser_app.tasks.task.TaskConfig]) -> None
+
+

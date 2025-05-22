@@ -1,0 +1,16 @@
+:py:mod:`common`
+================
+
+.. py:module:: common
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   path_resolvers/index.rst
+   paths/index.rst
+
+

@@ -1,0 +1,16 @@
+:py:mod:`planner.experts.expert_sampler`
+========================================
+
+.. py:module:: planner.experts.expert_sampler
+
+
+Module Contents
+---------------
+
+.. py:class:: ExpertSampler(plant: jacta.planner.dynamics.simulator_plant.SimulatorPlant, graph: jacta.planner.core.graph.Graph, params: jacta.planner.core.parameter_container.ParameterContainer)
+
+
+   .. py:method:: callback(node_ids: torch.IntTensor) -> torch.FloatTensor
+
+
+

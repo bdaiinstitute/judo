@@ -1,0 +1,17 @@
+:py:mod:`planner.dynamics`
+==========================
+
+.. py:module:: planner.dynamics
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   action_trajectory/index.rst
+   mujoco_dynamics/index.rst
+   simulator_plant/index.rst
+
+

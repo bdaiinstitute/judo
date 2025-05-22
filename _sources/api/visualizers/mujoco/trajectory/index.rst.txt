@@ -1,0 +1,22 @@
+:py:mod:`visualizers.mujoco.trajectory`
+=======================================
+
+.. py:module:: visualizers.mujoco.trajectory
+
+
+Module Contents
+---------------
+
+.. py:class:: TrajectoryVisualizer(params: jacta.planner.core.parameter_container.ParameterContainer, show_goal: bool = True)
+
+
+   .. py:method:: cycle_pause_button() -> None
+
+
+   .. py:method:: spin() -> None
+
+
+   .. py:method:: set_trajectory(trajectory: torch.Tensor, goal_state: torch.Tensor | None = None, colors: dict[str, float] | None = None)
+
+
+

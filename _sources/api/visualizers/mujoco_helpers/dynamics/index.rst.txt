@@ -1,0 +1,15 @@
+:py:mod:`visualizers.mujoco_helpers.dynamics`
+=============================================
+
+.. py:module:: visualizers.mujoco_helpers.dynamics
+
+
+Module Contents
+---------------
+
+.. py:class:: MujocoPlant(xml_model_path: str)
+
+
+   
+   Simple convenience object containing the model and data.
+

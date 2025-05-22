@@ -1,0 +1,18 @@
+:py:mod:`visualizers.viser_app.controllers.sampling`
+====================================================
+
+.. py:module:: visualizers.viser_app.controllers.sampling
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   cmaes/index.rst
+   cross_entropy_method/index.rst
+   mppi/index.rst
+   predictive_sampling/index.rst
+
+

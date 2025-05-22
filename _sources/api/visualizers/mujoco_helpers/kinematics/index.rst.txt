@@ -1,0 +1,120 @@
+:py:mod:`visualizers.mujoco_helpers.kinematics`
+===============================================
+
+.. py:module:: visualizers.mujoco_helpers.kinematics
+
+
+Module Contents
+---------------
+
+.. py:class:: IkSolver
+
+
+   
+   Simplistic inverse kinematics solver
+   .. py:property:: posture_task
+      :type: Any
+
+      
+      Posture task
+
+   .. py:property:: configuration
+      :type: Any
+
+      
+      Configuration
+
+   .. py:property:: configuration_limit
+      :type: Any
+
+      
+      Configuration limits
+
+   .. py:attribute:: model
+      :type: mujoco.MjModel
+
+      
+
+   .. py:attribute:: frame_names
+      :type: list[str]
+
+      
+
+   .. py:attribute:: frame_type
+      :type: str
+      :value: 'site'
+
+      
+
+   .. py:attribute:: solver
+      :type: str
+      :value: 'quadprog'
+
+      
+
+   .. py:attribute:: position_cost
+      :type: numpy.ndarray
+
+      
+
+   .. py:attribute:: orientation_cost
+      :type: numpy.ndarray
+
+      
+
+   .. py:attribute:: posture_cost
+      :type: numpy.ndarray
+
+      
+
+   .. py:attribute:: pos_threshold
+      :type: float
+      :value: 0.01
+
+      
+
+   .. py:attribute:: ori_threshold
+      :type: float
+      :value: 1.0
+
+      
+
+   .. py:attribute:: max_iters
+      :type: int
+      :value: 20
+
+      
+
+   .. py:attribute:: dt
+      :type: float
+      :value: 0.002
+
+      
+
+   .. py:attribute:: damping
+      :type: float
+      :value: 0.001
+
+      
+
+   .. py:attribute:: frame_tasks_damping
+      :type: numpy.ndarray
+
+      
+
+   .. py:method:: __post_init__() -> None
+
+      
+      Initialize tasks and configuration after the dataclass is initialized.
+
+   .. py:method:: set_target_pose(target_poses: list[numpy.ndarray | None]) -> None
+
+      
+      Set the target pose for the frame tasks.
+
+   .. py:method:: solve(q_ref: numpy.ndarray, target_poses: list[numpy.ndarray | None], use_configuration_limit: bool = True, logging_level: int = logging.INFO) -> numpy.ndarray
+
+      
+      Solve inverse kinematics to reach the target pose.
+
+

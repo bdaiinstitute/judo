@@ -1,0 +1,16 @@
+:py:mod:`common.path_resolvers`
+===============================
+
+.. py:module:: common.path_resolvers
+
+
+Module Contents
+---------------
+
+.. py:function:: get_package_path() -> str
+
+   
+   Get the source tree path.
+
+   :returns: The source tree path.
+

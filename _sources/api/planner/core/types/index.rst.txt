@@ -1,0 +1,160 @@
+:py:mod:`planner.core.types`
+============================
+
+.. py:module:: planner.core.types
+
+
+Module Contents
+---------------
+
+.. py:class:: ClippingType
+
+
+   Bases: :py:obj:`enum.Enum`
+
+   
+   Clipping type for the action space.
+   .. py:attribute:: CLIP
+      :value: 1
+
+      
+
+   .. py:attribute:: SCALE
+      :value: 2
+
+      
+
+   .. py:method:: __str__() -> str
+
+      
+      Return str(self).
+
+
+.. py:class:: SelectionType
+
+
+   Bases: :py:obj:`enum.Enum`
+
+   
+   Selection type for the node selection.
+   .. py:attribute:: PARETO
+      :value: 0
+
+      
+
+   .. py:attribute:: LAST
+      :value: 1
+
+      
+
+   .. py:method:: __str__() -> str
+
+      
+      Return str(self).
+
+
+.. py:class:: ActionType
+
+
+   Bases: :py:obj:`enum.Enum`
+
+   
+   Generic enumeration.
+
+   Derive from this class to define new enumerations.
+   .. py:attribute:: RANGED
+      :value: 0
+
+      
+
+   .. py:attribute:: PROXIMITY
+      :value: 1
+
+      
+
+   .. py:attribute:: CONTINUATION
+      :value: 2
+
+      
+
+   .. py:attribute:: GRADIENT
+      :value: 3
+
+      
+
+   .. py:attribute:: EXPERT
+      :value: 4
+
+      
+
+   .. py:method:: __str__() -> str
+
+      
+      Return str(self).
+
+
+.. py:data:: ACTION_TYPE_DIRECTIONAL_MAP
+
+   
+
+.. py:class:: ActionMode
+
+
+   Bases: :py:obj:`enum.Enum`
+
+   
+   Generic enumeration.
+
+   Derive from this class to define new enumerations.
+   .. py:attribute:: RELATIVE_TO_CURRENT_STATE
+      :value: 0
+
+      
+
+   .. py:attribute:: RELATIVE_TO_PREVIOUS_END_ACTION
+      :value: 1
+
+      
+
+   .. py:attribute:: ABSOLUTE_ACTION
+      :value: 2
+
+      
+
+   .. py:method:: __str__() -> str
+
+      
+      Return str(self).
+
+
+.. py:class:: ControlType
+
+
+   Bases: :py:obj:`enum.Enum`
+
+   
+   Generic enumeration.
+
+   Derive from this class to define new enumerations.
+   .. py:attribute:: ZERO_ORDER_HOLD
+      :value: 0
+
+      
+
+   .. py:attribute:: FIRST_ORDER_HOLD
+      :value: 1
+
+      
+
+   .. py:method:: __str__() -> str
+
+      
+      Return str(self).
+
+
+.. py:function:: set_default_device_and_dtype(device: Optional[str] = None, dtype: torch.dtype = torch.float32) -> None
+
+
+.. py:function:: convert_dtype(attr: Any, dtype: Optional[torch.dtype] = None, int_dtype: torch.dtype = torch.int64) -> Any
+
+

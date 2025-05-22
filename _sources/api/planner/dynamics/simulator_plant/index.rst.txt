@@ -1,0 +1,22 @@
+:py:mod:`planner.dynamics.simulator_plant`
+==========================================
+
+.. py:module:: planner.dynamics.simulator_plant
+
+
+Module Contents
+---------------
+
+.. py:class:: SimulatorPlant(params: jacta.planner.core.parameter_container.ParameterContainer)
+
+
+   .. py:method:: state_difference(s1: torch.FloatTensor, s2: torch.FloatTensor, h: float = 1.0) -> torch.FloatTensor
+
+
+
+.. py:function:: scaled_distances_to(plant: SimulatorPlant, states: torch.FloatTensor, target_states: torch.FloatTensor) -> torch.FloatTensor
+
+
+.. py:function:: scale_distances(delta_states: torch.FloatTensor, scaling: torch.FloatTensor) -> torch.FloatTensor
+
+
