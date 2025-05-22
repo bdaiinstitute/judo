@@ -1,0 +1,82 @@
+:py:mod:`controllers.sampling.cross_entropy_method`
+===================================================
+
+.. py:module:: controllers.sampling.cross_entropy_method
+
+
+Module Contents
+---------------
+
+.. py:class:: CrossEntropyConfig
+
+
+   Bases: :py:obj:`judo.controllers.sampling_base.SamplingBaseConfig`
+
+   
+   Configuration for cross-entropy method.
+   .. py:attribute:: sigma_min
+      :type: float
+      :value: 0.1
+
+      
+
+   .. py:attribute:: sigma_max
+      :type: float
+      :value: 1.0
+
+      
+
+   .. py:attribute:: num_elites
+      :type: int
+      :value: 2
+
+      
+
+   .. py:attribute:: horizon
+      :type: float
+      :value: 2.8
+
+      
+
+   .. py:attribute:: num_rollouts
+      :type: int
+      :value: 32
+
+      
+
+   .. py:attribute:: noise_ramp
+      :type: float
+      :value: 2.5
+
+      
+
+   .. py:attribute:: use_noise_ramp
+      :type: bool
+      :value: True
+
+      
+
+
+.. py:class:: CrossEntropyMethod(task: judo.tasks.task.Task, config: CrossEntropyConfig, reward_config: judo.tasks.task.TaskConfig)
+
+
+   Bases: :py:obj:`judo.controllers.sampling_base.SamplingBase`
+
+   
+   The cross-entropy method.
+
+   :param config: configuration object with hyperparameters for planner.
+   :param model: mujoco model of system being controlled.
+   :param data: current configuration data for mujoco model.
+   :param reward_func: function mapping batches of states/controls to batches of rewards.
+   .. py:method:: update_action(curr_state: numpy.ndarray, curr_time: float, additional_info: dict[str, Any]) -> None
+
+      
+      Performs rollouts + reward computation from current state.
+
+   .. py:method:: action(time: float) -> numpy.ndarray
+
+      
+      Current best action of policy.
+
+

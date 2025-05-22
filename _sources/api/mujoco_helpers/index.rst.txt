@@ -1,0 +1,15 @@
+:py:mod:`mujoco_helpers`
+========================
+
+.. py:module:: mujoco_helpers
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   utils/index.rst
+
+

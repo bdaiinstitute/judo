@@ -1,0 +1,117 @@
+:py:mod:`viser_app.io`
+======================
+
+.. py:module:: viser_app.io
+
+
+Module Contents
+---------------
+
+.. py:class:: ControlBufferKeys
+
+
+   
+   Keys of the control buffer in the IO context.
+   .. py:attribute:: all_traces_rollout_size
+      :type: str
+      :value: 'all_traces_rollout_size'
+
+      
+
+   .. py:attribute:: spline
+      :type: str
+      :value: 'spline'
+
+      
+
+   .. py:attribute:: traces
+      :type: str
+      :value: 'traces'
+
+      
+
+
+.. py:class:: StateBufferKeys
+
+
+   
+   Keys of the state buffer in the IO context.
+   .. py:attribute:: additional_info
+      :type: str
+      :value: 'additional_info'
+
+      
+
+   .. py:attribute:: last_policy_output
+      :type: str
+      :value: 'last_policy_output'
+
+      
+
+   .. py:attribute:: qpos
+      :type: str
+      :value: 'qpos'
+
+      
+
+   .. py:attribute:: qvel
+      :type: str
+      :value: 'qvel'
+
+      
+
+   .. py:attribute:: time
+      :type: str
+      :value: 'time'
+
+      
+
+   .. py:attribute:: xpos
+      :type: str
+      :value: 'xpos'
+
+      
+
+   .. py:attribute:: xquat
+      :type: str
+      :value: 'xquat'
+
+      
+
+
+.. py:class:: HardwareStateBufferKeys
+
+
+   Bases: :py:obj:`StateBufferKeys`
+
+   
+   Keys of the hardware state buffer in the IO context.
+   .. py:attribute:: spot_hardware_state
+      :type: str
+      :value: 'spot_hardware_state'
+
+      
+
+
+.. py:class:: IOContext(manager: multiprocessing.managers.SyncManager)
+
+
+   
+   Container for all multiprocessing I/O objects needed for Viser app.
+
+.. py:class:: SimulationIOContext(manager: multiprocessing.managers.SyncManager)
+
+
+   Bases: :py:obj:`IOContext`
+
+   
+   Container for all multiprocessing I/O objects needed for Viser app.
+
+.. py:class:: HardwareIOContext(manager: multiprocessing.managers.SyncManager)
+
+
+   Bases: :py:obj:`IOContext`
+
+   
+   Container for all multiprocessing I/O objects needed for Viser app.
+

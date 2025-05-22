@@ -1,0 +1,72 @@
+:py:mod:`controllers.controller`
+================================
+
+.. py:module:: controllers.controller
+
+
+Module Contents
+---------------
+
+.. py:class:: ControllerConfig
+
+
+   
+   Base controller config with spline parameters.
+
+.. py:class:: Controller
+
+
+   
+   Abstract base class for all controller implementations.
+   .. py:property:: num_timesteps
+      :type: int
+      :abstractmethod:
+
+      
+      Helper function to recalculate the number of timesteps for simulation
+
+   .. py:property:: rollout_times
+      :type: numpy.ndarray
+      :abstractmethod:
+
+      
+      Helper function to calculate the rollout times based on the horizon length
+
+   .. py:property:: controls
+      :type: numpy.ndarray
+      :abstractmethod:
+
+      
+      Contains the control signals applied in the current rollout.
+
+   .. py:method:: make_models() -> None
+      :abstractmethod:
+
+      
+      Helper to re-size the models vector to config.num_rollouts.
+
+   .. py:method:: update_action(curr_state: numpy.ndarray, curr_time: float, additional_info: dict[str, Any]) -> None
+      :abstractmethod:
+
+      
+      Abstract method for updating controller actions from current state/time.
+
+   .. py:method:: action(time: float) -> numpy.ndarray
+      :abstractmethod:
+
+      
+      Abstract method for querying current action from controller.
+
+   .. py:method:: set_default_controls() -> None
+      :abstractmethod:
+
+      
+      Set default value for the Controller.controls. if there is no default value set to zero.
+
+   .. py:method:: reset() -> None
+      :abstractmethod:
+
+      
+      Reset the controls and the spline to their default values.
+
+

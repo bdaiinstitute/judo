@@ -1,0 +1,21 @@
+:py:mod:`viser_app.path_utils`
+==============================
+
+.. py:module:: viser_app.path_utils
+
+
+Module Contents
+---------------
+
+.. py:data:: PACKAGE_ROOT
+
+   
+
+.. py:data:: MODEL_PATH
+
+   
+
+.. py:data:: DATA_PATH
+
+   
+

@@ -1,0 +1,18 @@
+:py:mod:`controllers.sampling`
+==============================
+
+.. py:module:: controllers.sampling
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   cmaes/index.rst
+   cross_entropy_method/index.rst
+   mppi/index.rst
+   predictive_sampling/index.rst
+
+

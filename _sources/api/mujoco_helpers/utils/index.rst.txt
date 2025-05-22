@@ -1,0 +1,52 @@
+:py:mod:`mujoco_helpers.utils`
+==============================
+
+.. py:module:: mujoco_helpers.utils
+
+.. autoapi-nested-parse::
+
+   
+   Class for rendering Mujoco trajectories in meshcat
+
+
+Module Contents
+---------------
+
+.. py:function:: get_sensor_name(model: mujoco.MjModel, sensorid: int) -> str
+
+   
+   Return name of the sensor with given ID from MjModel.
+
+.. py:function:: get_mesh_data(model: mujoco.MjModel, meshid: int) -> tuple[numpy.ndarray, numpy.ndarray]
+
+   
+   Retrieve the vertices and faces of a specified mesh from a MuJoCo model.
+
+   :param model: MjModel The MuJoCo model containing the mesh data.
+   :param meshid: int The index of the mesh to retrieve.
+
+   Result:
+       tuple[np.ndarray, np.ndarray]
+       Vertices (N, 3) and faces (M, 3) of the mesh.
+
+.. py:function:: is_trace_sensor(model: mujoco.MjModel, sensorid: int) -> bool
+
+
+.. py:function:: count_trace_sensors(model: mujoco.MjModel) -> int
+
+   
+   Count the number of trace sensors of a given mujoco model.
+
+.. py:function:: get_trace_sensors(model: mujoco.MjModel) -> List[int]
+
+
+.. py:function:: set_mocap_pose(data: mujoco.MjData, mocap_id: int, pose: numpy.ndarray) -> None
+
+   
+   Set the position of the mocap element.
+
+.. py:function:: set_mocap_poses(data: mujoco.MjData, mocap_ids: list[int], poses: list[numpy.ndarray]) -> None
+
+   
+   Set the positions of the mocap elements.
+
