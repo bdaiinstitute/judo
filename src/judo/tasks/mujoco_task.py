@@ -6,10 +6,7 @@ import mujoco
 import numpy as np
 from mujoco import MjData, MjModel
 from scipy.interpolate import interp1d
-from viser import ViserServer
 
-from judo.visualizers.visualization import MjVisualization
-from judo.viser_app.io import IOContext
 from judo.tasks.task import ConfigT, Task, TaskConfig
 from mujoco_extensions.policy_rollout import threaded_physics_rollout_in_place
 
@@ -24,12 +21,6 @@ class MujocoTask(Task[ConfigT, Tuple[MjModel, MjData]]):
         self.data = MjData(self.model)
         self.cutoff_time = None  # Placeholder
         self._additional_info: dict[str, Any] = {}
-
-    def create_visualization(
-        self, server: ViserServer, context: IOContext, text_handles: dict
-    ) -> None:
-        """Returns a visualizer for the task."""
-        return MjVisualization(self, server, context, text_handles)
 
     @property
     def additional_task_info(self) -> dict[str, Any]:

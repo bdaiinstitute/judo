@@ -5,10 +5,6 @@ from typing import Any, Generic, Optional, TypeVar
 
 import numpy as np
 from scipy.interpolate import interp1d
-from viser import ViserServer
-
-from judo.viser_app.io import IOContext
-from judo.visualizers.visualization import Visualization
 
 
 @dataclass
@@ -24,12 +20,6 @@ ModelT = TypeVar("ModelT")
 #### Specific implementations should be made in a child-class ###
 class Task(Generic[ConfigT, ModelT]):
     """Base container for sampling-based MPC tasks. Implements reward, simulation step, and resetting behavior."""
-
-    @abstractmethod
-    def create_visualization(
-        self, server: ViserServer, context: IOContext, text_handles: dict
-    ) -> Visualization:
-        """Returns a visualizer for the task."""
 
     @abstractmethod
     def reward(

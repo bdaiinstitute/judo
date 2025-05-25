@@ -8,34 +8,12 @@ from judo.tasks.cylinder_push import (
     CylinderPush,
     CylinderPushConfig,
 )
-
-# from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
-from judo.tasks.spot.spot_box import SpotBox, SpotBoxConfig
-from judo.tasks.spot.spot_hand_navigation import (
-    SpotHandNavigation,
-    SpotHandNavigationConfig,
-)
-from judo.tasks.spot.spot_navigation import (
-    SpotNavigation,
-    SpotNavigationConfig,
-)
-from judo.tasks.spot.spot_tire import SpotTire, SpotTireConfig
-from judo.tasks.spot.spot_yellow_chair import (
-    SpotYellowChair,
-    SpotYellowChairConfig,
-)
 from judo.tasks.task import Task, TaskConfig
 
 _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
     "acrobot": (Acrobot, AcrobotConfig),
     "cylinder_push": (CylinderPush, CylinderPushConfig),
     "cartpole": (Cartpole, CartpoleConfig),
-    # "leap_cube": (LeapCube, LeapCubeConfig),
-    "spot_box": (SpotBox, SpotBoxConfig),
-    "spot_hand_navigation": (SpotHandNavigation, SpotHandNavigationConfig),
-    "spot_navigation": (SpotNavigation, SpotNavigationConfig),
-    "spot_tire": (SpotTire, SpotTireConfig),
-    "spot_yellow_chair": (SpotYellowChair, SpotYellowChairConfig),
 }
 
 

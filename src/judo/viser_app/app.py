@@ -21,6 +21,8 @@ from judo.controllers.controller import (
     Controller,
     ControllerConfig,
 )
+from judo.tasks import get_registered_tasks
+from judo.tasks.task import Task, TaskConfig
 from judo.viser_app.gui import create_gui_elements
 from judo.viser_app.io import (
     ControlBufferKeys,
@@ -31,9 +33,7 @@ from judo.viser_app.io import (
 from judo.viser_app.json_serializer import ConfigEncoder
 from judo.viser_app.path_utils import PACKAGE_ROOT
 from judo.viser_app.profiler import ViserProfiler, ViserProfilerConfig
-from judo.tasks import get_registered_tasks
-from judo.tasks.task import Task, TaskConfig
-from judo.visualizers.visualization import Visualization
+from judo.visualizers.visualization import MjVisualization
 
 
 class SimulationProcess(Process):
@@ -458,8 +458,8 @@ class ViserApp:
     def setup_visualization(self) -> None:
         """Creates the visualization stack"""
         with self.context.visualization_lock:
-            self.visualization: Visualization = self.physics.task.create_visualization(
-                self.server, self.context, self.text_handles
+            self.visualization: MjVisualization = MjVisualization(
+                self.physics.task, self.server, self.context, self.text_handles
             )
 
     def setup_context(self) -> None:

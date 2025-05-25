@@ -8,7 +8,7 @@ version = "0.1.0"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
-    {name = "The AI Institute"},
+    {name = "The Robotics and AI Institute"},
 ]
 
 requires-python = ">=3.10"
@@ -24,6 +24,7 @@ dependencies = [
     "matplotlib==3.6.3",
     "mujoco==3.3.0", # WARNING: this version needs to match the 'bazelized' cpp libraries in @//deps
     "mujoco-mjx==3.3.0",
+    "mujoco-extensions @ file:src/mujoco_extensions",
     "numpy==1.26.4",
     "onnxruntime==1.19.0",
     "plotly==5.12.0",
@@ -36,29 +37,10 @@ dependencies = [
     "typing-extensions==4.11.0",
     "tyro==0.8.4",
     "viser",
-    "flake8-docstrings==1.7.0", # /!\ all the dependencies below could potentially be removed /!\
-    "google-cloud-storage==2.15.0",
-    "flask==3.0.2",
-    "importlib_metadata==6.11.0",
-    "ipdb==0.13.13",
-    "ipykernel==6.29.4",
-    "ipython>=5",  # meshcat: https://github.com/meshcat-dev/meshcat-python/blob/785bc9d5ba6f8a8bb79ee8b25f523805946c1fbd/setup.py#L20
-    "lark==1.1.5",
-    "pillow>=7.0.0",   # meshcat
-    "pip>=25.0",
-    "pyngrok>=4.1.6",  # meshcat
-    "pyzmq>=17.0.0",  # meshcat
-    "setuptools>=61.0",
-    "tensordict>=0.4.0",
-    "toposort>=1.10",
-    "tornado>=4.0.0",  # meshcat
-    "u-msgpack-python>=2.4.1",  # meshcat
-    "meshcat",
-    "drake==1.27.0",
 ]
 
 [project.scripts]
-viser-app = "judo.visualizers.viser_app.app:main"
+viser-app = "judo.viser_app.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
