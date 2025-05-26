@@ -11,7 +11,6 @@
 > While we may accept PRs implementing features and bugfixes, we cannot
 > guarantee timely responses to issues.
 
-
 ## Judo: A Unified Framework for Agile Robot Control, Learning, and Data Generation via Sampling-Based MPC
 
 ![judo](docs/source/_static/images/judo.gif)
@@ -55,6 +54,13 @@ If you are not using `uv` you will need to install the extensions manually with
 pip install -e ./src/mujoco_extensions
 ```
 
+The package contains custom C++ extensions for multi-threaded physics rollouts. These
+should be compiled as part of the "typical" python installation, but you may need to
+install `cmake` if it is not available on your system:
+```
+sudo apt install cmake
+```
+
 ### Getting started
 ```
 viser-app
@@ -77,9 +83,7 @@ unset PYTHONPATH
 
 ### Contributing
 
-We welcome contributions to `judo`!
-
-Before submitting a PR, please ensure:
+We welcome contributions to `judo`! Before submitting a PR, please ensure:
 1.  Your changes pass all pre-commit checks.
 2.  All unit tests pass, including any new tests for your changes.
 
