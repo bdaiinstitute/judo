@@ -8,7 +8,8 @@
 
 # File adapted from the Tyro package
 # https://github.com/brentyi/tyro
-
+import os
+import sys
 from typing import Dict, List
 
 import m2r2
@@ -19,6 +20,7 @@ import m2r2
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+sys.path.insert(0, os.path.abspath("../../src"))
 
 # -- Project information -----------------------------------------------------
 
@@ -62,7 +64,6 @@ extensions = [
 programoutput_use_ansi = True
 html_ansi_stylesheet = "black-on-white.css"
 html_static_path = ["_static"]
-html_favicon = "_static/images/logo-dice.svg"
 html_theme_options = {
     "light_css_variables": {
         "color-brand-primary": "#00cdda",  # Link color, brand color
@@ -196,9 +197,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "judo", "judo documentation", [author], 1)
-]
+man_pages = [(master_doc, "judo", "judo documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -227,6 +226,7 @@ googleanalytics_id = "G-??????"
 # -- Options for autoapi extension --------------------------------------------
 autoapi_dirs = ["../../src/judo"]
 autoapi_root = "api"
+# autoapi_options = ["members"]  # Or even just an empty list [] initially
 autoapi_options = [
     "members",
     "undoc-members",
