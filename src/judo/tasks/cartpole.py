@@ -6,13 +6,13 @@ from typing import Any, Optional
 import mujoco
 import numpy as np
 
-from judo.viser_app.path_utils import MODEL_PATH
 from judo.tasks.cost_functions import (
     quadratic_norm,
     smooth_l1_norm,
 )
 from judo.tasks.mujoco_task import MujocoTask
 from judo.tasks.task import TaskConfig
+from judo.viser_app.path_utils import MODEL_PATH
 
 XML_PATH = str(MODEL_PATH / "xml/cartpole.xml")
 

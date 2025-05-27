@@ -2,14 +2,11 @@
 
 """Class for rendering Mujoco trajectories in meshcat"""
 
-import time
 from typing import List
 
 import mujoco
 import numpy as np
 from mujoco import MjModel
-from torch import FloatTensor
-
 
 
 def get_sensor_name(model: MjModel, sensorid: int) -> str:
@@ -84,4 +81,3 @@ def set_mocap_poses(
             set_mocap_pose(data, mocap_id, pose)
         elif mocap_id < data.mocap_pos.shape[0]:
             set_mocap_pose(data, mocap_id, np.array([0, 0, -0.5, 1, 0, 0, 0]))
-

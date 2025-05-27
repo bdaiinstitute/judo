@@ -5,13 +5,13 @@ from typing import Any, Literal
 import numpy as np
 from scipy.interpolate import interp1d
 
-from judo.mujoco_helpers.utils import get_trace_sensors
 from judo.controllers.controller import (
     Controller,
     ControllerConfig,
 )
-from judo.viser_app.gui import slider
+from judo.mujoco_helpers.utils import get_trace_sensors
 from judo.tasks.task import Task, TaskConfig
+from judo.viser_app.gui import slider
 
 MAX_NUM_TRACES = 5
 

@@ -1,14 +1,14 @@
 # Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved.
+import time
 from abc import abstractmethod
 from typing import Protocol
-import time
 
 from mujoco import MjData
 from viser import ViserServer
 
-from judo.visualizers.model import ViserMjModel
-from judo.viser_app.io import ControlBufferKeys, IOContext, StateBufferKeys
 from judo.tasks.task import Task
+from judo.viser_app.io import ControlBufferKeys, IOContext, StateBufferKeys
+from judo.visualizers.model import ViserMjModel
 
 # TODO(pculbertson): make this configurable.
 VISUALIZATION_FREQ = 60
