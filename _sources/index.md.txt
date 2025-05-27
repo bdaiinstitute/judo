@@ -23,9 +23,10 @@
    :glob:
 
 
-   api/common/index
-   api/learning/index
-   api/planner/index
+   api/controllers/index
+   api/mujoco_helpers/index
+   api/tasks/index
+   api/viser_app/index
    api/visualizers/index
 
 
@@ -55,65 +56,55 @@
 
 <!-- prettier-ignore-end -->
 
-## Jacta: A Versatile Planner for Learning Dexterous and Whole-body Manipulation
+## Judo: A Unified Framework for Agile Robot Control, Learning, and Data Generation via Sampling-Based MPC
 
-[![Static Badge](https://img.shields.io/badge/ArXiv-8C48FC?style=for-the-badge)](https://arxiv.org/pdf/2408.01258)
-[![Static Badge](https://img.shields.io/badge/Project_Page-8C48FC?style=for-the-badge)](https://judo.github.io/)
-[![Static Badge](https://img.shields.io/badge/RAI_Institute-8C48FC?style=for-the-badge)](https://rai-inst.com/resources/papers/jacta-a-versatile-planner-for-learning-dexterous-and-whole-body-manipulation/)
+![judo](docs/source/_static/images/judo.gif)
 
+While sampling-based MPC has enjoyed success for both real-time control and as an underlying planner
+for model-based RL, recent years have seen promising results for applying these controllers directly
+in-the-loop as planners for difficult tasks such as [quadrupedal](https://lecar-lab.github.io/dial-mpc/)
+and [bipedal](https://johnzhang3.github.io/mujoco_ilqr/) locomotion as well as
+[dexterous manipulation](caltech-amber.github.io/drop/).
 
-Robotic manipulation is challenging and data-driven approaches typically require large amounts of data or expert demonstrations. Therefore, we introduce a motion planner for dexterous and whole-body manipulation tasks. The planner's demonstrations can directly be used by reinforcement learning. With this approach, we can efficiently learn policies for complex manipulation tasks, where traditional reinforcement learning alone only makes little progress.
+`judo` is a simple, `pip`-installable framework for designing and deploying new tasks and algorithms
+for sampling-based controllers. It consists of three components:
+1. A visualizer based on [`viser`](https://github.com/nerfstudio-project/viser) which enables
+3D visualization of system states and GUI callbacks for real-time, interactive parameter tuning.
+2. A multi-threaded C++ rollout of `mujoco` physics which can be used as the underlying engine
+for sampling-based controllers.
+3. `numpy`-based implementations of standard sampling-based MPC algorithms from literature and
+canonical tasks (cartpole, acrobot) as `mujoco` tasks.
 
+We also release a simple app that deploys simulated tasks and controllers for better study of how the
+algorithms perform in closed-loop.
 
-![Jacta](_static/images/jacta_overview.jpg)
+These utilities are being released with the hope that they will be of use to the broader community,
+and will facilitate more research into and benchmarking of sampling-based MPC methods in coming years.
 
 ### Installation
-Install cmake
-```
-sudo apt install cmake
-```
-
-Install mujoco_extensions
-```
-git clone https://github.com/bdaiinstitute/judo.git
-cd judo
-pip install src/mujoco_extensions -vv
-```
-
 Install judo
 ```
 pip install -e .
 ```
 
+The package contains custom C++ extensions for multi-threaded physics rollouts. These
+should be compiled as part of the "typical" python installation, but you may need to
+install `cmake` if it is not available on your system:
+```
+sudo apt install cmake
+```
 
 ### Getting started
 ```
-python examples/planner/example_notebook.py
+viser-app
 ```
 Open the visualizer in your browser by clicking on the link in the terminal.
 ```
-http://localhost:8080/
-```
-
-
-### Citation
-```
-@inproceedings{brudigam2024jacta,
-  author       = {Br{\"u}digam, Jan and Abbas, Ali-Adeeb and Sorokin, Maks and Fang, Kuan and Hung, Brandon and Guru, Maya and Sosnowski, Stefan and Wang, Jiuguang and Hirche, Sandra and Le Cleac'h, Simon},
-  editor       = {Agrawal, Pulkit and Kroemer, Oliver and Burgard, Wolfram},
-  title        = {Jacta: {A} Versatile Planner for Learning Dexterous and Whole-body Manipulation},
-  booktitle    = {Conference on Robot Learning, 6-9 November 2024, Munich, Germany},
-  series       = {Proceedings of Machine Learning Research},
-  volume       = {270},
-  pages        = {994--1020},
-  publisher    = {{PMLR}},
-  year         = {2024},
-  url          = {https://proceedings.mlr.press/v270/bruedigam25a.html},
-}
+http://localhost:8008/
 ```
 
 ### Run tests locally
-In the virtual environment:
+In the virtual environment
 ```
 pip install -e .[dev]
 python -m pytest
