@@ -47,7 +47,7 @@
 .. |docs| image:: https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg
    :alt: Docs status icon
    :target: https://github.com/bdaiinstitute/judo
-.. |coverage| image:: https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=7A0OJ37JRF
+.. |coverage| image:: https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=3GGYCZM2Y2
    :alt: Test coverage status icon
    :target: https://github.com/bdaiinstitute/judo
 .. |nbsp| unicode:: 0xA0
