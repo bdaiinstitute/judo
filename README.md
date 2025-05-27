@@ -8,6 +8,8 @@
 > production-quality software. Please note that the code may contain
 > missing features and potential bugs. As part of this release, the
 > RAI Institute does not offer maintenance or support for the software.
+> While we may accept PRs implementing features and bugfixes, we cannot
+> guarantee timely responses to issues.
 
 
 ## Judo: A Unified Framework for Agile Robot Control, Learning, and Data Generation via Sampling-Based MPC
@@ -72,6 +74,16 @@ you might have to
 ```
 unset PYTHONPATH
 ```
+
+### Contributing
+
+We welcome contributions to `judo`!
+
+Before submitting a PR, please ensure:
+1.  Your changes pass all pre-commit checks.
+2.  All unit tests pass, including any new tests for your changes.
+
+Thank you for helping improve this project!
 
 ### Limitations
 The code as released has several limitations:
