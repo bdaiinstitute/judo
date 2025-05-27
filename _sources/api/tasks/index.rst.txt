@@ -4,6 +4,15 @@
 .. py:module:: tasks
 
 
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   spot/index.rst
+
+
 Submodules
 ----------
 .. toctree::
@@ -15,6 +24,7 @@ Submodules
    cost_functions/index.rst
    cylinder_push/index.rst
    mujoco_task/index.rst
+   spot_base/index.rst
    task/index.rst
 
 

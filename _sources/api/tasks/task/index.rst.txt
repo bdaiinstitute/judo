@@ -60,6 +60,12 @@ Module Contents
       
       Timestep for this task.
 
+   .. py:method:: create_visualization(server: viser.ViserServer, context: judo.viser_app.io.IOContext, text_handles: dict) -> judo.visualizers.visualization.Visualization
+      :abstractmethod:
+
+      
+      Returns a visualizer for the task.
+
    .. py:method:: reward(states: numpy.ndarray, sensors: numpy.ndarray, controls: numpy.ndarray, config: ConfigT, additional_info: dict[str, Any]) -> numpy.ndarray
       :abstractmethod:
 

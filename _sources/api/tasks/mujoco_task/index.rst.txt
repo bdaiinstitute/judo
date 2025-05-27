@@ -46,6 +46,11 @@ Module Contents
       
       Default idling command for the task.
 
+   .. py:method:: create_visualization(server: viser.ViserServer, context: judo.viser_app.io.IOContext, text_handles: dict) -> None
+
+      
+      Returns a visualizer for the task.
+
    .. py:method:: sim_step(controls: Optional[scipy.interpolate.interp1d]) -> None
 
       
