@@ -8,8 +8,12 @@
 > production-quality software. Please note that the code may contain
 > missing features and potential bugs. As part of this release, the
 > RAI Institute does not offer maintenance or support for the software.
+<<<<<<< HEAD
 > While we may accept PRs implementing features and bugfixes, we cannot
 > guarantee timely responses to issues.
+=======
+
+>>>>>>> cd144c8 (add maintenance disclaimer to README)
 
 ## Judo: A Unified Framework for Agile Robot Control, Learning, and Data Generation via Sampling-Based MPC
 
