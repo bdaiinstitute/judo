@@ -24,7 +24,7 @@ dependencies = [
     "matplotlib==3.6.3",
     "mujoco==3.3.0", # WARNING: this version needs to match the 'bazelized' cpp libraries in @//deps
     "mujoco-mjx==3.3.0",
-    "mujoco-extensions @ file:src/mujoco_extensions",
+    "mujoco-extensions @ file:///home/pculbertson/judo/src/mujoco_extensions",
     "numpy==1.26.4",
     "onnxruntime==1.19.0",
     "plotly==5.12.0",
