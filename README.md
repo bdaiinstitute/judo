@@ -72,3 +72,14 @@ you might have to
 ```
 unset PYTHONPATH
 ```
+
+### Limitations
+The code as released has several limitations:
+* The inter-process communication (IPC) is implemented in Python `multiprocessing`
+    and cannot communicate with processes in other languages.
+* Coverage of canonical gradient-free and first-order methods (e.g., GAs, iLQR)
+    is low and could be improved.
+* The system architecture must contain `Physics`, `Controller` and `Visualizer` objects,
+    without exception, which is a somewhat limited API.
+* `Controllers` must output splines even if (like RL controllers) they are instantaneous
+    feedback policies.
