@@ -4,6 +4,11 @@
 [![docs](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml)
 [![Static Badge](https://img.shields.io/badge/documentation-latest-8A2BE2)](https://bdaiinstitute.github.io/judo)
 
+> Disclaimer: This code is released as a research prototype and is not
+> production-quality software. Please note that the code may contain
+> missing features and potential bugs. As part of this release, the
+> RAI Institute does not offer maintenance or support for the software.
+
 
 ## Judo: A Unified Framework for Agile Robot Control, Learning, and Data Generation via Sampling-Based MPC
 
