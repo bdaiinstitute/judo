@@ -33,7 +33,7 @@ and will facilitate more research into and benchmarking of sampling-based MPC me
 ### Installation
 Install judo
 ```
-pip install -e .
+uv pip install -e .
 ```
 
 The package contains custom C++ extensions for multi-threaded physics rollouts. These
@@ -41,6 +41,11 @@ should be compiled as part of the "typical" python installation, but you may nee
 install `cmake` if it is not available on your system:
 ```
 sudo apt install cmake
+```
+
+If you are not using `uv` you will need to install the extensions manually with
+```
+pip install -e ./src/mujoco_extensions
 ```
 
 ### Getting started
