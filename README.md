@@ -54,13 +54,6 @@ If you are not using `uv` you will need to install the extensions manually with
 pip install -e ./src/mujoco_extensions
 ```
 
-The package contains custom C++ extensions for multi-threaded physics rollouts. These
-should be compiled as part of the "typical" python installation, but you may need to
-install `cmake` if it is not available on your system:
-```
-sudo apt install cmake
-```
-
 ### Getting started
 ```
 viser-app
