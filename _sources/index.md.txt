@@ -95,10 +95,11 @@ sudo apt install cmake
 ```
 
 ### Getting started
+To run the application, simply run:
 ```
-viser-app
+uv run viser-app
 ```
-Open the visualizer in your browser by clicking on the link in the terminal.
+Then open the visualizer in your browser by clicking on the link in the terminal.
 ```
 http://localhost:8008/
 ```
