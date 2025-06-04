@@ -1,0 +1,58 @@
+<mujoco model="fr3_assets">
+  <asset>
+    <material name="black" rgba=".2 .2 .2 1"/>
+    <material name="white" rgba="1 1 1 1"/>
+    <material name="red" rgba="1 0.072272 0.039546 1"/>
+    <material name="gray" rgba="0.863156 0.863156 0.863157 1"/>
+    <material name="button_green" rgba="0.102241 0.571125 0.102242 1"/>
+    <material name="button_red" rgba="0.520996 0.008023 0.013702 1"/>
+    <material name="button_blue" rgba="0.024157 0.445201 0.737911 1"/>
+    <material name="off_white" rgba="0.901961 0.921569 0.929412 1"/>
+
+    <mesh file="../../meshes/fr3/link0_0.obj"/>
+    <mesh file="../../meshes/fr3/link0_1.obj"/>
+    <mesh file="../../meshes/fr3/link0_2.obj"/>
+    <mesh file="../../meshes/fr3/link0_3.obj"/>
+    <mesh file="../../meshes/fr3/link0_4.obj"/>
+    <mesh file="../../meshes/fr3/link0_5.obj"/>
+    <mesh file="../../meshes/fr3/link0_6.obj"/>
+    <mesh file="../../meshes/fr3/link1.obj"/>
+    <mesh file="../../meshes/fr3/link2.obj"/>
+    <mesh file="../../meshes/fr3/link3_0.obj"/>
+    <mesh file="../../meshes/fr3/link3_1.obj"/>
+    <mesh file="../../meshes/fr3/link4_0.obj"/>
+    <mesh file="../../meshes/fr3/link4_1.obj"/>
+    <mesh file="../../meshes/fr3/link5_0.obj"/>
+    <mesh file="../../meshes/fr3/link5_1.obj"/>
+    <mesh file="../../meshes/fr3/link5_2.obj"/>
+    <mesh file="../../meshes/fr3/link6_0.obj"/>
+    <mesh file="../../meshes/fr3/link6_1.obj"/>
+    <mesh file="../../meshes/fr3/link6_2.obj"/>
+    <mesh file="../../meshes/fr3/link6_3.obj"/>
+    <mesh file="../../meshes/fr3/link6_4.obj"/>
+    <mesh file="../../meshes/fr3/link6_5.obj"/>
+    <mesh file="../../meshes/fr3/link6_6.obj"/>
+    <mesh file="../../meshes/fr3/link6_7.obj"/>
+    <mesh file="../../meshes/fr3/link7_0.obj"/>
+    <mesh file="../../meshes/fr3/link7_1.obj"/>
+    <mesh file="../../meshes/fr3/link7_2.obj"/>
+    <mesh file="../../meshes/fr3/link7_3.obj"/>
+    <mesh file="../../meshes/fr3/hand_0.obj"/>
+    <mesh file="../../meshes/fr3/hand_1.obj"/>
+    <mesh file="../../meshes/fr3/hand_2.obj"/>
+    <mesh file="../../meshes/fr3/hand_3.obj"/>
+    <mesh file="../../meshes/fr3/hand_4.obj"/>
+    <mesh file="../../meshes/fr3/finger_0.obj"/>
+    <mesh file="../../meshes/fr3/finger_1.obj"/>
+
+    <mesh name="link0_coll" file="../../meshes/fr3/link0.stl"/>
+    <mesh name="link1_coll" file="../../meshes/fr3/link1.stl"/>
+    <mesh name="link2_coll" file="../../meshes/fr3/link2.stl"/>
+    <mesh name="link3_coll" file="../../meshes/fr3/link3.stl"/>
+    <mesh name="link4_coll" file="../../meshes/fr3/link4.stl"/>
+    <mesh name="link5_coll" file="../../meshes/fr3/link5.stl"/>
+    <mesh name="link6_coll" file="../../meshes/fr3/link6.stl"/>
+    <mesh name="link7_coll" file="../../meshes/fr3/link7.stl"/>
+    <mesh name="hand_coll" file="../../meshes/fr3/hand.stl"/>
+  </asset>
+</mujoco>

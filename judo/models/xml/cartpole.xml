@@ -1,0 +1,45 @@
+<mujoco model="cartpole">
+  <asset>
+    <texture name="blue_grid" type="2d" builtin="checker" rgb1=".02 .14 .44" rgb2=".27 .55 1" width="300" height="300" mark="edge" markrgb="1 1 1"/>
+    <material name="blue_grid" texture="blue_grid" texrepeat="1 1" texuniform="true" reflectance=".2"/>
+    <material name="beige" rgba=".7 .5 .3 1"/>
+  </asset>
+
+  <option timestep="0.04">
+    <flag contact="disable"/>
+  </option>
+
+  <default>
+    <default class="cart">
+      <joint damping="10" type="slide" axis="1 0 0" range="-1.8 1.8" />
+      <position kp="100" ctrlrange="-1.8 1.8" forcerange="-10 10"/>
+    </default>
+    <default class="pole">
+      <joint damping="0" type="hinge" axis="0 1 0"/>
+      <geom type="capsule" fromto="0 0 0 0 0 1" size="0.045" material="beige" mass=".1"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <body name="cart" pos="0 0 0">
+      <joint name="joint_cart" class="cart" />
+      <geom name="cart" type="box" size="0.2 0.15 0.1" material="beige"  mass="1"/>
+      <site name="trace_cart" pos="0 0 0" size="0.01"/>
+      <body name="pole" childclass="pole">
+        <joint name="joint_pole" class="pole"/>
+        <geom name="pole"/>
+        <site name="trace_pole" pos="0 0 1" size="0.01"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="actuator_cart" joint="joint_cart" class="cart" />
+  </actuator>
+
+  <sensor>
+    <framepos name="trace_cart" objtype="site" objname="trace_cart" />
+    <framepos name="trace_pole" objtype="site" objname="trace_pole" />
+  </sensor>
+
+</mujoco>

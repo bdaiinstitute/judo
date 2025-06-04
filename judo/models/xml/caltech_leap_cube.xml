@@ -1,0 +1,33 @@
+<mujoco model="caltech_leap_cube_control">
+  <include file="caltech_leap_components/assets.xml" />
+  <include file="caltech_leap_components/params_and_default.xml" />
+
+  <worldbody>
+    <!-- Ground and light -->
+    <light pos="0 0 3" dir="0 0 -1" directional="false" />
+    <body name="floor" pos="0 0 0">
+      <geom name="floor" pos="0 0 -1.25" size="10 10 1" type="box" material="groundplane" />
+    </body>
+
+    <!-- goal cube -->
+    <body name="goal" mocap="true" pos="0.1 0.2 0.0475">
+      <include file="leap_components/cube_pips_vis.xml" />
+    </body>
+
+    <!-- cube and hand -->
+    <body name="cube" pos="0.11 0.005 0.04" quat="1 0 0 0">
+      <freejoint/>
+      <include file="leap_components/cube_pips_coll.xml" />
+    </body>
+    <body name="leap_hand" pos="0.0 0.0 0.0" quat="1.0 0.0 0.0 0.0">
+      <include file="caltech_leap_components/leap_rh.xml" />
+    </body>
+  </worldbody>
+
+  <!-- Sensors for the cube -->
+  <sensor>
+    <framepos name="cube_position" objtype="body" objname="cube" reftype="site" refname="grasp_site" />
+    <framequat name="cube_orientation" objtype="body" objname="cube" reftype="body" refname="goal"/>
+  </sensor>
+
+</mujoco>

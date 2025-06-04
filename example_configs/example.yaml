@@ -1,0 +1,33 @@
+defaults:
+  - judo
+
+task: "my_cylinder_push"
+optimizer: "my_cem"
+
+# example of how to register custom tasks and optimizers using hydra
+# these are essentially identical to the regular cylinder_push task and cem optimizer,
+# but with an extra parameter in each of the configs
+custom_tasks:
+  my_cylinder_push:
+    task: judo.examples.example_task.MyCylinderPush
+    config: judo.examples.example_task.MyCylinderPushConfig
+
+custom_optimizers:
+  my_cem:
+    optimizer: judo.examples.example_optimizer.MyCrossEntropyMethod
+    config: judo.examples.example_optimizer.MyCrossEntropyMethodConfig
+
+# example of how to use task-specific controller config overrides
+controller_config_overrides:
+  my_cylinder_push:
+    horizon: 1.0
+    spline_order: "zero"
+
+optimizer_config_overrides:
+  my_cylinder_push:
+    ps:
+      num_nodes: 4
+      num_rollouts: 32
+      use_noise_ramp: true
+      noise_ramp: 4.0
+      sigma: 0.2

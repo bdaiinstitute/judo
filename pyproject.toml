@@ -1,89 +1,164 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
-name = "judo"
+name = "judo-rai"
 version = "0.1.0"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
-    {name = "The Robotics and AI Institute"},
+    { name = "The Robotics and AI Institute" },
+    { name = "Preston Culbertson" },
+    { name = "Albert Li" },
+    { name = "Simon Le Cleac'h" },
+    { name = "Brandon Hung" },
 ]
 
 requires-python = ">=3.10"
 classifiers = [
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
 
 dependencies = [
-    "cma==3.4.0",
-    "dacite==1.8.1",
-    "matplotlib==3.6.3",
-    "mujoco==3.3.0", # WARNING: this version needs to match the 'bazelized' cpp libraries in @//deps
-    "mujoco-mjx==3.3.0",
-    "mujoco-extensions",
-    "numpy==1.26.4",
-    "onnxruntime==1.19.0",
-    "plotly==5.12.0",
-    "python-benedict==0.33.2",
-    "pyyaml==6.0.1",
-    "scipy==1.14.0",
-    "torch>=2.3.0",
-    "torchrl>=0.4.0",
-    "tqdm==4.64.1",
-    "typing-extensions==4.11.0",
-    "tyro==0.8.4",
+    "dora-utils",  # dora + qol utils for writing nodes
+    "mujoco",
+    "numpy",
+    "requests",  # for sharing GUI link
+    "rich",  # for displaying tables in benchmarking
+    "scipy",
     "viser",
 ]
 
-[project.scripts]
-viser-app = "judo.viser_app.app:main"
+[project.urls]
+"Documentation" = "https://bdaiinstitute.github.io/judo"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[project.scripts]
+judo = "judo.cli:app"
+benchmark = "judo.cli:benchmark"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["judo"]
 
 [project.optional-dependencies]
 dev = [
-  "pre-commit>=4.1.0",
-  "pytest>=8.3.4",
-  "pytest-cov>=6.0.0",
-  "pytest-xdist>=3.6.1",
+    "pre-commit",
+    "pybind11-stubgen",
+    "pyright",
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "ruff",
 ]
 
 [tool.coverage.run]
 source = ["./judo"]
 
-[tool.ruff]
-lint.select = [
-    "E",  # pycodestyle errors.
-    "F",  # Pyflakes rules.
-    "PLC",  # Pylint convention warnings.
-    "PLE",  # Pylint errors.
-    "PLR",  # Pylint refactor recommendations.
-    "PLW",  # Pylint warnings.
-    "I", # Import sorting.
+[tool.pytest.ini_options]
+addopts = "-n=8 --disable-warnings"
+testpaths = [
+    "tests",
 ]
-lint.ignore = [
-    "E741", # Ambiguous variable name. (l, O, or I)
+
+[tool.pyright]
+include = ["judo", "tests"]
+exclude = [
+    "**/__pycache__",
+]
+defineConstant = { DEBUG = true }
+stubPath = "typings"
+
+reportMissingImports = "warning"
+reportMissingTypeStubs = false
+reportPrivateImportUsage = false
+
+pythonVersion = "3.13"
+pythonPlatform = "Linux"
+
+[tool.ruff]
+line-length = 120
+respect-gitignore = false
+exclude=[
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+[tool.ruff.lint]
+pydocstyle.convention = "google"
+select = [
+    "ANN",  # annotations
+    "N",  # naming conventions
+    "D",  # docstrings
+    "B",  # flake8 bugbear
+    "E",  # pycodestyle errors
+    "F",  # Pyflakes rules
+    "I",  # isort formatting
+    "PLC",  # Pylint convention warnings
+    "PLE",  # Pylint errors
+    "PLR",  # Pylint refactor recommendations
+    "PLW",  # Pylint warnings
+]
+ignore = [
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
+    "D100",  # missing docstring in public module
+    "D104",  # missing docstring in public package
+    "D203",  # blank line before class docstring
+    "D211",  # no blank line before class
+    "D212",  # multi-line docstring summary at first line
+    "D213",  # multi-line docstring summary at second line
+    "E741",  # Ambiguous variable name. (l, O, or I)
     "E501",  # Line too long.
     "E721",  # Do not compare types, use `isinstance()`.
     "F722",  # Forward annotation false positive from jaxtyping. Should be caught by pyright.
     "F821",  # Forward annotation false positive from jaxtyping. Should be caught by pyright.
-    "PLR2004",  # Magic value used in comparison.
-    "PLR0915",  # Too many statements.
-    "PLR0913",  # Too many arguments.
-    "PLC0414",  # Import alias does not rename variable. (this is used for exporting names)
-    "PLC1901",  # Use falsey strings.
-    "PLR5501",  # Use `elif` instead of `else if`.
-    "PLR0911",  # Too many return statements.
-    "PLR0912",  # Too many branches.
-    "PLW0603",  # Globa statement updates are discouraged.
-    "PLW2901",  # For loop variable overwritten.
-    "PLW0642",  # Reassigned self in instance method.
+    "N803",  # Argument name should be lowercase
+    "N806",  # Variable <variable> in function should be lowercase
+    "N812",  # lowercase imported as non-lowercase
+    "N817",  # CamelCase imported as acronym
+    "PLR0911",  # Too many return statements
+    "PLR0912",  # Too many branches (conditional statements)
+    "PLR0913",  # Too many arguments in function definition
+    "PLR0915",  # Too many statements in function
+    "PLR2004",  # magic numbers
 ]
 
-[tool.uv.sources]
-mujoco-extensions = { path = "./src/mujoco_extensions", editable = true}
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64", "osx-64"]
+
+[tool.pixi.pypi-dependencies]
+judo-rai = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }

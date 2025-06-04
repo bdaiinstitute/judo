@@ -1,7 +1,0 @@
-<mujoco>
-  <asset>
-      <mesh name="tire_rim" file="../../meshes/tire_rim/visual/tire_rim.obj"/>
-      <mesh name="tire_rim_mesh" file="../../meshes/tire_rim/visual/tire_rim.obj"/>
-      <mesh name="tire_rim_coacd" file="../../meshes/tire_rim/collision/tire_rim.obj"/>
-  </asset>
-</mujoco>
