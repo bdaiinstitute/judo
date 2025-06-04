@@ -1,98 +1,129 @@
-# judo
-[![build](https://github.com/bdaiinstitute/judo/actions/workflows/build.yml/badge.svg)](https://github.com/bdaiinstitute/judo/actions/workflows/build.yml)
-[![codecov](https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=3GGYCZM2Y2)](https://codecov.io/gh/bdaiinstitute/judo)
-[![docs](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml)
-[![Static Badge](https://img.shields.io/badge/documentation-latest-8A2BE2)](https://bdaiinstitute.github.io/judo)
+# Judo 🥋
 
-> Disclaimer: This code is released as a research prototype and is not
-> production-quality software. Please note that the code may contain
-> missing features and potential bugs. As part of this release, the
-> RAI Institute does not offer maintenance or support for the software.
-> While we may accept PRs implementing features and bugfixes, we cannot
-> guarantee timely responses to issues.
+<p align="center">
+  <img src="docs/source/_static/images/banner.gif" alt="task dropdown" width="640">
+</p>
 
+`judo` is a `python` package inspired by [`mujoco_mpc`](https://github.com/google-deepmind/mujoco_mpc) that makes sampling-based MPC easy. Features include:
+- 👩‍💻 A simple interface for defining custom tasks and controllers.
+- 🤖 Automatic parsing of configs into a browser-based GUI, allowing real-time parameter tuning.
+- 📬 Asynchronous interprocess communication using [`dora`](https://dora-rs.ai/) for easy integration with your hardware.
+- 🗂️ Configuration management with [`hydra`](https://hydra.cc/docs/intro/) for maximum flexibility.
 
-## Judo: A Unified Framework for Agile Robot Control, Learning, and Data Generation via Sampling-Based MPC
+> ⚠️ **Disclaimer** ⚠️
+>
+> This code is released as a **research prototype** and is *not* production-quality software. It may contain missing features and potential bugs. The RAI Institute does **not** offer maintenance or support for this software. While we *may* accept pull requests for new features or bugfixes, we **cannot guarantee** timely responses to issues.
+>
+> The current release is also in **alpha**. We reserve the right to make breaking changes to the API and configuration system in future releases. We will try to minimize these changes, but please be aware that they may occur.
 
-![judo](docs/source/_static/images/judo.gif)
+# Quickstart
+This section walks you through the installation and usage of `judo`. For more details, see [the docs](https://bdaiinstitute.github.io/judo).
 
-While sampling-based MPC has enjoyed success for both real-time control and as an underlying planner
-for model-based RL, recent years have seen promising results for applying these controllers directly
-in-the-loop as planners for difficult tasks such as [quadrupedal](https://lecar-lab.github.io/dial-mpc/)
-and [bipedal](https://johnzhang3.github.io/mujoco_ilqr/) locomotion as well as
-[dexterous manipulation](caltech-amber.github.io/drop/).
-
-`judo` is a simple, `pip`-installable framework for designing and deploying new tasks and algorithms
-for sampling-based controllers. It consists of three components:
-1. A visualizer based on [`viser`](https://github.com/nerfstudio-project/viser) which enables
-3D visualization of system states and GUI callbacks for real-time, interactive parameter tuning.
-2. A multi-threaded C++ rollout of `mujoco` physics which can be used as the underlying engine
-for sampling-based controllers.
-3. `numpy`-based implementations of standard sampling-based MPC algorithms from literature and
-canonical tasks (cartpole, acrobot) as `mujoco` tasks.
-
-We also release a simple app that deploys simulated tasks and controllers for better study of how the
-algorithms perform in closed-loop.
-
-These utilities are being released with the hope that they will be of use to the broader community,
-and will facilitate more research into and benchmarking of sampling-based MPC methods in coming years.
-
-### Installation
-Install judo
-```
-uv pip install -e .
+## 1. Installation
+### Using `pip`
+We recommend installing `judo` using `pip` as follows:
+```bash
+pip install judo-rai  # if you want dev dependencies, use judo-rai[dev]
 ```
 
-The package contains custom C++ extensions for multi-threaded physics rollouts. These
-should be compiled as part of the "typical" python installation, but you may need to
-install `cmake` if it is not available on your system:
-```
-sudo apt install cmake
-```
-
-If you are not using `uv` you will need to install the extensions manually with
-```
-pip install -e ./src/mujoco_extensions
-```
-
-### Getting started
-To run the application, simply run:
-```
-uv run viser-app
-```
-Then open the visualizer in your browser by clicking on the link in the terminal.
-```
-http://localhost:8008/
-```
-
-### Run tests locally
-In the virtual environment
-```
+### Developers
+#### Conda
+For developers, run the following commands from this folder after cloning:
+```bash
+conda create -n judo python=3.13
+conda activate judo
 pip install -e .[dev]
-python -m pytest
-```
-you might have to
-```
-unset PYTHONPATH
+pre-commit install
+pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
 ```
 
-### Contributing
+#### Pixi
+You can also use [`pixi`](https://pixi.sh/dev/) instead of `conda`, which has the added benefit of having an associated lock file that ensures complete reproducibility.
 
-We welcome contributions to `judo`!
+To install `pixi`, run the following:
+```bash
+curl -fsSL https://pixi.sh/install.sh | sh
+```
+To create our environment (and activate it each time later), run the following in the repo root:
+```bash
+# every time you want to activate
+pixi shell -e dev
 
-Before submitting a PR, please ensure:
-1.  Your changes pass all pre-commit checks.
-2.  All unit tests pass, including any new tests for your changes.
+# first time only
+pre-commit install
+pybind11-stubgen mujoco -o typings/
+```
 
-Thank you for helping improve this project!
+## 2. Run the `judo` app!
+To start the simulator, you can simply run:
+```bash
+judo
+```
+We package `judo` with a few starter tasks and optimizers. If you want to start the simulator with one of these, you can run:
+```bash
+judo task=<task_name> optimizer=<optimizer_name>
+```
+where `task_name` is one of the following:
+```
+cylinder_push
+cartpole
+leap_cube
+leap_cube_down
+caltech_leap_cube
+```
+and `optimizer_name` is one of the following:
+```
+cem
+mppi
+ps
+```
+This is not necessary, though, because you can use the dropdown menus to switch between tasks and optimizers after launching the app.
+<p align="center">
+  <img src="docs/source/_static/images/task_dropdown.png" alt="task dropdown" width="300">
+   <img src="docs/source/_static/images/optimizer_dropdown.png" alt="optimizer dropdown" width="300">
+</p>
 
-### Limitations
-The code as released has several limitations:
-* The inter-process communication (IPC) is implemented in Python `multiprocessing`
-    and cannot communicate with processes in other languages.
-* Coverage of canonical gradient-free and first-order methods (e.g., GAs, iLQR)
-    is low and could be improved.
-* The system architecture must contain `Physics`, `Controller` and `Visualizer` objects,
-    without exception, which is a somewhat limited API.
-* `Controllers` must output splines even if (like RL controllers) they are instantaneous
-    feedback policies.
+You can also run the app programmatically from some other script or program.
+```python
+from judo.cli import app
+
+if __name__ == "__main__":
+    # do whatever you want here, like registering tasks/optimizers/overrides, etc.
+    app()  # this runs the app from your own script
+```
+
+## 3. Running `judo` as a Dependency
+You can easily install `judo` as a dependency in your own project. A few comments:
+* You can still use the `judo` CLI command from anywhere, so long as you are working in an environment where `judo` is installed.
+* If you do this, you should use the `hydra` configuration system to do things like registering custom tasks and optimizers, modifying the `dora` nodes in the sim stack, etc. See the [Configuration with `hydra`](#configuration-with-hydra) and [Config Registration](#config-registration) sections for more details.
+* You can also run the app programmatically, as shown above.
+
+## 4. Benchmarking
+To benchmark all registered tasks and optimizers, simply run
+```bash
+benchmark
+```
+This will loop through all task/optimizer pairs and check the planning time over 100 samples. The end result will be printed to the console, showing useful statistics on your system.
+
+Note that the benchmarking program runs the default task and optimizer parameters (subject to default task-specific overrides). If you want to benchmark with different settings, please read the information below, which explains how to change defaults.
+
+# Docs
+For developers, to build docs locally, run the following in your environment. Note that asset paths will be broken locally that work correctly on Github Pages.
+```bash
+cd docs
+pip install -r requirements.txt
+sphinx-build docs/source docs/build -b dirhtml
+python -m http.server --directory docs/build 8000
+```
+
+# Citation
+If you use `judo` in your research, please use the following citation:
+```
+@inproceedings{li2025_judo,
+  title     = {Judo: A User-Friendly Open-Source Package for Sampling-Based Model Predictive Control},
+  author    = {Albert Li and Simon Le Cleac'h and Brandon Huang and Aaron D. Ames and Jiuguang Wang and Preston Culbertson},
+  booktitle = {Proceedings of the Workshop on Fast Motion Planning and Control in the Era of Parallelism at Robotics: Science and Systems (RSS)},
+  year      = {2025},
+  url       = {https://github.com/bdaiinstitute/judo},
+}
+```

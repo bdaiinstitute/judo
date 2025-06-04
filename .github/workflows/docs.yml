@@ -11,18 +11,20 @@ permissions:
 
 jobs:
   docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      # Check out source
       - uses: actions/checkout@v4
 
-      # Set up Python
-      - name: "Set up Python 3.10"
+      - uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          pixi-version: v0.47.0
+          cache: true
+
+      - name: "Set up Python 3.13"
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
-      # Build documentation
       - name: Building documentation
         run: |
           pip install uv
@@ -30,9 +32,9 @@ jobs:
           uv pip install --system -r docs/requirements.txt
           sphinx-build docs/source docs/build -b dirhtml
 
-      # Deploy
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build
+          force_orphan: true

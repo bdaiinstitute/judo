@@ -1,0 +1,14 @@
+<mujoco model="leap_assets">
+  <asset>
+    <mesh name="palm" file="../../meshes/leap/palm_right.obj"/>
+    <mesh name="base" file="../../meshes/leap/base.obj"/>
+    <mesh name="proximal" file="../../meshes/leap/proximal.obj"/>
+    <mesh name="medial" file="../../meshes/leap/medial.obj"/>
+    <mesh name="distal" file="../../meshes/leap/distal.obj"/>
+    <mesh name="tip" file="../../meshes/leap/tip.obj"/>
+    <mesh name="thumb_base" file="../../meshes/leap/thumb_base.obj"/>
+    <mesh name="thumb_proximal" file="../../meshes/leap/thumb_proximal.obj"/>
+    <mesh name="thumb_distal" file="../../meshes/leap/thumb_distal.obj"/>
+    <mesh name="thumb_tip" file="../../meshes/leap/thumb_tip.obj"/>
+  </asset>
+</mujoco>

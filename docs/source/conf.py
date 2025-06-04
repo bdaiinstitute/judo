@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
+
 # -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
@@ -20,7 +22,7 @@ import m2r2
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-sys.path.insert(0, os.path.abspath("../../src"))
+sys.path.insert(0, os.path.abspath("../../judo"))
 
 # -- Project information -----------------------------------------------------
 
@@ -29,9 +31,9 @@ copyright = "2024 - 2025"
 author = "The AI Institute"
 
 # The short X.Y version
-version = ""
+version = "0.1.0"
 # The full version, including alpha/beta/rc tags
-release = ""
+release = "v0.1.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -59,7 +61,7 @@ extensions = [
     "m2r2",
     "sphinxcontrib.programoutput",
     "sphinxcontrib.ansi",
-    "sphinxcontrib.googleanalytics",
+    # "sphinxcontrib.googleanalytics",
 ]
 programoutput_use_ansi = True
 html_ansi_stylesheet = "black-on-white.css"
@@ -221,10 +223,10 @@ texinfo_documents = [
 # -- Extension configuration --------------------------------------------------
 
 # -- Google analytics ID ------------------------------------------------------
-googleanalytics_id = "G-??????"
+# googleanalytics_id = "G-??????"
 
 # -- Options for autoapi extension --------------------------------------------
-autoapi_dirs = ["../../src/judo"]
+autoapi_dirs = ["../../judo"]
 autoapi_root = "api"
 # autoapi_options = ["members"]  # Or even just an empty list [] initially
 autoapi_options = [
@@ -236,7 +238,8 @@ autoapi_options = [
     "special-members",
     #  "show-module-summary",
 ]
-autoapi_add_toctree_entry = False
+autoapi_add_toctree_entry = True
+autoapi_python_use_implicit_namespaces = True
 
 
 # -- Options for todo extension ----------------------------------------------

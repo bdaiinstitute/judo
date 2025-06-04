@@ -1,0 +1,17 @@
+<mujoco model="leap_rh">
+  <include file="leap_components/assets.xml" />
+  <include file="leap_components/params_and_default.xml" />
+
+  <worldbody>
+    <body name="goal" pos="0.0 -0.2 -0.05" quat="1 0 0 0" mocap="true">
+      <include file="leap_components/cube_pips_vis.xml" />
+    </body>
+    <body name="cube" pos="0.0 0.0 0.2" quat="1 0 0 0">
+      <freejoint/>
+      <include file="leap_components/cube_pips_coll.xml" />
+    </body>
+    <body name="leap_hand" pos="0.0 0.0 0.0" quat="1.0 0.0 0.0 0.0">
+      <include file="leap_components/leap_hand.xml" />
+    </body>
+  </worldbody>
+</mujoco>

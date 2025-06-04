@@ -1,0 +1,39 @@
+<mujoco model="cube">
+  <geom name="cube" type="box" size=".03 .03 .03" mass="0.108"/>
+
+  <!-- face 1 -->
+  <geom name="cube_visual_face_1_1" pos="0.03 0.0 0.0" size="0.005" class="visual" type="sphere"/>
+
+  <!-- face 2 -->
+  <geom name="cube_visual_face_2_1" pos="-0.03 -0.01 0.01" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_2_2" pos="-0.03 0.01 -0.01" size="0.005" class="visual" type="sphere"/>
+
+  <!-- face 3 -->
+  <geom name="cube_visual_face_3_1" pos="-0.01 0.03 0.01" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_3_2" pos="0.0 0.03 0.0" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_3_3" pos="0.01 0.03 -0.01" size="0.005" class="visual" type="sphere"/>
+
+  <!-- face 4 -->
+  <geom name="cube_visual_face_4_1" pos="-0.01 -0.03  0.01" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_4_2" pos="-0.01 -0.03  -0.01" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_4_3" pos="0.01 -0.03 0.01" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_4_4" pos="0.01 -0.03 -0.01" size="0.005" class="visual" type="sphere"/>
+
+  <!-- face 5 -->
+  <geom name="cube_visual_face_5_1" pos="-0.01 0.01 0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_5_2" pos="-0.01 -0.01 0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_5_3" pos="0.01 0.01 0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_5_4" pos="0.01 -0.01 0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_5_5" pos="0.0 0.0 0.03" size="0.005" class="visual" type="sphere"/>
+
+  <!-- face 6 -->
+  <geom name="cube_visual_face_6_1" pos="0.01 0.015 -0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_6_2" pos="0.01 -0.015 -0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_6_3" pos="0.0 0.015 -0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_6_4" pos="0.0 -0.015 -0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_6_5" pos="-0.01 0.015 -0.03" size="0.005" class="visual" type="sphere"/>
+  <geom name="cube_visual_face_6_6" pos="-0.01 -0.015 -0.03" size="0.005" class="visual" type="sphere"/>
+
+  <!-- trace for visualization -->
+  <site name="trace_cube" pos="0 0 0" size="0.01"/>
+</mujoco>
