@@ -202,7 +202,7 @@ def set_default_fr3_pick_overrides() -> None:
         CrossEntropyMethodConfig,
         {
             "num_nodes": 4,
-            "num_rollouts": 100,
+            "num_rollouts": 64,
             "num_elites": 3,
             "use_noise_ramp": True,
             "noise_ramp": 4.0,
