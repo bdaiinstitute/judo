@@ -12,7 +12,7 @@
 
 > ⚠️ **Disclaimer** ⚠️
 >
-> This code is released as a **research prototype** and is *not* production-quality software. It may contain missing features and potential bugs. The RAI Institute does **not** offer maintenance or support for this software. While we *may* accept pull requests for new features or bugfixes, we **cannot guarantee** timely responses to issues.
+> This code is released as a **research prototype** and is *not* production-quality software. It may contain missing features and potential bugs. The RAI Institute does **not** guarantee maintenance or support for this software. While we encourage contributions and may accept pull requests for new features or bugfixes, we **cannot guarantee** timely responses to issues.
 >
 > The current release is also in **alpha**. We reserve the right to make breaking changes to the API and configuration system in future releases. We will try to minimize these changes, but please be aware that they may occur.
 
@@ -59,6 +59,11 @@ To start the simulator, you can simply run:
 ```bash
 judo
 ```
+This will start the stack and print a link in the terminal that will open the app in your browser, e.g.,
+```
+http://localhost:8080
+```
+
 We package `judo` with a few starter tasks and optimizers. If you want to start the simulator with one of these, you can run:
 ```bash
 judo task=<task_name> optimizer=<optimizer_name>
@@ -67,6 +72,7 @@ where `task_name` is one of the following:
 ```
 cylinder_push
 cartpole
+fr3_pick
 leap_cube
 leap_cube_down
 caltech_leap_cube

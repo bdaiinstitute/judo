@@ -49,6 +49,7 @@ where `task_name` is one of the following:
 ```
 cylinder_push
 cartpole
+fr3_pick
 leap_cube
 leap_cube_down
 caltech_leap_cube
