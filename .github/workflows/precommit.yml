@@ -1,4 +1,4 @@
-name: Code Checks
+name: Precommit
 
 on:
   push:
@@ -48,6 +48,3 @@ jobs:
 
       - name: Run Pyright
         run: pixi run -e dev pyright
-
-      - name: Test with pytest
-        run: pixi run -e dev pytest -rsx
