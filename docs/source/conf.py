@@ -1,5 +1,7 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+#
+
 # -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
@@ -80,7 +82,7 @@ html_theme_options = {
             "name": "GitHub",
             "url": "https://github.com/bdaiinstitute/judo",
             "html": """
-                <span style="font-size: 1.2em;">🎲</span>
+                <span style="font-size: 1.2em;">🥋</span>
             """,
             "class": "",
         },
