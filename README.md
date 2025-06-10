@@ -114,10 +114,9 @@ This will loop through all task/optimizer pairs and check the planning time over
 Note that the benchmarking program runs the default task and optimizer parameters (subject to default task-specific overrides). If you want to benchmark with different settings, please read the information below, which explains how to change defaults.
 
 # Docs
-For developers, to build docs locally, run the following in your environment. Note that asset paths will be broken locally that work correctly on Github Pages.
+For developers, to build docs locally, run the following in your environment from the repo root. Note that asset paths will be broken locally that work correctly on Github Pages.
 ```bash
-cd docs
-pip install -r requirements.txt
+pip install -r docs/requirements.txt
 sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
