@@ -2,6 +2,7 @@
 
 import threading
 import time
+import warnings
 
 from dora_utils.dataclasses import from_arrow, to_arrow
 from dora_utils.node import DoraNode, on_event
@@ -78,7 +79,16 @@ class SimulationNode(DoraNode):
             self.write_states()
 
             # Force controller to run at fixed rate specified by model dt.
-            time.sleep(max(0, (self.task.sim_model.opt.timestep) - (time.time() - start_time)))
+            dt_des = self.task.sim_model.opt.timestep
+            dt_elapsed = time.time() - start_time
+            if dt_elapsed < dt_des:
+                time.sleep(dt_des - dt_elapsed)
+            else:
+                warnings.warn(
+                    f"Simulation step took {dt_elapsed:.3f}s, which is longer than the model timestep {dt_des:.3f}s. "
+                    "This may lead to performance issues or missed control updates.",
+                    stacklevel=2,
+                )
 
     def write_states(self) -> None:
         """Reads data from simulation and writes to output topic."""
