@@ -4,7 +4,7 @@
   <img src="docs/source/_static/images/banner.gif" alt="task dropdown" width="640">
 </p>
 
-![Python](https://img.shields.io/badge/python-3.10--3.13-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10|3.11|3.12|3.13-blue?logo=python&logoColor=white)
 [![Build Status](https://github.com/bdaiinstitute/judo/actions/workflows/build.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
 &nbsp;
 [![Docs Status](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo)

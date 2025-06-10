@@ -30,7 +30,7 @@
 
 |python| |nbsp| |build| |nbsp| |docs| |nbsp| |coverage|
 
-.. |python| image:: https://img.shields.io/badge/Python-3.10--3.13-blue?logo=python&logoColor=white
+.. |python| image:: https://img.shields.io/badge/Python-3.10%7C3.11%7C3.12%7C3.13-blue?logo=python&logoColor=white
    :alt: Supported Python versions
    :target: https://github.com/bdaiinstitute/judo
 .. |build| image:: https://github.com/bdaiinstitute/judo/actions/workflows/build.yml/badge.svg
