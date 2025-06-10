@@ -11,7 +11,11 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
 
@@ -23,14 +27,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: ${{ matrix.python-version }}
 
       - name: Restore typings cache
         uses: actions/cache@v4
         id: typings-cache
         with:
           path: typings
-          key: typings-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+          key: typings-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Generate stubs if cache miss
         if: steps.typings-cache.outputs.cache-hit != 'true'
