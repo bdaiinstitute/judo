@@ -418,8 +418,7 @@ class VisualizationNode(DoraNode):
         for v in self.gui_elements.values():
             if isinstance(v, list):
                 for handle in v:
-                    if not handle._impl.removed:
-                        handle.remove()
+                    self.remove_handles(handle)
             else:
                 v.remove()
         self.viser_model.remove()
