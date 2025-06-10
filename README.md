@@ -4,6 +4,14 @@
   <img src="docs/source/_static/images/banner.gif" alt="task dropdown" width="640">
 </p>
 
+![Python](https://img.shields.io/badge/python-3.10--3.13-blue.svg)
+[![Build Status](https://github.com/bdaiinstitute/judo/actions/workflows/build.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
+&nbsp;
+[![Docs Status](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
+&nbsp;
+[![Coverage Status](https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=3GGYCZM2Y2)](https://github.com/bdaiinstitute/judo)
+
+
 `judo` is a `python` package inspired by [`mujoco_mpc`](https://github.com/google-deepmind/mujoco_mpc) that makes sampling-based MPC easy. Features include:
 - 👩‍💻 A simple interface for defining custom tasks and controllers.
 - 🤖 Automatic parsing of configs into a browser-based GUI, allowing real-time parameter tuning.
