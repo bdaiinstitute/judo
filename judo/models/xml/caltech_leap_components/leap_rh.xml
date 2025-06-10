@@ -128,8 +128,8 @@ Naming Conventions
               <geom name="if_ds_collision_2" size="0.007 0.011 0.002" pos="0 -0.006 0.0295" type="box"/>
               <geom name="if_ds_collision_3" size="0.007 0.011 0.002" pos="0 -0.006 -0.0005" type="box"/>
 
-              <geom name="if_tip_collision_1" size="0.014 0.007" pos="0.0 -0.027 0.0145" quat="1 1 0 0" type="cylinder" class="tip"/>
-              <geom name="if_tip_collision_2" size="0.014" pos="0.0 -0.034 0.0145" quat="1 0 0 0" type="sphere" class="tip"/>
+              <geom name="if_tip_1" size="0.014 0.007" pos="0.0 -0.027 0.0145" quat="1 1 0 0" type="cylinder" class="tip"/>
+              <geom name="if_tip_2" size="0.014" pos="0.0 -0.034 0.0145" quat="1 0 0 0" type="sphere" class="tip"/>
             </body>
 
           </body>
@@ -172,8 +172,8 @@ Naming Conventions
               <geom name="mf_ds_collision_2" size="0.007 0.011 0.002" pos="0 -0.006 0.0295" type="box"/>
               <geom name="mf_ds_collision_3" size="0.007 0.011 0.002" pos="0 -0.006 -0.0005" type="box"/>
 
-              <geom name="mf_tip_collision_1" size="0.014 0.007" pos="0.0 -0.027 0.0145" quat="1 1 0 0" type="cylinder" class="tip"/>
-              <geom name="mf_tip_collision_2" size="0.014" pos="0.0 -0.034 0.0145" quat="1 0 0 0" type="sphere" class="tip"/>
+              <geom name="mf_tip_1" size="0.014 0.007" pos="0.0 -0.027 0.0145" quat="1 1 0 0" type="cylinder" class="tip"/>
+              <geom name="mf_tip_2" size="0.014" pos="0.0 -0.034 0.0145" quat="1 0 0 0" type="sphere" class="tip"/>
             </body>
 
           </body>
@@ -216,8 +216,8 @@ Naming Conventions
               <geom name="rf_ds_collision_2" size="0.007 0.011 0.002" pos="0 -0.006 0.0295" type="box"/>
               <geom name="rf_ds_collision_3" size="0.007 0.011 0.002" pos="0 -0.006 -0.0005" type="box"/>
 
-              <geom name="rf_tip_collision_1" size="0.014 0.007" pos="0.0 -0.027 0.0145" quat="1 1 0 0" type="cylinder" class="tip"/>
-              <geom name="rf_tip_collision_2" size="0.014" pos="0.0 -0.034 0.0145" quat="1 0 0 0" type="sphere" class="tip"/>
+              <geom name="rf_tip_1" size="0.014 0.007" pos="0.0 -0.027 0.0145" quat="1 1 0 0" type="cylinder" class="tip"/>
+              <geom name="rf_tip_2" size="0.014" pos="0.0 -0.034 0.0145" quat="1 0 0 0" type="sphere" class="tip"/>
             </body>
 
           </body>
@@ -256,8 +256,8 @@ Naming Conventions
               <geom name="th_ds_collision_1" size="0.01 0.0165 0.0115" pos="0 -0.008 -0.01425" type="box"/>
               <geom name="th_ds_collision_2" size="0.01 0.005 0.01425" pos="0 -0.0255 -0.01425" type="box"/>
 
-              <geom name="th_tip_collision_1" size="0.014 0.007" pos="0.0 -0.0375 -0.01425" quat="1 1 0 0" type="cylinder" class="tip"/>
-              <geom name="th_tip_collision_2" size="0.014" pos="0.0 -0.0445 -0.01425" quat="1 0 0 0" type="sphere" class="tip"/>
+              <geom name="th_tip_1" size="0.014 0.007" pos="0.0 -0.0375 -0.01425" quat="1 1 0 0" type="cylinder" class="tip"/>
+              <geom name="th_tip_2" size="0.014" pos="0.0 -0.0445 -0.01425" quat="1 0 0 0" type="sphere" class="tip"/>
             </body>
 
           </body>
