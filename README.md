@@ -5,7 +5,7 @@
 </p>
 
 ![Python](https://img.shields.io/badge/Python-3.10|3.11|3.12|3.13-blue?logo=python&logoColor=white)
-[![Build Status](https://github.com/bdaiinstitute/judo/actions/workflows/build.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
+[![Test Status](https://github.com/bdaiinstitute/judo/actions/workflows/test.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
 &nbsp;
 [![Docs Status](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
 &nbsp;
