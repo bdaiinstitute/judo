@@ -85,8 +85,7 @@ class SimulationNode(DoraNode):
                 time.sleep(dt_des - dt_elapsed)
             else:
                 warnings.warn(
-                    f"Simulation step took {dt_elapsed:.3f}s, which is longer than the model timestep {dt_des:.3f}s. "
-                    "This may lead to performance issues or missed control updates.",
+                    f"Sim step {dt_elapsed:.3f} longer than desired step {dt_des:.3f}!",
                     stacklevel=2,
                 )
 
