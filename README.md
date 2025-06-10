@@ -4,12 +4,13 @@
   <img src="docs/source/_static/images/banner.gif" alt="task dropdown" width="640">
 </p>
 
-![Python](https://img.shields.io/badge/Python-3.10|3.11|3.12|3.13-blue?logo=python&logoColor=white)
-[![Test Status](https://github.com/bdaiinstitute/judo/actions/workflows/test.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
+[![Python](https://img.shields.io/badge/Python-3.10|3.11|3.12|3.13-blue?logo=python&logoColor=white)](https://github.com/bdaiinstitute/judo)
 &nbsp;
-[![Docs Status](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo)
+[![Test Status](https://github.com/bdaiinstitute/judo/actions/workflows/test.yml/badge.svg)](https://github.com/bdaiinstitute/judo/actions/workflows/test.yml)
 &nbsp;
-[![Coverage Status](https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=3GGYCZM2Y2)](https://github.com/bdaiinstitute/judo)
+[![Docs Status](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg)](https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml)
+&nbsp;
+[![Coverage Status](https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=3GGYCZM2Y2)](https://codecov.io/gh/bdaiinstitute/judo)
 
 
 `judo` is a `python` package inspired by [`mujoco_mpc`](https://github.com/google-deepmind/mujoco_mpc) that makes sampling-based MPC easy. Features include:

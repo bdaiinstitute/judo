@@ -33,15 +33,19 @@
 .. |python| image:: https://img.shields.io/badge/Python-3.10%7C3.11%7C3.12%7C3.13-blue?logo=python&logoColor=white
    :alt: Supported Python versions
    :target: https://github.com/bdaiinstitute/judo
+
 .. |test| image:: https://github.com/bdaiinstitute/judo/actions/workflows/test.yml/badge.svg
    :alt: Test status
-   :target: https://github.com/bdaiinstitute/judo
+   :target: https://github.com/bdaiinstitute/judo/actions/workflows/test.yml
+
 .. |docs| image:: https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml/badge.svg
    :alt: Docs status
-   :target: https://github.com/bdaiinstitute/judo
+   :target: https://github.com/bdaiinstitute/judo/actions/workflows/docs.yml
+
 .. |coverage| image:: https://codecov.io/gh/bdaiinstitute/judo/graph/badge.svg?token=3GGYCZM2Y2
    :alt: Test coverage
-   :target: https://github.com/bdaiinstitute/judo
+   :target: https://codecov.io/gh/bdaiinstitute/judo
+
 .. |nbsp| unicode:: 0xA0
    :trim:
 
