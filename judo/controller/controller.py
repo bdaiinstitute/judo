@@ -172,9 +172,10 @@ class Controller:
                 self.system_metadata,
             )
             i += 1
+            nominal_knots = self.optimizer.update_nominal_knots(self.candidate_knots, self.rewards)
 
         # Update nominal controls and spline.
-        self.nominal_knots = self.optimizer.update_nominal_knots(self.candidate_knots, self.rewards)
+        self.nominal_knots = nominal_knots
         self.times = new_times
         self.update_spline(self.times, self.nominal_knots)
         self.update_traces()
