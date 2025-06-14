@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
+
 from typing import Callable
 
 import numpy as np
@@ -9,6 +11,7 @@ from judo.tasks import CylinderPush, CylinderPushConfig
 # ##### #
 # MOCKS #
 # ##### #
+
 
 class MockOptimizerTrackNominalKnots(Optimizer):
     """A mock optimizer to track the history of nominal_knots."""
@@ -29,9 +32,11 @@ class MockOptimizerTrackNominalKnots(Optimizer):
         """Selects something."""
         return sampled_knots[0]
 
+
 # ##### #
 # TESTS #
 # ##### #
+
 
 def test_max_opt_iters(temp_np_seed: Callable) -> None:
     """Tests that max_opt_iters correctly applies multiple iterations of optimization to a solution."""
