@@ -1,0 +1,43 @@
+judo.visualizers.utils
+======================
+
+.. py:module:: judo.visualizers.utils
+
+
+
+
+Module Contents
+---------------
+
+.. py:function:: get_sensor_name(model: mujoco.MjModel, sensorid: int) -> str
+
+   
+   Return name of the sensor with given ID from MjModel.
+
+.. py:function:: get_mesh_data(model: mujoco.MjModel, meshid: int) -> tuple[numpy.ndarray, numpy.ndarray]
+
+   
+   Retrieve the vertices and faces of a specified mesh from a MuJoCo model.
+
+   :param model: MjModel The MuJoCo model containing the mesh data.
+   :param meshid: int The index of the mesh to retrieve.
+
+   Result:
+       tuple[np.ndarray, np.ndarray]
+       Vertices (N, 3) and faces (M, 3) of the mesh.
+
+.. py:function:: is_trace_sensor(model: mujoco.MjModel, sensorid: int) -> bool
+
+   
+   Check if a sensor is a trace sensor.
+
+.. py:function:: count_trace_sensors(model: mujoco.MjModel) -> int
+
+   
+   Count the number of trace sensors of a given mujoco model.
+
+.. py:function:: get_trace_sensors(model: mujoco.MjModel) -> List[int]
+
+   
+   Get the IDs of all trace sensors in a given mujoco model.
+
