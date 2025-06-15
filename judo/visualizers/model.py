@@ -70,7 +70,7 @@ class ViserMjModel:
                 suffix = f"{_placeholder_idx}"
                 _placeholder_idx += 1
             geom_name = f"{parent_name}/geom_{suffix}"
-            if geom_exclude_substring in geom_name:
+            if geom_exclude_substring and geom_exclude_substring in geom_name:
                 continue
             self.add_geom(geom_name, self._model.geom(i))
 
