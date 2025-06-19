@@ -71,7 +71,7 @@ class CrossEntropyMethod(Optimizer[CrossEntropyMethodConfig]):
             ramp = np.linspace(noise_ramp / num_nodes, noise_ramp, num_nodes, endpoint=True)[:, None]
             self.sigma = np.clip(self.sigma * ramp, self.sigma_min, self.sigma_max)
         noised_knots = nominal_knots + self.sigma[None] * np.random.randn(num_rollouts - 1, num_nodes, self.nu)
-        return np.concatenate([nominal_knots, noised_knots])
+        return np.concatenate([nominal_knots[None], noised_knots])
 
     def update_nominal_knots(self, sampled_knots: np.ndarray, rewards: np.ndarray) -> np.ndarray:
         """Update the nominal control knots based on the sampled controls and rewards.

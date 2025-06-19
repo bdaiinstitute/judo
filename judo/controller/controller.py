@@ -125,7 +125,7 @@ class Controller:
 
         # Adjust time + move policy forward.
         new_times = curr_time + self.spline_timesteps
-        nominal_knots = self.spline(new_times)[None]
+        nominal_knots = self.spline(new_times)
 
         # resizing any variables due to changes in the GUI
         if len(self.model_data_pairs) != self.optimizer_cfg.num_rollouts:

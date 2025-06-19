@@ -47,7 +47,7 @@ class PredictiveSampling(Optimizer[PredictiveSamplingConfig]):
         else:
             sigma = _sigma
         noised_knots = nominal_knots + sigma * np.random.randn(num_rollouts - 1, num_nodes, self.nu)
-        return np.concatenate([nominal_knots, noised_knots])
+        return np.concatenate([nominal_knots[None], noised_knots])
 
     def update_nominal_knots(self, sampled_knots: np.ndarray, rewards: np.ndarray) -> np.ndarray:
         """Update the nominal control knots based on the sampled controls and rewards.
