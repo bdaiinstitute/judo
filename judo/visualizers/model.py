@@ -64,7 +64,6 @@ class ViserMjModel:
         for body in self._spec.bodies[1:]:
             # Sharp edge: not using the tree structure of the kinematics ...
             body_name = f"{body.name}"
-            print(f"Body name: {body_name}")
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
             for geom in body.geoms:
@@ -75,7 +74,6 @@ class ViserMjModel:
                 geom_name = f"{body_name}/geom_{suffix}"
                 if geom_exclude_substring in geom_name:
                     continue
-                print(f"adding geom: {geom_name}")
                 self.add_geom(geom_name, geom)
 
         # Add traces
@@ -85,8 +83,6 @@ class ViserMjModel:
 
     def add_geom(self, geom_name: str, geom: Any) -> None:
         """Helper function for adding geoms to scene tree."""
-        # DEBUG
-        print(f"adding geom: {geom_name}")
         match geom.type:
             case mujoco.mjtGeom.mjGEOM_PLANE:
                 # TODO(pculbert): support more color options.
@@ -402,6 +398,7 @@ def add_mesh_from_file(
     if not mesh_file.exists():
         raise FileNotFoundError(f"Mesh file {mesh_file} does not exist.")
     mesh = trimesh.load(mesh_file, force="mesh")
+    breakpoint()
     assert isinstance(mesh, trimesh.Trimesh), "Loaded geometry is not a mesh type."
     if mesh_scale is not None:
         mesh.apply_scale(mesh_scale)
