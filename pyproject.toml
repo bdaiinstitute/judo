@@ -120,6 +120,7 @@ exclude=[
 ]
 
 [tool.ruff.lint]
+pydocstyle.convention = "google"
 select = [
     "ANN",  # annotations
     "N",  # naming conventions
@@ -156,9 +157,6 @@ ignore = [
     "PLR0915",  # Too many statements in function
     "PLR2004",  # magic numbers
 ]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
