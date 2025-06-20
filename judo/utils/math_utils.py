@@ -3,6 +3,25 @@
 import numpy as np
 
 
+def safe_normalize_axis(axis: np.ndarray, eps: float = 1e-6) -> np.ndarray:
+    """Safely normalizes a batch of 3D axis vectors, avoiding division by zero.
+
+    If the norm of an axis is less than `eps`, it defaults to [1, 0, 0].
+
+    Args:
+        axis: The unnormalized axis vectors. Shape = (..., 3).
+        eps: Small threshold to avoid division by zero.
+
+    Returns:
+        Normalized axis vectors. Shape = (..., 3).
+    """
+    norm = np.linalg.norm(axis, axis=-1)
+    small_angle_mask = norm < eps
+    safe_norm = np.where(small_angle_mask, 1.0, norm)
+    normalized = axis / safe_norm[..., None]
+    return np.where(small_angle_mask[..., None], np.array([1.0, 0.0, 0.0]), normalized)
+
+
 def quat_inv(u: np.ndarray) -> np.ndarray:
     """Inverts a quaternion in a way that can broadcast cleanly.
 
@@ -63,7 +82,7 @@ def axis_angle_diff(u: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarra
     sin_a_2 = np.linalg.norm(axis, axis=-1)
 
     # handle division by zero
-    axis = np.where(sin_a_2[..., None] > 0, axis / sin_a_2[..., None], np.array([1.0, 0.0, 0.0]))
+    axis = safe_normalize_axis(axis, eps=1e-6)
     angle = 2.0 * np.arctan2(sin_a_2, diff[..., 0])
 
     # use correct angle comparison logic
@@ -78,7 +97,7 @@ def quat_diff_so3(u: np.ndarray, v: np.ndarray) -> np.ndarray:
     diff = quat_diff(u, v)
     axis = diff[..., 1:]
     sin_a_2 = np.linalg.norm(axis, axis=-1)
-    axis = np.where((np.abs(sin_a_2[..., None]) < 1e-6).any(), np.array([1.0, 0.0, 0.0]), axis / sin_a_2[..., None])
+    axis = safe_normalize_axis(axis, eps=1e-6)
     speed = 2.0 * np.arctan2(sin_a_2, diff[..., 0])
     speed = np.where(speed > np.pi, speed - 2 * np.pi, speed)
     output = axis * speed[..., None]
