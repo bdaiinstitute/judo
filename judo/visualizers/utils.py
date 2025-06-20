@@ -1,10 +1,11 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+from pathlib import Path
 from typing import List
 
 import mujoco
 import numpy as np
-from mujoco import MjModel
+from mujoco import MjModel, MjsGeom, MjSpec
 
 
 def get_sensor_name(model: MjModel, sensorid: int) -> str:
@@ -36,6 +37,29 @@ def get_mesh_data(model: MjModel, meshid: int) -> tuple[np.ndarray, np.ndarray]:
     facenum = model.mesh_facenum[meshid]
     faces = model.mesh_face[faceadr : faceadr + facenum]
     return vertices, faces
+
+
+def get_mesh_file(spec: MjSpec, geom: MjsGeom) -> Path:
+    """Extracts the mesh filepath for a particular geom from an MjSpec."""
+    assert geom.type == mujoco.mjtGeom.mjGEOM_MESH, f"Can only get mesh files for meshes, got type {geom.type}"
+
+    meshname = geom.meshname
+    mesh = spec.mesh(meshname)
+
+    mesh_path = Path(spec.modelfiledir) / spec.meshdir / mesh.file
+    return mesh_path
+
+
+def get_mesh_scale(spec: MjSpec, geom: MjsGeom) -> np.ndarray:
+    """Extracts the relevant scale parameters for a given geom in the MjSpec."""
+    assert geom.type == mujoco.mjtGeom.mjGEOM_MESH, (
+        f"Can only get mesh scale for mesh-type geoms, got type {geom.type}."
+    )
+
+    meshname = geom.meshname
+    mesh = spec.mesh(meshname)
+
+    return mesh.scale
 
 
 def is_trace_sensor(model: MjModel, sensorid: int) -> bool:

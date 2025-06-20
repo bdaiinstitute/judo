@@ -1,11 +1,12 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+from pathlib import Path
 from typing import Any, List, Tuple
 
 import mujoco
 import numpy as np
 import trimesh
-from mujoco import MjData, MjModel
+from mujoco import MjData, MjSpec
 from trimesh.creation import box, capsule, cylinder, icosphere
 from trimesh.transformations import scale_and_translate
 from trimesh.visual import TextureVisuals
@@ -18,7 +19,7 @@ from viser import (
     ViserServer,
 )
 
-from judo.visualizers.utils import count_trace_sensors, get_mesh_data
+from judo.visualizers.utils import count_trace_sensors, get_mesh_file, get_mesh_scale
 
 DEFAULT_GRID_SECTION_COLOR = (0.02, 0.14, 0.44)
 DEFAULT_GRID_CELL_COLOR = (0.27, 0.55, 1)
@@ -32,23 +33,25 @@ class ViserMjModel:
 
     Args:
         target: ViserServer or ClientHandle to add MjModel to.
-        model: MjModel to be visualized.
-        data: MjData of model in initial configuration.
+        spec: MjSpec of the model to be visualized.
+        show_ground_plane: optional flag to show the default ground plane.
+        geom_exclude_substring: optional string to exclude a geom from visualization.
     """
 
     def __init__(
         self,
         target: ViserServer | ClientHandle,
-        model: MjModel,
+        spec: MjSpec,
         show_ground_plane: bool = True,
         geom_exclude_substring: str = "",
     ) -> None:
-        """Initialize ViserMjModel."""
+        """Constructor for ViserMjModel."""
         self._target = target
-        self._model = model
+        self._spec = spec
+        self._model = spec.compile()
 
         # Assume first body is root of kinematic tree.
-        self._bodies = [self._target.scene.add_frame("/" + self._model.body(0).name, show_axes=False)]
+        self._bodies = [self._target.scene.add_frame("/" + self._spec.bodies[0].name, show_axes=False)]
         self._geoms: List = []
 
         # Show world plane if desired.
@@ -56,33 +59,35 @@ class ViserMjModel:
             self._geoms.append(add_plane(self._target, "ground_plane"))
 
         # Add coordinate frame for each non-world body in model.
-        for i in range(1, self._model.nbody):
+        _placeholder_idx = 0
+
+        for body in self._spec.bodies[1:]:
             # Sharp edge: not using the tree structure of the kinematics ...
-            body_name = f"/{self._model.body(i).name}"
+            body_name = f"{body.name}"
+            print(f"Body name: {body_name}")
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
-        # Add each geom to its respective parent.
-        _placeholder_idx = 0
-        for i in range(self._model.ngeom):
-            parent_name = self._bodies[self._model.geom(i).bodyid.item()].name
-            suffix = self._model.geom(i).name
-            if not suffix:  # if geom has no name, use a placeholder.
-                suffix = f"{_placeholder_idx}"
-                _placeholder_idx += 1
-            geom_name = f"{parent_name}/geom_{suffix}"
-            if geom_exclude_substring in geom_name:
-                continue
-            self.add_geom(geom_name, self._model.geom(i))
+            for geom in body.geoms:
+                suffix = geom.name
+                if not suffix:  # if geom has no name, use a placeholder.
+                    suffix = f"{_placeholder_idx}"
+                    _placeholder_idx += 1
+                geom_name = f"{body_name}/geom_{suffix}"
+                if geom_exclude_substring in geom_name:
+                    continue
+                print(f"adding geom: {geom_name}")
+                self.add_geom(geom_name, geom)
 
         # Add traces
-        self.num_traces = 0
         self._num_trace_sensors = count_trace_sensors(self._model)
         self.all_traces_rollout_size = 0
         self.add_traces()
 
     def add_geom(self, geom_name: str, geom: Any) -> None:
         """Helper function for adding geoms to scene tree."""
-        match geom.type.item():
+        # DEBUG
+        print(f"adding geom: {geom_name}")
+        match geom.type:
             case mujoco.mjtGeom.mjGEOM_PLANE:
                 # TODO(pculbert): support more color options.
                 self._geoms.append(
@@ -145,21 +150,24 @@ class ViserMjModel:
                     )
                 )
             case mujoco.mjtGeom.mjGEOM_MESH:
-                mesh_id = geom.dataid[0]
-                vertices, faces = get_mesh_data(self._model, mesh_id)
-                self._geoms.append(
-                    add_mesh(
-                        self._target,
-                        geom_name,
-                        vertices=vertices,
-                        faces=faces,
-                        pos=geom.pos,
-                        quat=geom.quat,
-                        rgba=geom.rgba,
-                    )
+                # Get necessary mesh properties.
+                mesh_file = get_mesh_file(self._spec, geom)
+                mesh_scale = get_mesh_scale(self._spec, geom)
+
+                # Call the new, robust function to add the mesh.
+                handle = add_mesh_from_file(
+                    target=self._target,
+                    name=geom_name,
+                    mesh_file=mesh_file,
+                    pos=geom.pos,
+                    quat=geom.quat,
+                    mesh_scale=mesh_scale,
                 )
+                self._geoms.append(handle)
             case mujoco.mjtGeom.mjGEOM_SDF:
                 raise NotImplementedError("")
+            case _:
+                raise NotImplementedError(f"Geom type {geom.type} is not supported for visualization.")
 
     def add_traces(
         self,
@@ -379,6 +387,25 @@ def add_mesh(
     """
     mesh = trimesh.Trimesh(vertices, faces)
     set_mesh_color(mesh, rgba)
+    return target.scene.add_mesh_trimesh(name, mesh, position=pos, wxyz=quat)
+
+
+def add_mesh_from_file(
+    target: ViserServer | ClientHandle,
+    name: str,
+    mesh_file: Path,
+    pos: np.ndarray,
+    quat: np.ndarray,
+    mesh_scale: np.ndarray | None = None,
+) -> SceneNodeHandle:
+    """Add a triangle mesh from file, via trimesh."""
+    if not mesh_file.exists():
+        raise FileNotFoundError(f"Mesh file {mesh_file} does not exist.")
+    mesh = trimesh.load(mesh_file, force="mesh")
+    assert isinstance(mesh, trimesh.Trimesh), "Loaded geometry is not a mesh type."
+    if mesh_scale is not None:
+        mesh.apply_scale(mesh_scale)
+
     return target.scene.add_mesh_trimesh(name, mesh, position=pos, wxyz=quat)
 
 
