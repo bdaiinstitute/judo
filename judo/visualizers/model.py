@@ -19,7 +19,13 @@ from viser import (
     ViserServer,
 )
 
-from judo.visualizers.utils import apply_mujoco_material, count_trace_sensors, get_mesh_file, get_mesh_scale
+from judo.visualizers.utils import (
+    apply_mujoco_material,
+    count_trace_sensors,
+    get_mesh_file,
+    get_mesh_scale,
+    rgba_float_to_int,
+)
 
 DEFAULT_GRID_SECTION_COLOR = (0.02, 0.14, 0.44)
 DEFAULT_GRID_CELL_COLOR = (0.27, 0.55, 1)
@@ -471,16 +477,6 @@ def add_segments(
         visible: whether or not the lines are initially visible
     """
     return target.scene.add_line_segments(name, points, rgb, line_width, quat, pos, visible)
-
-
-def rgba_float_to_int(rgba_float: np.ndarray) -> np.ndarray:
-    """Convert RGBA float values in [0, 1] to int values in [0, 255]."""
-    return (255 * rgba_float).astype("int")
-
-
-def rgba_int_to_float(rgba_int: np.ndarray) -> np.ndarray:
-    """Convert RGBA int values in [0, 255] to float values in [0, 1]."""
-    return rgba_int / 255.0
 
 
 def set_mesh_color(mesh: trimesh.Trimesh, rgba: np.ndarray) -> None:

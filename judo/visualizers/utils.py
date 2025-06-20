@@ -1,5 +1,6 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+import warnings
 from pathlib import Path
 from typing import List
 
@@ -8,7 +9,7 @@ import numpy as np
 import trimesh
 from mujoco import MjModel, MjsGeom, MjsMaterial, MjSpec
 from PIL import Image
-from trimesh.visual import ColorVisuals, TextureVisuals
+from trimesh.visual import TextureVisuals
 from trimesh.visual.material import PBRMaterial
 
 
@@ -69,75 +70,43 @@ def get_mesh_scale(spec: MjSpec, geom: MjsGeom) -> np.ndarray:
 def apply_mujoco_material(
     mesh: trimesh.Trimesh,
     material: MjsMaterial,
-    texture_dir: Path = Path("."),
 ) -> None:
-    """
-    Applies a MuJoCo material specification to a trimesh mesh.
+    """Applies a MuJoCo material to a trimesh mesh.
 
-    This function translates material properties, including color, PBR values,
-    and textures, into a trimesh-compatible visual format.
+    This sets up PBR parameters and handles RGBA conversion.
 
     Args:
-        mesh: The trimesh.Trimesh object to modify.
-        material: An object with attributes matching the mjsMaterial struct.
-        texture_dir: The directory where texture files are located.
+        mesh: the trimesh.Trimesh to modify
+        model: the Mujoco MjModel to read textures (spec.texturedir if available)
+        material: an object matching the mjsMaterial struct
+        texture_dir: optional override of the directory for texture files
     """
+    # prepare PBR material
+    pbr = PBRMaterial()
 
-    # Helper to convert float RGBA (0-1) to int RGBA (0-255)
-    def rgba_float_to_int(rgba_f: np.ndarray) -> np.ndarray:
-        return (np.array(rgba_f) * 255).astype(np.uint8)
-
-    # --- 1. Create and configure the PBR material ---
-    pbr_material = PBRMaterial()
-
-    # Get RGBA and ensure it's in the integer format trimesh expects
+    # get RGBA, convert if needed
     rgba = np.array(material.rgba)
     if np.issubdtype(rgba.dtype, np.floating):
         rgba = rgba_float_to_int(rgba)
+    color = tuple(int(x) for x in rgba.tolist())
+    pbr.alphaMode = "BLEND" if rgba[3] < 255 else "OPAQUE"
 
-    # Set base color and alpha mode (preserving logic from your original function)
-    pbr_material.baseColorFactor = rgba
-    pbr_material.alphaMode = "BLEND" if rgba[-1] < 255 else "OPAQUE"
+    # set PBR values
+    pbr.metallicFactor = float(material.metallic)
+    pbr.roughnessFactor = float(material.roughness)
+    pbr.emissiveFactor = [material.emission] * 3
+    if material.roughness == 0.0 and getattr(material, "shininess", 0) > 0:
+        pbr.roughnessFactor = np.sqrt(2.0 / (material.shininess + 2.0)).item()
 
-    # Map PBR properties
-    pbr_material.metallicFactor = material.metallic
-    pbr_material.roughnessFactor = material.roughness
-    pbr_material.emissiveFactor = np.array([material.emission] * 3)
+    dummy = Image.new("RGBA", (1, 1), color)
+    pbr.baseColorTexture = dummy
+    uv = getattr(mesh.visual, "uv", None)
+    mesh.visual = TextureVisuals(material=pbr, uv=uv)
 
-    # Fallback for legacy shininess value if roughness is not set
-    if material.roughness == 0.0 and hasattr(material, "shininess") and material.shininess > 0:
-        pbr_material.roughnessFactor = np.sqrt(2.0 / (material.shininess + 2.0))
+    if getattr(material, "textures", None):
+        warnings.warn("Textured meshes are currently unsupported. Loading with RGBA color instead.", stacklevel=2)
 
-    # --- 2. Handle Textured vs. Simple Color cases ---
-    has_texture = hasattr(material, "textures") and material.textures and material.textures[0]
-    texture_loaded = False
-
-    if has_texture:
-        texture_path = texture_dir / material.textures[0]
-        try:
-            texture_image = Image.open(texture_path)
-            pbr_material.baseColorTexture = texture_image
-
-            # For a texture to be applied, the mesh needs UV coordinates.
-            # We create a TextureVisuals object and assign the material.
-            mesh.visual = TextureVisuals(material=pbr_material)
-
-            # Handle texture repetition by scaling the UVs
-            if hasattr(material, "texrepeat") and hasattr(mesh.visual, "uv") and mesh.visual.uv is not None:
-                mesh.visual.uv *= material.texrepeat
-
-            texture_loaded = True
-        except FileNotFoundError:
-            print(f"Warning: Texture not found at '{texture_path}'. Falling back to simple color.")
-        except Exception as e:
-            print(f"Warning: Failed to load texture. Error: {e}. Falling back to simple color.")
-
-    # If no texture was specified or if it failed to load, apply a simple color
-    if not texture_loaded:
-        # For simple colors, ColorVisuals is the correct type.
-        # It sets a color for each face or vertex.
-        mesh.visual = ColorVisuals()
-        mesh.visual.face_colors = rgba
+    mesh.visual = TextureVisuals(material=pbr, uv=None)
 
 
 def is_trace_sensor(model: MjModel, sensorid: int) -> bool:
@@ -162,3 +131,13 @@ def count_trace_sensors(model: MjModel) -> int:
 def get_trace_sensors(model: MjModel) -> List[int]:
     """Get the IDs of all trace sensors in a given mujoco model."""
     return [id for id in range(model.nsensor) if is_trace_sensor(model, id)]
+
+
+def rgba_float_to_int(rgba_float: np.ndarray) -> np.ndarray:
+    """Convert RGBA float values in [0, 1] to int values in [0, 255]."""
+    return (255 * rgba_float).astype("int")
+
+
+def rgba_int_to_float(rgba_int: np.ndarray) -> np.ndarray:
+    """Convert RGBA int values in [0, 255] to float values in [0, 1]."""
+    return rgba_int / 255.0
