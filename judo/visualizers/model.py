@@ -6,10 +6,10 @@ from typing import Any, List, Tuple
 import mujoco
 import numpy as np
 import trimesh
-from mujoco import MjData, MjSpec
+from mujoco import MjData, MjsMaterial, MjSpec
 from trimesh.creation import box, capsule, cylinder, icosphere
 from trimesh.transformations import scale_and_translate
-from trimesh.visual import TextureVisuals
+from trimesh.visual import ColorVisuals, TextureVisuals
 from trimesh.visual.material import PBRMaterial
 from viser import (
     ClientHandle,
@@ -19,7 +19,7 @@ from viser import (
     ViserServer,
 )
 
-from judo.visualizers.utils import count_trace_sensors, get_mesh_file, get_mesh_scale
+from judo.visualizers.utils import apply_mujoco_material, count_trace_sensors, get_mesh_file, get_mesh_scale
 
 DEFAULT_GRID_SECTION_COLOR = (0.02, 0.14, 0.44)
 DEFAULT_GRID_CELL_COLOR = (0.27, 0.55, 1)
@@ -51,7 +51,7 @@ class ViserMjModel:
         self._model = spec.compile()
 
         # Assume first body is root of kinematic tree.
-        self._bodies = [self._target.scene.add_frame("/" + self._spec.bodies[0].name, show_axes=False)]
+        self._bodies = [self._target.scene.add_frame(self._spec.bodies[0].name, show_axes=False)]
         self._geoms: List = []
 
         # Show world plane if desired.
@@ -59,18 +59,22 @@ class ViserMjModel:
             self._geoms.append(add_plane(self._target, "ground_plane"))
 
         # Add coordinate frame for each non-world body in model.
-        _placeholder_idx = 0
+        _geom_placeholder_idx = 0
+        _body_placeholder_idx = 0
 
         for body in self._spec.bodies[1:]:
             # Sharp edge: not using the tree structure of the kinematics ...
-            body_name = f"{body.name}"
+            body_name = body.name
+            if not body_name:
+                body_name = f"body_{_body_placeholder_idx}"
+                _body_placeholder_idx += 1
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
             for geom in body.geoms:
                 suffix = geom.name
                 if not suffix:  # if geom has no name, use a placeholder.
-                    suffix = f"{_placeholder_idx}"
-                    _placeholder_idx += 1
+                    suffix = f"{_geom_placeholder_idx}"
+                    _geom_placeholder_idx += 1
                 geom_name = f"{body_name}/geom_{suffix}"
                 if geom_exclude_substring in geom_name:
                     continue
@@ -83,6 +87,8 @@ class ViserMjModel:
 
     def add_geom(self, geom_name: str, geom: Any) -> None:
         """Helper function for adding geoms to scene tree."""
+        # Store compiled model geom info (handles things like fromto).
+        model_geom = self._model.geom(geom.name)
         match geom.type:
             case mujoco.mjtGeom.mjGEOM_PLANE:
                 # TODO(pculbert): support more color options.
@@ -102,10 +108,10 @@ class ViserMjModel:
                     add_sphere(
                         self._target,
                         geom_name,
-                        radius=geom.size[0],
+                        radius=model_geom.size[0],
                         pos=geom.pos,
                         quat=geom.quat,
-                        rgba=geom.rgba,
+                        rgba=model_geom.rgba,
                     )
                 )
             case mujoco.mjtGeom.mjGEOM_CAPSULE:
@@ -113,11 +119,11 @@ class ViserMjModel:
                     add_capsule(
                         self._target,
                         geom_name,
-                        radius=geom.size[0],
-                        length=2 * geom.size[1],  # MJC has capsule half-lengths.
-                        pos=geom.pos,
-                        quat=geom.quat,
-                        rgba=geom.rgba,
+                        radius=model_geom.size[0],
+                        length=2 * model_geom.size[1],  # MJC has capsule half-lengths.
+                        pos=model_geom.pos,
+                        quat=model_geom.quat,
+                        rgba=model_geom.rgba,
                     )
                 )
             case mujoco.mjtGeom.mjGEOM_ELLIPSOID:
@@ -127,11 +133,11 @@ class ViserMjModel:
                     add_cylinder(
                         self._target,
                         geom_name,
-                        radius=geom.size[0],
-                        height=2 * geom.size[1],
-                        pos=geom.pos,
-                        quat=geom.quat,
-                        rgba=geom.rgba,
+                        radius=model_geom.size[0],
+                        height=2 * model_geom.size[1],
+                        pos=model_geom.pos,
+                        quat=model_geom.quat,
+                        rgba=model_geom.rgba,
                     )
                 )
             case mujoco.mjtGeom.mjGEOM_BOX:
@@ -139,16 +145,19 @@ class ViserMjModel:
                     add_box(
                         self._target,
                         geom_name,
-                        size=2 * geom.size,  # MJC has box half-lengths.
-                        pos=geom.pos,
-                        quat=geom.quat,
-                        rgba=geom.rgba,
+                        size=2 * model_geom.size,  # MJC has box half-lengths.
+                        pos=model_geom.pos,
+                        quat=model_geom.quat,
+                        rgba=model_geom.rgba,
                     )
                 )
             case mujoco.mjtGeom.mjGEOM_MESH:
                 # Get necessary mesh properties.
                 mesh_file = get_mesh_file(self._spec, geom)
                 mesh_scale = get_mesh_scale(self._spec, geom)
+
+                # Introspect on texture.
+                mjs_material = self._spec.material(geom.material)
 
                 # Call the new, robust function to add the mesh.
                 handle = add_mesh_from_file(
@@ -158,6 +167,7 @@ class ViserMjModel:
                     pos=geom.pos,
                     quat=geom.quat,
                     mesh_scale=mesh_scale,
+                    mjs_material=mjs_material,
                 )
                 self._geoms.append(handle)
             case mujoco.mjtGeom.mjGEOM_SDF:
@@ -210,8 +220,10 @@ class ViserMjModel:
         for i in range(1, len(self._bodies)):
             # Use atomic to update both position/orientation synchronously.
             with self._target.atomic():
-                self._bodies[i].position = tuple(data.xpos[i])
-                self._bodies[i].wxyz = tuple(data.xquat[i])
+                # Line up order of bodies in spec with order of bodies in model.
+                data_idx = self._spec.bodies[i].id
+                self._bodies[i].position = tuple(data.xpos[data_idx])
+                self._bodies[i].wxyz = tuple(data.xquat[data_idx])
 
     def set_traces(self, traces: np.ndarray | None, all_traces_rollout_size: int) -> None:
         """Write updated traces to viser viewer.
@@ -393,15 +405,19 @@ def add_mesh_from_file(
     pos: np.ndarray,
     quat: np.ndarray,
     mesh_scale: np.ndarray | None = None,
+    mjs_material: MjsMaterial | None = None,
 ) -> SceneNodeHandle:
     """Add a triangle mesh from file, via trimesh."""
     if not mesh_file.exists():
         raise FileNotFoundError(f"Mesh file {mesh_file} does not exist.")
     mesh = trimesh.load(mesh_file, force="mesh")
-    breakpoint()
     assert isinstance(mesh, trimesh.Trimesh), "Loaded geometry is not a mesh type."
     if mesh_scale is not None:
         mesh.apply_scale(mesh_scale)
+
+    # If mesh does not have a good texture, apply MuJoCo one.
+    if isinstance(mesh.visual, ColorVisuals) and mjs_material is not None:
+        apply_mujoco_material(mesh, mjs_material)
 
     return target.scene.add_mesh_trimesh(name, mesh, position=pos, wxyz=quat)
 
