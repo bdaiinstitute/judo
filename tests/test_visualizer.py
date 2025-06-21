@@ -17,12 +17,11 @@ from judo.visualizers.model import (
     add_segments,
     add_sphere,
     add_spline,
-    rgba_float_to_int,
-    rgba_int_to_float,
     set_mesh_color,
     set_segment_points,
     set_spline_positions,
 )
+from judo.visualizers.utils import rgba_float_to_int, rgba_int_to_float
 
 # Create a global ViserServer instance for use by the tests.
 viser_server = ViserServer()
