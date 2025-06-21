@@ -1,0 +1,17 @@
+name: Publish Package to PyPI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    name: Build and Publish to PyPI
+    runs-on: ubuntu-24.04
+    if: github.actor == 'alberthli' || github.actor == 'pculbertson'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
