@@ -132,38 +132,9 @@ sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
 
-# Contributing
-We welcome contributions to `judo`! If you find a bug, have a feature request, or want to contribute code, please open an issue or pull request with clearly documented minimum examples and/or tests. In particular, bugfixes are extremely valuable to us and the community, and if you see something, please inform us! We will try to respond as quickly as possible, but please be patient as we are a small team. Here are a few guidelines to help contributors get started.
+## 🤝 Contributing
+We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
 
-The various tools we use in the codebase are summarized here.
-| Tool | Support |
-| ---- | ------- |
-| Formatting and Linting | [Ruff](https://docs.astral.sh/ruff/) |
-| Type Checking | [Pyright](https://github.com/microsoft/pyright) |
-| Testing | [Pytest](https://docs.pytest.org/en/stable/) |
-| Docs | [Sphinx](https://www.sphinx-doc.org/en/master/) |
-| Docstring Style | [Google Style](https://google.github.io/styleguide/) |
-| Code Coverage | [Codecov](https://about.codecov.io/) |
-
-When you develop, please make sure to install `judo` with the `dev` extras as well as the pre-commit hooks.
-```bash
-# option 1: with conda
-pip install -e .[dev]
-
-# option 2: with pixi
-pixi shell -e dev
-
-# pre-commit hooks + typing stubs for mujoco
-pre-commit install
-pybind11-stubgen mujoco -o typings/
-```
-The hooks will ensure that your code complies with the repository's code style rules. Please make sure that your code is passing checks (unless it's our fault that checks are failing) before you submit a pull request. You can tell either by CI on your fork or by running checks locally:
-```bash
-pre-commit run --all-files  # runs all pre-commit hooks
-pyright  # pyright is excluded from pre-commit, so you have to run it manually
-```
-
-When you add new tasks, be sure to update the `README.md` file under the `tasks` section to include a brief description of the task and its parameters. This will help users understand how to use the task in the app, its drawbacks, and how to tune it.
 
 # Citation
 If you use `judo` in your research, please use the following citation:
