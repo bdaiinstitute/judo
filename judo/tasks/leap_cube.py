@@ -83,7 +83,7 @@ class LeapCube(Task[LeapCubeConfig]):
 
     def post_sim_step(self) -> None:
         """Checks if the cube has dropped and resets if so."""
-        has_dropped = self.data.qpos[2] < -0.3
+        has_dropped = self.sim_data.qpos[2] < -0.3
 
         # we reset here if the cube has dropped
         if has_dropped:
@@ -91,7 +91,7 @@ class LeapCube(Task[LeapCubeConfig]):
 
         # check whether goal quat needs to be updated
         goal_quat = self.goal_quat
-        q_diff = quat_diff(self.data.qpos[3:7], goal_quat)
+        q_diff = quat_diff(self.sim_data.qpos[3:7], goal_quat)
         sin_a_2 = np.linalg.norm(q_diff[1:])
         angle = 2 * np.arctan2(sin_a_2, q_diff[0])
         if angle > np.pi:
@@ -113,7 +113,7 @@ class LeapCube(Task[LeapCubeConfig]):
                 np.sqrt(uvw[0]) * np.cos(2 * np.pi * uvw[2]),
             ]
         )
-        self.data.mocap_quat[0] = goal_quat
+        self.sim_data.mocap_quat[0] = self.data.mocap_quat[0] = goal_quat
         self.goal_quat = goal_quat
 
     def reset(self) -> None:
