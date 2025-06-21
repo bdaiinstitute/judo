@@ -76,13 +76,14 @@ class ViserMjModel:
                 _body_placeholder_idx += 1
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
+
             for geom in body.geoms:
                 suffix = geom.name
                 if not suffix:  # if geom has no name, use a placeholder.
                     suffix = f"{_geom_placeholder_idx}"
                     _geom_placeholder_idx += 1
                 geom_name = f"{body_name}/geom_{suffix}"
-                if geom_exclude_substring in geom_name:
+                if geom_exclude_substring and geom_exclude_substring in geom_name:
                     continue
                 self.add_geom(geom_name, geom)
 
