@@ -17,22 +17,22 @@ from judo.visualizers.model import (
     add_segments,
     add_sphere,
     add_spline,
-    rgba_float_to_int,
-    rgba_int_to_float,
     set_mesh_color,
     set_segment_points,
     set_spline_positions,
 )
+from judo.visualizers.utils import rgba_float_to_int, rgba_int_to_float
 
 # Create a global ViserServer instance for use by the tests.
 viser_server = ViserServer()
 model_path = str(MODEL_PATH / "xml/cylinder_push.xml")
-model = mujoco.MjModel.from_xml_path(model_path)
+spec = mujoco.MjSpec.from_file(model_path)
+model = spec.compile()
 
 
 def test_model_loading() -> None:
     """Test that the model loads correctly and creates bodies and geometries."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     assert viser_model is not None, "Failed to create ViserMjModel"
     assert len(viser_model._bodies) == model.nbody, "Incorrect number of bodies"
     assert len(viser_model._geoms) > 0, "No geometries created"
@@ -40,7 +40,7 @@ def test_model_loading() -> None:
 
 def test_set_data() -> None:
     """Test that setting data updates body positions and orientations."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     data = mujoco.MjData(model)
     data.qpos = np.random.randn(model.nq)
     data.qvel = np.random.randn(model.nv)
@@ -53,10 +53,10 @@ def test_set_data() -> None:
 
 def test_ground_plane() -> None:
     """Test that the ground plane can be toggled on and off."""
-    viser_model_with_plane = ViserMjModel(viser_server, model, show_ground_plane=True)
+    viser_model_with_plane = ViserMjModel(viser_server, spec, show_ground_plane=True)
     assert any("ground_plane" in geom.name for geom in viser_model_with_plane._geoms), "Ground plane not found"
 
-    viser_model_no_plane = ViserMjModel(viser_server, model, show_ground_plane=False)
+    viser_model_no_plane = ViserMjModel(viser_server, spec, show_ground_plane=False)
     assert all("ground_plane" not in geom.name for geom in viser_model_no_plane._geoms), "Unexpected ground plane"
 
 
@@ -251,7 +251,7 @@ def test_set_segment_points() -> None:
 
 def test_remove_traces() -> None:
     """Test that remove_traces clears the traces list."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     # Ensure _traces is defined.
     assert hasattr(viser_model, "_traces"), "Model does not have _traces attribute"
     # Remove the traces.
@@ -261,7 +261,7 @@ def test_remove_traces() -> None:
 
 def test_set_traces() -> None:
     """Test that set_traces correctly sets the traces and handles them."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     # Create a dummy trace array with shape (3, 2, 3)
     traces = np.random.rand(3, 2, 3)
     all_traces_rollout_size = 2
@@ -287,7 +287,7 @@ def test_set_traces() -> None:
 
 def test_remove() -> None:
     """Test that remove clears the traces and removes geometries."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     viser_model.remove()
     # Verify that traces are cleared.
     assert viser_model._traces == [], "remove did not clear _traces"

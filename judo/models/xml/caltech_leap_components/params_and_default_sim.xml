@@ -1,5 +1,5 @@
 <mujoco model="leap_cube_default">
-  <compiler angle="radian" meshdir="./meshes/" />
+  <compiler angle="radian" />
   <option
     timestep="0.002"
     integrator="implicitfast"

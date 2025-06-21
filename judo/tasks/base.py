@@ -7,7 +7,7 @@ from typing import Any, Generic, TypeVar
 
 import mujoco
 import numpy as np
-from mujoco import MjData, MjModel
+from mujoco import MjData, MjModel, MjSpec
 
 
 @dataclass
@@ -25,7 +25,8 @@ class Task(ABC, Generic[ConfigT]):
         """Initialize the Mujoco task."""
         if not model_path:
             raise ValueError("Model path must be provided.")
-        self.model = MjModel.from_xml_path(str(model_path))
+        self.spec = MjSpec.from_file(str(model_path))
+        self.model = self.spec.compile()
         self.data = MjData(self.model)
         self.model_path = model_path
         self.sim_model = self.model if sim_model_path is None else MjModel.from_xml_path(str(sim_model_path))

@@ -112,7 +112,7 @@ class VisualizationNode(DoraNode):
         self.data = mujoco.MjData(self.task.model)
         self.viser_model = ViserMjModel(
             self.server,
-            self.task.model,
+            self.task.spec,
             geom_exclude_substring=self.geom_exclude_substring,
         )
 
