@@ -107,6 +107,8 @@ if __name__ == "__main__":
     app()  # this runs the app from your own script
 ```
 
+To see more information about the available tasks, please refer to [the task README](judo/tasks/README.md).
+
 ## 3. Running `judo` as a Dependency
 You can easily install `judo` as a dependency in your own project. A few comments:
 * You can still use the `judo` CLI command from anywhere, so long as you are working in an environment where `judo` is installed.
@@ -129,6 +131,10 @@ pip install -r docs/requirements.txt
 sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
+
+## 🤝 Contributing
+We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
+
 
 # Citation
 If you use `judo` in your research, please use the following citation:

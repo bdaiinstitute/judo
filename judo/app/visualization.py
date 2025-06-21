@@ -4,13 +4,16 @@ import threading
 import warnings
 
 import mujoco
+import numpy as np
 import pyarrow as pa
 import viser
 from dora_utils.dataclasses import from_arrow, to_arrow
 from dora_utils.node import DoraNode, on_event
 from omegaconf import DictConfig
-from viser import GuiFolderHandle, GuiInputHandle, MeshHandle
+from PIL import Image
+from viser import GuiFolderHandle, GuiImageHandle, GuiInputHandle, MeshHandle
 
+from judo import PACKAGE_ROOT
 from judo.app.structs import MujocoState
 from judo.app.utils import register_optimizers_from_cfg, register_tasks_from_cfg
 from judo.config import set_config_overrides
@@ -20,7 +23,7 @@ from judo.optimizers import get_registered_optimizers
 from judo.tasks import get_registered_tasks
 from judo.visualizers.model import ViserMjModel
 
-ElementType = GuiInputHandle | GuiFolderHandle | MeshHandle
+ElementType = GuiImageHandle | GuiInputHandle | GuiFolderHandle | MeshHandle
 
 
 class VisualizationNode(DoraNode):
@@ -150,6 +153,11 @@ class VisualizationNode(DoraNode):
     def setup_gui(self) -> None:
         """Set up the GUI for the visualization node."""
         self.gui_elements = {}
+
+        # add the Judo logo
+        logo_path = PACKAGE_ROOT / "app" / "asset" / "viser-logo-light.png"
+        logo = self.server.gui.add_image(np.array(Image.open(logo_path)))
+        self.gui_elements["logo"] = logo
 
         # create the dropdown to select the task
         task_dropdown = self.server.gui.add_dropdown(
