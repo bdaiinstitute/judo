@@ -19,6 +19,7 @@ This release contains bugfixes prior to RSS 2025.
 * Changelog file to track changes in the repository (@alberthli, #43)
 * Added contributor guidelines to the README (@alberthli, #43)
 * Added information about the tasks in a task README (@alberthli, #43)
+* Updated author order in the README citation (@pculbertson, #50)
 
 ## Dev
 * Bump prefix-dev/setup-pixi from 0.8.8 to 0.8.10 (#18)
