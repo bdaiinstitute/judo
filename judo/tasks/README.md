@@ -48,6 +48,10 @@ There are other tunable parameters:
 ## FR3 Pick
 The FR3 Pick task involves a Franka Research 3 picking up an object and placing it at a goal location. The task is divided into four phases, the first three of which have reward weights, and also includes global reward weights applied throughout the task.
 
+> ⚠️ **Disclaimer** ⚠️
+>
+> This task is currently configured to use up to 64 threads by default (depending on the optimizer)! For most users, this is too many, and will be very slow. You can adjust this in the GUI or update the default value.
+
 ### Reward Weights
 
 #### Lift Phase Weights
@@ -106,5 +110,13 @@ The LEAP Cube Rotation task involves a robotic hand manipulating a cube to achie
 ## Leap Cube Down
 This works the same way as the LEAP Cube task, but the palm is facing downwards.
 
+> ⚠️ **Disclaimer** ⚠️
+>
+> This task is currently configured to use up to 64 threads by default (depending on the optimizer)! For most users, this is too many, and will be very slow. You can adjust this in the GUI or update the default value.
+
 ## Caltech Leap Cube
 This works the same way as the LEAP Cube task, but uses a modified LEAP hand model from Caltech.
+
+> ⚠️ **Disclaimer** ⚠️
+>
+> This task is currently configured to use up to 32 threads by default (depending on the optimizer)! For many users, this is too many, and will be very slow. You can adjust this in the GUI or update the default value.
