@@ -23,7 +23,7 @@ jobs:
         with:
           pixi-version: v0.47.0
           # cache: true
-          install_dependencies: false
+          run-install: false
           cache: false
 
       # --- START OF DEBUGGING STEPS ---
