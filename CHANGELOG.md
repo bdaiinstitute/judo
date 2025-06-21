@@ -13,6 +13,11 @@ This release contains bugfixes prior to RSS 2025.
 * Fix bug where when `max_opt_iters>1`, the shape of `nominal_knots` is not correct. **NEW BEHAVIOR:** in the controller, `self.nominal_knots` now has shape `(num_knots, nu)` instead of `(1, num_knots, nu)` (@yunhaif, #29).
 * Update model loading so that textures appear correctly in the visualizer (@pculbertson, #32)
 * Fix bug where leap cube task encountered division by 0 in axis normalization (@alberthli, #34)
+* Fixed bug where changing tasks added accumulating grey lines to the GUI (@slecleach, #44)
+
+## Documentation
+* Added contributor guidelines to the README (@alberthli, #43)
+* Added information about the tasks in a task README (@alberthli, #43)
 
 ## Dev
 * Bump prefix-dev/setup-pixi from 0.8.8 to 0.8.10 (#18)
