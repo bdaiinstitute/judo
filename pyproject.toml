@@ -32,6 +32,7 @@ dependencies = [
     "dora-utils",  # dora + qol utils for writing nodes
     "mujoco",
     "numpy",
+    "pillow",  # for displaying app logo
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
     "scipy",

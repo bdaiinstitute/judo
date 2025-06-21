@@ -1348,11 +1348,12 @@ packages:
 - pypi: ./
   name: judo-rai
   version: 0.0.1
-  sha256: c4f900710d5505be1895e84771043ec8559e5867a96668595ab6e11c6c84bf4b
+  sha256: eb8ae1c3ca1d7efcb686a1bfde9acb62aec8e55c8d6a9c02b4827036a7417bc4
   requires_dist:
   - dora-utils
   - mujoco
   - numpy
+  - pillow
   - requests
   - rich
   - scipy
