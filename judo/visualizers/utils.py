@@ -64,7 +64,7 @@ def get_mesh_scale(spec: MjSpec, geom: MjsGeom) -> np.ndarray:
     meshname = geom.meshname
     mesh = spec.mesh(meshname)
 
-    return mesh.scale
+    return mesh.scale  # type: ignore
 
 
 def apply_mujoco_material(
