@@ -3,7 +3,6 @@ This release contains bugfixes prior to RSS 2025.
 
 ## Added
 * New `judo`-specific branding! (@slecleach, #42)
-* Changelog file to track changes in the repository (@alberthli, #43)
 
 ## Fixed
 * Brandon's last name misspelling in citation in README.md (@pculbertson, #15)
@@ -16,6 +15,7 @@ This release contains bugfixes prior to RSS 2025.
 * Fixed bug where changing tasks added accumulating grey lines to the GUI (@slecleach, #44)
 
 ## Documentation
+* Changelog file to track changes in the repository (@alberthli, #43)
 * Added contributor guidelines to the README (@alberthli, #43)
 * Added information about the tasks in a task README (@alberthli, #43)
 
