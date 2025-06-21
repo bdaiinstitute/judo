@@ -93,12 +93,12 @@ class SimulationNode(DoraNode):
         """Reads data from simulation and writes to output topic."""
         sim_state = MujocoState(
             time=self.task.data.time,
-            qpos=self.task.data.qpos,
-            qvel=self.task.data.qvel,
-            xpos=self.task.data.xpos,
-            xquat=self.task.data.xquat,
-            mocap_pos=self.task.data.mocap_pos,
-            mocap_quat=self.task.data.mocap_quat,
+            qpos=self.task.data.qpos,  # type: ignore
+            qvel=self.task.data.qvel,  # type: ignore
+            xpos=self.task.data.xpos,  # type: ignore
+            xquat=self.task.data.xquat,  # type: ignore
+            mocap_pos=self.task.data.mocap_pos,  # type: ignore
+            mocap_quat=self.task.data.mocap_quat,  # type: ignore
             sim_metadata=self.task.get_sim_metadata(),
         )
         arr, metadata = to_arrow(sim_state)

@@ -73,9 +73,9 @@ class Task(ABC, Generic[ConfigT]):
     def actuator_ctrlrange(self) -> np.ndarray:
         """Mujoco actuator limits for this task."""
         limits = self.model.actuator_ctrlrange
-        limited: np.ndarray = self.model.actuator_ctrllimited.astype(bool)
+        limited: np.ndarray = self.model.actuator_ctrllimited.astype(bool)  # type: ignore
         limits[~limited] = np.array([-np.inf, np.inf], dtype=limits.dtype)  # if not limited, set to inf
-        return limits
+        return limits  # type: ignore
 
     def reset(self) -> None:
         """Reset behavior for task. Sets config + velocities to zeros."""
