@@ -107,6 +107,8 @@ if __name__ == "__main__":
     app()  # this runs the app from your own script
 ```
 
+To see more information about the available tasks, please refer to [the task README](judo/tasks/README.md).
+
 ## 3. Running `judo` as a Dependency
 You can easily install `judo` as a dependency in your own project. A few comments:
 * You can still use the `judo` CLI command from anywhere, so long as you are working in an environment where `judo` is installed.
