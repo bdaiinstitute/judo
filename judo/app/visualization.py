@@ -109,7 +109,7 @@ class VisualizationNode(DoraNode):
 
         task_cls, self.task_config_cls = task_entry
         self.task = task_cls()
-        self.data = mujoco.MjData(self.task.model)
+        self.data = mujoco.MjData(self.task.sim_model)
         self.viser_model = ViserMjModel(
             self.server,
             self.task.spec,

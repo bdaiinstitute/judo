@@ -319,4 +319,9 @@ class FR3Pick(Task[FR3PickConfig]):
         self.data.qpos[:] = QPOS_HOME
         self.data.qvel[:] = 0.0
         self.data.ctrl[:] = self.reset_command
+        self.sim_data.qpos[:] = QPOS_HOME
+        self.sim_data.qvel[:] = 0.0
+        self.sim_data.ctrl[:] = self.reset_command
+
         mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.sim_model, self.sim_data)

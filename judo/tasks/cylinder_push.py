@@ -93,7 +93,7 @@ class CylinderPush(Task[CylinderPushConfig]):
     def reset(self) -> None:
         """Resets the model to a default (random) state."""
         theta = 2 * np.pi * np.random.rand(2)
-        self.data.qpos = np.array(
+        qpos = np.array(
             [
                 np.cos(theta[0]),
                 np.sin(theta[0]),
@@ -101,5 +101,12 @@ class CylinderPush(Task[CylinderPushConfig]):
                 2 * np.sin(theta[1]),
             ]
         )
-        self.data.qvel = np.zeros(4)
+        qvel = np.zeros(4)
+
+        self.data.qpos[:] = qpos
+        self.data.qvel[:] = qvel
+        self.sim_data.qpos[:] = qpos
+        self.sim_data.qvel[:] = qvel
+
         mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.sim_model, self.sim_data)

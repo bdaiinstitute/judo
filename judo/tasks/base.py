@@ -30,6 +30,7 @@ class Task(ABC, Generic[ConfigT]):
         self.data = MjData(self.model)
         self.model_path = model_path
         self.sim_model = self.model if sim_model_path is None else MjModel.from_xml_path(str(sim_model_path))
+        self.sim_data = self.data if sim_model_path is None else MjData(self.sim_model)
 
     @property
     def time(self) -> float:

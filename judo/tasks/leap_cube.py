@@ -121,8 +121,13 @@ class LeapCube(Task[LeapCubeConfig]):
         self.data.qpos[:] = self.qpos_home
         self.data.qvel[:] = 0.0
         self.data.ctrl[:] = self.reset_command
+        self.sim_data.qpos[:] = self.qpos_home
+        self.sim_data.qvel[:] = 0.0
+        self.sim_data.ctrl[:] = self.reset_command
+
         self._update_goal_quat()
         mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.sim_model, self.sim_data)
 
     def get_sim_metadata(self) -> dict[str, Any]:
         """Returns the simulation's goal quat."""

@@ -62,9 +62,9 @@ class SimulationNode(DoraNode):
         """Step the simulation forward by one timestep."""
         if self.control is not None and not self.paused:
             try:
-                self.task.data.ctrl[:] = self.control(self.task.data.time)
+                self.task.sim_data.ctrl[:] = self.control(self.task.sim_data.time)
                 self.task.pre_sim_step()
-                mj_step(self.task.sim_model, self.task.data)
+                mj_step(self.task.sim_model, self.task.sim_data)
                 self.task.post_sim_step()
             except ValueError:
                 # we're switching tasks and the new task has a different number of actuators
@@ -92,13 +92,13 @@ class SimulationNode(DoraNode):
     def write_states(self) -> None:
         """Reads data from simulation and writes to output topic."""
         sim_state = MujocoState(
-            time=self.task.data.time,
-            qpos=self.task.data.qpos,  # type: ignore
-            qvel=self.task.data.qvel,  # type: ignore
-            xpos=self.task.data.xpos,  # type: ignore
-            xquat=self.task.data.xquat,  # type: ignore
-            mocap_pos=self.task.data.mocap_pos,  # type: ignore
-            mocap_quat=self.task.data.mocap_quat,  # type: ignore
+            time=self.task.sim_data.time,
+            qpos=self.task.sim_data.qpos,  # type: ignore
+            qvel=self.task.sim_data.qvel,  # type: ignore
+            xpos=self.task.sim_data.xpos,  # type: ignore
+            xquat=self.task.sim_data.xquat,  # type: ignore
+            mocap_pos=self.task.sim_data.mocap_pos,  # type: ignore
+            mocap_quat=self.task.sim_data.mocap_quat,  # type: ignore
             sim_metadata=self.task.get_sim_metadata(),
         )
         arr, metadata = to_arrow(sim_state)

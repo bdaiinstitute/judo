@@ -75,6 +75,13 @@ class Cartpole(Task[CartpoleConfig]):
 
     def reset(self) -> None:
         """Resets the model to a default (random) state."""
-        self.data.qpos = np.array([1.0, np.pi]) + np.random.randn(2)
-        self.data.qvel = 1e-1 * np.random.randn(2)
+        qpos = np.array([1.0, np.pi]) + np.random.randn(2)
+        qvel = 1e-1 * np.random.randn(2)
+
+        self.data.qpos[:] = qpos
+        self.data.qvel[:] = qvel
+        self.sim_data.qpos[:] = qpos
+        self.sim_data.qvel[:] = qvel
+
         mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.sim_model, self.sim_data)
