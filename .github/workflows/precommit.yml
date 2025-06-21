@@ -22,24 +22,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.8.10
         with:
           pixi-version: v0.47.0
-          # cache: true
-          run-install: false
-          cache: false
-
-      # --- START OF DEBUGGING STEPS ---
-      - name: Check for Lock File Mismatch (DEBUG)
-        run: |
-          # Step 1: Force pixi to re-generate the lock file based on how it sees
-          # the world from within this Linux environment.
-          echo "Forcing lock file regeneration for linux-64..."
-          pixi install
-
-          # Step 2: Use git to show the exact differences between the lock file
-          # you committed and the one the CI runner just generated.
-          echo "Checking for differences..."
-          git diff --exit-code pixi.lock
-
-      # --- END OF DEBUGGING STEPS ---
+          cache: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
