@@ -6,7 +6,6 @@ This release contains bugfixes prior to RSS 2025.
 * Changelog file to track changes in the repository (@alberthli, #43)
 
 ## Fixed
-
 * Brandon's last name misspelling in citation in README.md (@pculbertson, #15)
 * Fixed `max_opt_iters` not correctly being applied (@lujieyang and @tzhao-bdai, #14)
     * Added a test to check for this case (@alberthli, #16)
