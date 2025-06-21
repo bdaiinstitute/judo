@@ -247,6 +247,8 @@ class VisualizationNode(DoraNode):
 
         # main tab containing parameter GUI elements
         tab_group = self.server.gui.add_tab_group()
+        self.gui_elements["tab_group"] = tab_group
+
         controller_tab = tab_group.add_tab("Controller", viser.Icon.DEVICE_GAMEPAD)
         task_tab = tab_group.add_tab("Task", viser.Icon.CHECKLIST)
         optimizer_tab = tab_group.add_tab("Optimizer", viser.Icon.BINARY_TREE_2)
