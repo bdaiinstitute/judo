@@ -3,6 +3,7 @@ This release contains bugfixes prior to RSS 2025.
 
 ## Added
 * New `judo`-specific branding! (@slecleach, #42)
+* More cleanly separate the role of `task.data` and `task.sim_data` - one for control rollouts and the other for sim rollouts (@alberthli and @Zolkin1, #45)
 
 ## Fixed
 * Brandon's last name misspelling in citation in README.md (@pculbertson, #15)
