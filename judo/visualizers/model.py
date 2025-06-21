@@ -76,7 +76,6 @@ class ViserMjModel:
                 _body_placeholder_idx += 1
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
-
             for geom in body.geoms:
                 suffix = geom.name
                 if not suffix:  # if geom has no name, use a placeholder.
