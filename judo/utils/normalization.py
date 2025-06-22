@@ -16,7 +16,6 @@ class MinMaxNormalizerKwargs(TypedDict, total=False):
 class RunningMeanStdNormalizerKwargs(TypedDict, total=False):
     """Kwargs for RunningMeanStdNormalizer."""
 
-    momentum: float
     init_std: float
     min_std: float
     max_std: float
@@ -130,7 +129,6 @@ class RunningMeanStdNormalizer(Normalizer):
     def __init__(
         self,
         dim: int,
-        momentum: float = 0.99,
         init_std: float = 1.0,
         min_std: float = 1e-6,
         max_std: float = 1e6,
@@ -140,7 +138,6 @@ class RunningMeanStdNormalizer(Normalizer):
 
         Args:
             dim: Dimension of the data.
-            momentum: The momentum for exponential moving average.
             init_std: The initial standard deviation for the running statistics.
             min_std: The minimum standard deviation.
             max_std: The maximum standard deviation.
@@ -148,7 +145,6 @@ class RunningMeanStdNormalizer(Normalizer):
         """
         super().__init__(dim)
         self.eps = eps
-        self.momentum = momentum
         self.min_std = min_std
         self.max_std = max_std
 
