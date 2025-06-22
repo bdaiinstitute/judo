@@ -10,7 +10,7 @@ class MinMaxNormalizerKwargs(TypedDict, total=False):
 
     min: np.ndarray
     max: np.ndarray
-    eps: float = 1e-8
+    eps: float
 
 
 class RunningMeanStdNormalizerKwargs(TypedDict, total=False):

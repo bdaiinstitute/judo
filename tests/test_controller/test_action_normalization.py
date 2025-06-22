@@ -5,7 +5,7 @@ import numpy as np
 from judo.controller import Controller, ControllerConfig
 from judo.optimizers import CrossEntropyMethod, CrossEntropyMethodConfig
 from judo.tasks import CylinderPush, CylinderPushConfig
-from judo.utils.normalization import IdentityNormalizer, MinMaxNormalizer
+from judo.utils.normalization import IdentityNormalizer, MinMaxNormalizer, RunningMeanStdNormalizer
 
 # ##### #
 # TESTS #
@@ -27,6 +27,9 @@ def test_identity_normalizer() -> None:
         optimizer_config,
         rollout_backend="mujoco",
     )
+
+    # Check that the normalizer is initialized as identity
+    assert isinstance(controller.action_normalizer, IdentityNormalizer)
 
     # Test with random actions
     actions = np.random.randn(10, task.nu)
@@ -52,6 +55,9 @@ def test_min_max_normalizer_behavior() -> None:
         optimizer_config,
         rollout_backend="mujoco",
     )
+
+    # Check that the normalizer is initialized as min_max
+    assert isinstance(controller.action_normalizer, MinMaxNormalizer)
 
     # Test with actions at the bounds
     min_actions = task.actuator_ctrlrange[:, 0]
@@ -92,6 +98,9 @@ def test_running_mean_std_normalizer() -> None:
         optimizer_config,
         rollout_backend="mujoco",
     )
+
+    # Check that the normalizer is initialized as running_mean_std
+    assert isinstance(controller.action_normalizer, RunningMeanStdNormalizer)
 
     # Test with some random actions
     actions = np.random.randn(10, task.nu)
