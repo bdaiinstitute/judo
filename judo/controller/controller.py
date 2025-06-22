@@ -12,7 +12,7 @@ from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
 from judo.tasks.base import Task, TaskConfig
 from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
-from judo.utils.normalization import Normalizer, make_normalizer, normalizer_registry
+from judo.utils.normalization import Normalizer, NormalizerType, make_normalizer, normalizer_registry
 from judo.visualizers.utils import get_trace_sensors
 
 
@@ -27,7 +27,7 @@ class ControllerConfig(OverridableConfig):
     control_freq: float = 20.0
     max_opt_iters: int = 1
     max_num_traces: int = 5
-    action_normalizer: Literal["identity", "min_max", "running_mean_std"] = "identity"
+    action_normalizer: Literal["none", "min_max", "running"] = "none"
 
 
 class Controller:
@@ -104,7 +104,7 @@ class Controller:
         return self.controller_cfg.spline_order
 
     @property
-    def action_normalizer_type(self) -> str:
+    def action_normalizer_type(self) -> NormalizerType:
         """Helper function to get the type of action normalizer."""
         return self.controller_cfg.action_normalizer
 

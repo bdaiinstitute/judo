@@ -1,20 +1,27 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
-from typing import TypedDict, Union
+import warnings
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Literal, Union
 
 import numpy as np
 
+NormalizerType = Literal["none", "min_max", "running"]
 
-class MinMaxNormalizerKwargs(TypedDict, total=False):
-    """Kwargs for MinMaxNormalizer."""
+
+@dataclass
+class MinMaxNormalizerConfig:
+    """Config for MinMaxNormalizer."""
 
     min: np.ndarray
     max: np.ndarray
     eps: float
 
 
-class RunningMeanStdNormalizerKwargs(TypedDict, total=False):
-    """Kwargs for RunningMeanStdNormalizer."""
+@dataclass
+class RunningMeanStdNormalizerConfig:
+    """Config for RunningMeanStdNormalizer."""
 
     init_std: float
     min_std: float
@@ -22,16 +29,15 @@ class RunningMeanStdNormalizerKwargs(TypedDict, total=False):
     eps: float
 
 
-class IdentityNormalizerKwargs(TypedDict, total=False):
-    """Kwargs for IdentityNormalizer."""
-
-    pass
-
-
-NormalizerKwargs = Union[IdentityNormalizerKwargs, MinMaxNormalizerKwargs, RunningMeanStdNormalizerKwargs]
+@dataclass
+class IdentityNormalizerConfig:
+    """Config for IdentityNormalizer."""
 
 
-class Normalizer:
+NormalizerConfig = Union[IdentityNormalizerConfig, MinMaxNormalizerConfig, RunningMeanStdNormalizerConfig]
+
+
+class Normalizer(ABC):
     """Base class for normalizers."""
 
     def __init__(self, dim: int) -> None:
@@ -42,6 +48,7 @@ class Normalizer:
         """
         self.dim = dim
 
+    @abstractmethod
     def normalize(self, x: np.ndarray) -> np.ndarray:
         """Normalize the data.
 
@@ -50,6 +57,7 @@ class Normalizer:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def denormalize(self, x: np.ndarray) -> np.ndarray:
         """Denormalize the data.
 
@@ -64,7 +72,7 @@ class Normalizer:
         Args:
             x: The data to update the normalizer with. Shape=(batch_size, dim).
         """
-        pass
+        return None
 
 
 class IdentityNormalizer(Normalizer):
@@ -102,29 +110,38 @@ class MinMaxNormalizer(Normalizer):
 
         # Only normalize the dimensions that are not -inf or inf
         self.norm_dims = np.where((self.min != -np.inf) & (self.max != np.inf))[0]
+        if len(self.norm_dims) != dim:
+            excluded_dims = np.where((self.min == -np.inf) | (self.max == np.inf))[0]
+            warnings.warn(
+                f"MinMaxNormalizer: {len(excluded_dims)} action dimensions ({excluded_dims.tolist()}) have infinite range "
+                f"and will not be normalized. Please check your model description for proper ctrlrange. "
+                f"Consider using RunningMeanStdNormalizer instead for automatic range estimation.",
+                UserWarning,
+                stacklevel=2,
+            )
 
     def normalize(self, x: np.ndarray) -> np.ndarray:
         """Normalize the data."""
         x_normalized = x.copy()
-        x_normalized[..., self.norm_dims] = (
-            2
-            * (x[..., self.norm_dims] - self.min[self.norm_dims])
-            / (self.max[self.norm_dims] - self.min[self.norm_dims])
-            - 1
-        )
+        min_vals = self.min[self.norm_dims]
+        max_vals = self.max[self.norm_dims]
+        x_normalized[..., self.norm_dims] = 2 * (x[..., self.norm_dims] - min_vals) / (max_vals - min_vals) - 1
         return x_normalized
 
     def denormalize(self, x: np.ndarray) -> np.ndarray:
         """Denormalize the data."""
         x_denormalized = x.copy()
-        x_denormalized[..., self.norm_dims] = (x[..., self.norm_dims] + 1) * (
-            self.max[self.norm_dims] - self.min[self.norm_dims]
-        ) / 2 + self.min[self.norm_dims]
+        min_vals = self.min[self.norm_dims]
+        max_vals = self.max[self.norm_dims]
+        x_denormalized[..., self.norm_dims] = (x[..., self.norm_dims] + 1) * (max_vals - min_vals) / 2 + min_vals
         return x_denormalized
 
 
 class RunningMeanStdNormalizer(Normalizer):
-    """Normalizer that uses running statistics (mean and std) to scale the data."""
+    """Normalizer that uses running statistics (mean and std) to scale the data elementwise.
+
+    Each dimension is normalized using its own statistics independently, without using a full covariance matrix.
+    """
 
     def __init__(
         self,
@@ -168,13 +185,11 @@ class RunningMeanStdNormalizer(Normalizer):
         batch_size = x.shape[0]
         self.count += batch_size
 
-        # new values - old mean
         delta = x - self.mean
 
         # Update mean
         self.mean += np.sum(delta, axis=0) / self.count
 
-        # new values - new mean
         delta2 = x - self.mean
 
         # Update M2
@@ -195,13 +210,13 @@ class RunningMeanStdNormalizer(Normalizer):
 
 
 normalizer_registry = {
-    "identity": IdentityNormalizer,
+    "none": IdentityNormalizer,
     "min_max": MinMaxNormalizer,
-    "running_mean_std": RunningMeanStdNormalizer,
+    "running": RunningMeanStdNormalizer,
 }
 
 
-def make_normalizer(normalizer_type: str, dim: int, **kwargs: NormalizerKwargs) -> Normalizer:
+def make_normalizer(normalizer_type: NormalizerType, dim: int, **kwargs: NormalizerConfig) -> Normalizer:
     """Make a normalizer from a string."""
     if normalizer_type not in normalizer_registry:
         raise ValueError(f"Invalid normalizer type: {normalizer_type}")

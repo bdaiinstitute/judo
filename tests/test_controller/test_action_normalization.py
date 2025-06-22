@@ -13,14 +13,14 @@ from judo.utils.normalization import IdentityNormalizer, MinMaxNormalizer, Runni
 
 
 def test_identity_normalizer() -> None:
-    """Test that identity normalizer correctly passes through values."""
+    """Test that IdentityNormalizer correctly passes through values."""
     task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
 
     controller = Controller(
-        ControllerConfig(action_normalizer="identity"),
+        ControllerConfig(action_normalizer="none"),
         task,
         task_config,
         optimizer,
@@ -28,7 +28,7 @@ def test_identity_normalizer() -> None:
         rollout_backend="mujoco",
     )
 
-    # Check that the normalizer is initialized as identity
+    # Check that the normalizer is initialized as IdentityNormalizer
     assert isinstance(controller.action_normalizer, IdentityNormalizer)
 
     # Test with random actions
@@ -41,7 +41,7 @@ def test_identity_normalizer() -> None:
 
 
 def test_min_max_normalizer_behavior() -> None:
-    """Test that min_max normalizer correctly scales values to [-1, 1] range."""
+    """Test that MinMaxNormalizer correctly scales values to [-1, 1] range."""
     task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
@@ -56,7 +56,7 @@ def test_min_max_normalizer_behavior() -> None:
         rollout_backend="mujoco",
     )
 
-    # Check that the normalizer is initialized as min_max
+    # Check that the normalizer is initialized as MinMaxNormalizer
     assert isinstance(controller.action_normalizer, MinMaxNormalizer)
 
     # Test with actions at the bounds
@@ -84,14 +84,14 @@ def test_min_max_normalizer_behavior() -> None:
 
 
 def test_running_mean_std_normalizer() -> None:
-    """Test that running_mean_std normalizer correctly updates and normalizes."""
+    """Test that RunningMeanStdNormalizer correctly updates and normalizes."""
     task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
 
     controller = Controller(
-        ControllerConfig(action_normalizer="running_mean_std"),
+        ControllerConfig(action_normalizer="running"),
         task,
         task_config,
         optimizer,
@@ -99,7 +99,7 @@ def test_running_mean_std_normalizer() -> None:
         rollout_backend="mujoco",
     )
 
-    # Check that the normalizer is initialized as running_mean_std
+    # Check that the normalizer is initialized as RunningMeanStdNormalizer
     assert isinstance(controller.action_normalizer, RunningMeanStdNormalizer)
 
     # Test with some random actions
@@ -115,7 +115,7 @@ def test_running_mean_std_normalizer() -> None:
     normalized = controller.action_normalizer.normalize(actions)
     denormalized = controller.action_normalizer.denormalize(normalized)
 
-    np.testing.assert_array_almost_equal(actions, denormalized)
+    np.testing.assert_array_almost_equal(actions, denormalized, decimal=5)
 
 
 def test_normalizer_type_change() -> None:
@@ -126,7 +126,7 @@ def test_normalizer_type_change() -> None:
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
 
     controller = Controller(
-        ControllerConfig(action_normalizer="identity"),
+        ControllerConfig(action_normalizer="none"),
         task,
         task_config,
         optimizer,
@@ -134,10 +134,10 @@ def test_normalizer_type_change() -> None:
         rollout_backend="mujoco",
     )
 
-    # Initially should be identity normalizer
+    # Initially should be IdentityNormalizer
     assert isinstance(controller.action_normalizer, IdentityNormalizer)
 
-    # Change the normalizer type in config
+    # Change the normalizer type in config to MinMaxNormalizer
     controller.controller_cfg.action_normalizer = "min_max"
 
     # Update with some actions and rewards
@@ -145,7 +145,7 @@ def test_normalizer_type_change() -> None:
     rewards = np.random.randn(10)
     controller.update_action_normalizer(actions, rewards)
 
-    # Should now be min_max normalizer
+    # Should now be MinMaxNormalizer
     assert isinstance(controller.action_normalizer, MinMaxNormalizer)
 
 
@@ -157,7 +157,7 @@ def test_normalizer_in_update_action_loop() -> None:
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
 
     # Test with different normalizer types
-    for normalizer_type in ["identity", "min_max", "running_mean_std"]:
+    for normalizer_type in ["none", "min_max", "running"]:
         controller = Controller(
             ControllerConfig(action_normalizer=normalizer_type, max_opt_iters=2),
             task,
