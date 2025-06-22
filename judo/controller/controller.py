@@ -12,6 +12,7 @@ from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
 from judo.tasks.base import Task, TaskConfig
 from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
+from judo.utils.normalization import Normalizer, make_normalizer, normalizer_registry
 from judo.visualizers.utils import get_trace_sensors
 
 
@@ -26,6 +27,7 @@ class ControllerConfig(OverridableConfig):
     control_freq: float = 20.0
     max_opt_iters: int = 1
     max_num_traces: int = 5
+    action_normalizer: Literal["identity", "min_max", "running_mean_std"] = "identity"
 
 
 class Controller:
@@ -63,6 +65,8 @@ class Controller:
 
         self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
 
+        self.action_normalizer = self._init_action_normalizer()
+
         # a container for any metadata from the system that we want to pass to the task
         self.system_metadata = {}
 
@@ -98,6 +102,11 @@ class Controller:
     def spline_order(self) -> str:
         """Helper function to recalculate the spline order for simulation."""
         return self.controller_cfg.spline_order
+
+    @property
+    def action_normalizer_type(self) -> str:
+        """Helper function to get the type of action normalizer."""
+        return self.controller_cfg.action_normalizer
 
     @property
     def num_timesteps(self) -> int:
@@ -139,12 +148,17 @@ class Controller:
         i = 0
         while i < self.max_opt_iters and not self.optimizer.stop_cond():
             # sample controls and clamp to action bounds
-            self.candidate_knots = self.optimizer.sample_control_knots(nominal_knots)
+            nominal_knots_normalized = self.action_normalizer.normalize(nominal_knots)
+            candidate_knots_normalized = self.optimizer.sample_control_knots(nominal_knots_normalized)
+            self.candidate_knots = self.action_normalizer.denormalize(candidate_knots_normalized)
             self.candidate_knots = np.clip(
                 self.candidate_knots,
                 self.task.actuator_ctrlrange[:, 0],
                 self.task.actuator_ctrlrange[:, 1],
             )
+
+            # Also make the normalized candidate knots correctly clipped
+            candidate_knots_normalized = self.action_normalizer.normalize(self.candidate_knots)
 
             # Evaluate rollout controls at sim timesteps.
             candidate_splines = make_spline(new_times, self.candidate_knots, self.spline_order)
@@ -171,8 +185,15 @@ class Controller:
                 self.task_cfg,
                 self.system_metadata,
             )
+
+            # Update nominal knots for next optimization iteration
+            nominal_knots_normalized = self.optimizer.update_nominal_knots(candidate_knots_normalized, self.rewards)
+            nominal_knots = self.action_normalizer.denormalize(nominal_knots_normalized)
+
+            # Update action normalizer
+            self.update_action_normalizer(self.candidate_knots.reshape(-1, self.model.nu), self.rewards)
+
             i += 1
-            nominal_knots = self.optimizer.update_nominal_knots(self.candidate_knots, self.rewards)
 
         # Update nominal controls and spline.
         self.nominal_knots = nominal_knots
@@ -240,6 +261,25 @@ class Controller:
             s1 = np.reshape(sensors[:, :, sensor * 3 : (sensor + 1) * 3], separated_sensors_size)
             elites[sensor :: self.num_trace_sensors] = s1
         self.traces = np.reshape(elites, (total_traces_rollouts, 2, 3))
+
+    def _init_action_normalizer(self) -> Normalizer:
+        """Initialize the action normalizer."""
+        action_normalizer_kwargs = {}
+        if self.action_normalizer_type == "min_max":
+            action_normalizer_kwargs["min"] = self.task.actuator_ctrlrange[:, 0]
+            action_normalizer_kwargs["max"] = self.task.actuator_ctrlrange[:, 1]
+        elif self.action_normalizer_type == "running_mean_std":
+            action_normalizer_kwargs["init_std"] = 1.0
+        return make_normalizer(self.action_normalizer_type, self.model.nu, **action_normalizer_kwargs)
+
+    def update_action_normalizer(self, actions: np.ndarray, rewards: np.ndarray) -> None:
+        """Update the action normalizer."""
+        if normalizer_registry.get(self.action_normalizer_type) != type(self.action_normalizer):
+            # Force the normalizer to be re-initialized when the type changes in GUI
+            self.action_normalizer = self._init_action_normalizer()
+
+        # Use top 20% of actions to update the normalizer
+        self.action_normalizer.update(actions[rewards.argsort()[-int(0.2 * len(rewards)) :]])
 
 
 def make_spline(times: np.ndarray, controls: np.ndarray, spline_order: str) -> interp1d:
