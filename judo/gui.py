@@ -88,7 +88,12 @@ def _get_gui_element(
     # Create a slider for an integer-valued param.
     if field.type is int:
         if "ui_config" not in field.metadata:
-            min_int, max_int, step_int = 1, 2 * init_value, DEFAULT_SLIDER_STEP_INT
+            if init_value < 0:
+                min_int, max_int, step_int = 2 * init_value, -1, DEFAULT_SLIDER_STEP_INT
+            elif init_value == 0:
+                min_int, max_int, step_int = -5, 5, DEFAULT_SLIDER_STEP_INT
+            else:
+                min_int, max_int, step_int = 1, 2 * init_value, DEFAULT_SLIDER_STEP_INT
         else:
             min_int, max_int, step_int = field.metadata["ui_config"]
 
@@ -108,11 +113,12 @@ def _get_gui_element(
     # Create a slider for a float-valued param.
     elif field.type is float:
         if "ui_config" not in field.metadata:
-            min_float, max_float, step_float = (
-                0.0,
-                2 * init_value,
-                DEFAULT_SLIDER_STEP_FLOAT,
-            )
+            if init_value < 0.0:
+                min_float, max_float, step_float = 2 * init_value, 0.0, DEFAULT_SLIDER_STEP_FLOAT
+            elif init_value == 0.0:
+                min_float, max_float, step_float = -5.0, 5.0, DEFAULT_SLIDER_STEP_FLOAT
+            else:
+                min_float, max_float, step_float = 0.0, 2 * init_value, DEFAULT_SLIDER_STEP_FLOAT
         else:
             min_float, max_float, step_float = field.metadata["ui_config"]
 

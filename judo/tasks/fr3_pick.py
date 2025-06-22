@@ -204,12 +204,16 @@ class FR3Pick(Task[FR3PickConfig]):
         self._data.qpos[:] = curr_state[: self.model.nq]
         self._data.qvel[:] = curr_state[self.model.nq : self.model.nq + self.model.nv]
         mujoco.mj_forward(self.model, self._data)
-        curr_sensor = self._data.sensordata  # (total_sensor_dim,)
+
+        # BUG: mujoco distance sensor seems to be broken and doesn't always return signed distance, so here we instead
+        # check the object z position
+        # curr_sensor = self._data.sensordata  # (total_sensor_dim,)
 
         phase = Phase.LIFT  # default phase
 
         # check whether the phase is MOVE
-        obj_in_air = curr_sensor[self.obj_table_adr] > 0  # object is not touching the table
+        # obj_in_air = curr_sensor[self.obj_table_adr] > 0  # object is not touching the table
+        obj_in_air = curr_state[self.obj_pos_adr + 2] > 0.02 + 1e-3  # object z position is above the table
         if obj_in_air:
             phase = Phase.MOVE  # if the object is in the air, we are in lift phase
 
@@ -219,8 +223,11 @@ class FR3Pick(Task[FR3PickConfig]):
             phase = Phase.PLACE  # if the object is in the goal xy, we are in place phase
 
         # check whether the phase is HOMING
-        obj_table_dist = curr_sensor[self.obj_table_adr]
-        if in_goal_xy and obj_table_dist <= 0:
+        # obj_table_dist = curr_sensor[self.obj_table_adr]
+        # if in_goal_xy and obj_table_dist <= 0:
+        #     phase = Phase.HOMING
+        obj_z_pos = curr_state[self.obj_pos_adr + 2]  # z position of the object
+        if in_goal_xy and obj_z_pos <= 0.02 + 1e-3:  # the cube is 4cm wide and we allow a tolerance
             phase = Phase.HOMING
 
         self.phase = phase
