@@ -137,7 +137,7 @@ We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to ge
 
 
 # Citation
-If you use `judo` in your research, please use the following citation:
+If you use `judo` in your research, please use the following citation for our [paper](https://arxiv.org/abs/2506.17184):
 ```
 @inproceedings{li2025_judo,
   title     = {Judo: A User-Friendly Open-Source Package for Sampling-Based Model Predictive Control},
