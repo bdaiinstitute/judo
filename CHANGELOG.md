@@ -3,6 +3,9 @@
 ## Documentation
 * Updated the README with the arxiv link for the paper (@alberthli, #56)
 
+## Dev
+* Made `pixi-version` use `latest` instead of pinned version in all workflows (@alberthli, #59)
+
 # v0.0.2
 This release contains bugfixes prior to RSS 2025.
 
