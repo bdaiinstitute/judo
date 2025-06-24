@@ -4,6 +4,9 @@
 * Updated the README with the arxiv link for the paper (@alberthli, #56)
 * Created `docs` dependency group for even easier one-command installation of docs deps for both conda and pixi (@alberthli, #57)
 
+## Dev
+* Made `pixi-version` use `latest` instead of pinned version in all workflows (@alberthli, #59)
+
 # v0.0.2
 This release contains bugfixes prior to RSS 2025.
 
