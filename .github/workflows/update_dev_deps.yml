@@ -1,0 +1,41 @@
+name: Update dev lockfile
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * 1'  # weekly
+
+jobs:
+  pixi-update-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.10
+        with:
+          run-install: false
+
+      - name: Update lockfile for dev environment
+        run: |
+          set -o pipefail
+          pixi update --environment dev --json | pixi exec pixi-diff-to-markdown > diff.md
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update pixi lockfile for dev environment"
+          title: "Update dev dependencies for pixi"
+          body-path: diff.md
+          branch: update-pixi-dev-${{ github.run_id }}
+          base: main
+          labels: pixi, dev
+          delete-branch: true
+          add-paths: |
+            pixi.lock
