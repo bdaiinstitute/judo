@@ -27,10 +27,7 @@ jobs:
 
       - name: Building documentation
         run: |
-          pip install uv
-          uv pip install --system -e ".[dev]"
-          uv pip install --system -r docs/requirements.txt
-          sphinx-build docs/source docs/build -b dirhtml
+          pixi run -e dev sphinx-build docs/source docs/build -b dirhtml
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
