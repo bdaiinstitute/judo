@@ -26,6 +26,10 @@ jobs:
           set -o pipefail
           pixi update --environment dev --json | pixi exec pixi-diff-to-markdown > diff.md
 
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
@@ -33,9 +37,10 @@ jobs:
           commit-message: "Update pixi lockfile for dev environment"
           title: "Update dev dependencies for pixi"
           body-path: diff.md
-          branch: update-pixi-dev-${{ github.run_id }}
+          branch: update-pixi-dev-${{ steps.date.outputs.today }}-${{ github.run_id }}
           base: main
           labels: pixi, dev
           delete-branch: true
           add-paths: |
             pixi.lock
+          skip-empty: true
