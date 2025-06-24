@@ -41,7 +41,7 @@ For developers, run the following commands from this folder after cloning:
 ```bash
 conda create -n judo python=3.13
 conda activate judo
-pip install -e .[dev]
+pip install -e .[dev]  # includes docs dependencies
 pre-commit install
 pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
 ```
@@ -127,12 +127,18 @@ Note that the benchmarking program runs the default task and optimizer parameter
 # Docs
 For developers, to build docs locally, run the following in your environment from the repo root. Note that asset paths will be broken locally that work correctly on Github Pages.
 ```bash
-pip install -r docs/requirements.txt
+# using conda
+pip install -e .[docs]  # dev also includes docs
+
+# using pixi
+pixi shell -e docs  # dev also includes docs
+
+# building the docs (both conda and pixi)
 sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
 
-## 🤝 Contributing
+# 🤝 Contributing
 We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
 
 

@@ -53,7 +53,16 @@ allow-direct-references = true
 packages = ["judo"]
 
 [project.optional-dependencies]
+docs = [
+    "furo",
+    "m2r2",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinxcontrib-ansi-rai",
+    "sphinxcontrib-programoutput-rai",
+]
 dev = [
+    "judo-rai[docs]",
     "pre-commit",
     "pybind11-stubgen",
     "pyright",
@@ -168,4 +177,5 @@ judo-rai = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
-dev = { features = ["dev"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+dev = { features = ["dev", "docs"], solve-group = "default" }
