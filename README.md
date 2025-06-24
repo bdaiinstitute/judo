@@ -138,7 +138,7 @@ sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
 
-## 🤝 Contributing
+# 🤝 Contributing
 We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
 
 
