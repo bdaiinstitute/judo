@@ -41,7 +41,7 @@ For developers, run the following commands from this folder after cloning:
 ```bash
 conda create -n judo python=3.13
 conda activate judo
-pip install -e .[dev]
+pip install -e .[dev]  # includes docs dependencies
 pre-commit install
 pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
 ```
@@ -127,12 +127,18 @@ Note that the benchmarking program runs the default task and optimizer parameter
 # Docs
 For developers, to build docs locally, run the following in your environment from the repo root. Note that asset paths will be broken locally that work correctly on Github Pages.
 ```bash
-pip install -r docs/requirements.txt
+# using conda
+pip install -e .[docs]  # dev also includes docs
+
+# using pixi
+pixi shell -e docs  # dev also includes docs
+
+# building the docs (both conda and pixi)
 sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
 
-## 🤝 Contributing
+# 🤝 Contributing
 We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
 
 
@@ -141,7 +147,7 @@ If you use `judo` in your research, please use the following citation for our [p
 ```
 @inproceedings{li2025_judo,
   title     = {Judo: A User-Friendly Open-Source Package for Sampling-Based Model Predictive Control},
-  author    = {Albert Li and Brandon Hung and Aaron D. Ames and Jiuguang Wang and Simon Le Cleac'h and Preston Culbertson},
+  author    = {Albert H. Li and Brandon Hung and Aaron D. Ames and Jiuguang Wang and Simon Le Cleac'h and Preston Culbertson},
   booktitle = {Proceedings of the Workshop on Fast Motion Planning and Control in the Era of Parallelism at Robotics: Science and Systems (RSS)},
   year      = {2025},
   url       = {https://github.com/bdaiinstitute/judo},
