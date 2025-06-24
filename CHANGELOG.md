@@ -3,6 +3,9 @@
 ## Documentation
 * Updated the README with the arxiv link for the paper (@alberthli, #56)
 
+## Dev
+* Added a workflow to automatically update development dependencies in the pixi lock file (@alberthli, #58)
+
 # v0.0.2
 This release contains bugfixes prior to RSS 2025.
 
