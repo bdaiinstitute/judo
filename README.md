@@ -141,7 +141,7 @@ If you use `judo` in your research, please use the following citation for our [p
 ```
 @inproceedings{li2025_judo,
   title     = {Judo: A User-Friendly Open-Source Package for Sampling-Based Model Predictive Control},
-  author    = {Albert Li and Brandon Hung and Aaron D. Ames and Jiuguang Wang and Simon Le Cleac'h and Preston Culbertson},
+  author    = {Albert H. Li and Brandon Hung and Aaron D. Ames and Jiuguang Wang and Simon Le Cleac'h and Preston Culbertson},
   booktitle = {Proceedings of the Workshop on Fast Motion Planning and Control in the Era of Parallelism at Robotics: Science and Systems (RSS)},
   year      = {2025},
   url       = {https://github.com/bdaiinstitute/judo},
