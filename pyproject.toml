@@ -54,6 +54,7 @@ packages = ["judo"]
 
 [project.optional-dependencies]
 dev = [
+    "pixi-diff-to-markdown",
     "pre-commit",
     "pybind11-stubgen",
     "pyright",
