@@ -88,16 +88,6 @@ feat(task): add fr3_stack task with novel constraints
 fix(mppi): guard against div-by-zero in cost calculation
 ```
 
-## 📄 Docs
-
-To build the documentation locally:
-
-```bash
-pip install -r docs/requirements.txt
-sphinx-build docs/source docs/build -b dirhtml
-python -m http.server --directory docs/build 8000
-```
-
 ## 💬 Discussions
 
 Have questions or ideas?
