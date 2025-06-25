@@ -142,6 +142,9 @@ html_title = "judo"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+# Favicon configuration
+html_favicon = "_static/images/favicon-emoji.svg"
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
