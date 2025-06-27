@@ -84,6 +84,32 @@ def test_running_mean_std_normalizer() -> None:
     np.testing.assert_array_almost_equal(data, denormalized, decimal=5)
 
 
+def test_running_mean_std_normalizer_3d_data() -> None:
+    """Test that RunningMeanStdNormalizer correctly updates with data with more than 2 dimensions."""
+    dim = 3
+    normalizer = RunningMeanStdNormalizer(dim)
+
+    # Test with random 3-dimensional data
+    batch_size1, batch_size2 = 10, 2
+    data = np.random.randn(batch_size1, batch_size2, dim)
+    normalizer.update(data)
+
+    # Check that statistics were updated correctly
+    assert normalizer.count == batch_size1 * batch_size2
+    np.testing.assert_array_almost_equal(normalizer.mean, np.mean(data, axis=(0, 1)))
+    np.testing.assert_array_almost_equal(normalizer.std, np.std(data, axis=(0, 1)))
+
+    normalized = normalizer.normalize(data)
+    denormalized = normalizer.denormalize(normalized)
+
+    # Check that normalized data has mean 0 and std 1
+    np.testing.assert_array_almost_equal(np.mean(normalized, axis=(0, 1)), np.zeros(dim), decimal=5)
+    np.testing.assert_array_almost_equal(np.std(normalized, axis=(0, 1)), np.ones(dim), decimal=5)
+
+    # Check that denormaling the normalized data returns the original data
+    np.testing.assert_array_almost_equal(data, denormalized, decimal=5)
+
+
 def test_normalizer_type_change() -> None:
     """Test that normalizer is re-initialized when type changes."""
     task_config = CylinderPushConfig()
