@@ -94,7 +94,7 @@ class IdentityNormalizer(Normalizer):
 class MinMaxNormalizer(Normalizer):
     """Normalizer that uses min and max values to scale the data to the range [-1, 1]."""
 
-    def __init__(self, dim: int, min: np.ndarray, max: np.ndarray, eps: float = 1e-8) -> None:
+    def __init__(self, dim: int, min: np.ndarray, max: np.ndarray, eps: float = 1e-6) -> None:
         """Initialize the normalizer.
 
         Args:
@@ -186,11 +186,9 @@ class RunningMeanStdNormalizer(Normalizer):
         batch_size = np.prod(batch_dims)
         self.count += batch_size
 
+        # Welford's online algorithm
         delta = x - self.mean
-
-        # Update mean
         self.mean += np.sum(delta, axis=batch_axis) / self.count
-
         delta2 = x - self.mean
 
         # Update M2

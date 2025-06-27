@@ -153,7 +153,7 @@ class Controller:
             warnings.warn(
                 f"Invalid action normalizer type '{self.action_normalizer_type}'. "
                 f"Available types: {list(normalizer_registry.keys())}. "
-                "Falling back to none normalizer.",
+                "Falling back to 'none' normalizer.",
                 stacklevel=2,
             )
             normalizer_cls = IdentityNormalizer
