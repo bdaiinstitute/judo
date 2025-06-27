@@ -1,5 +1,11 @@
 # v0.0.3
 
+## Added
+* Action normalization (@yunhaif, #54)
+    * Added three types of action normalizer: `none` (default, doing nothing), `min_max` (normalizing with actuator control range), and `running` (tracking running mean and std to normalize actions)
+    * Added tests for the normalizers and their integration with the controller.
+    * Users can change the action normalizer under the controller tab in the GUI.
+
 ## Documentation
 * Updated the README with the arxiv link for the paper (@alberthli, #56)
 * Created `docs` dependency group for even easier one-command installation of docs deps for both conda and pixi (@alberthli, #57)
