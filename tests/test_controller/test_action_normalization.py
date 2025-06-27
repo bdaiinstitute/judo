@@ -140,10 +140,10 @@ def test_normalizer_type_change() -> None:
     # Change the normalizer type in config to MinMaxNormalizer
     controller.controller_cfg.action_normalizer = "min_max"
 
-    # Update with some actions and rewards
-    actions = np.random.randn(10, task.nu)
-    rewards = np.random.randn(10)
-    controller.update_action_normalizer(actions, rewards)
+    # Run action update loop once
+    curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
+    curr_time = 0.0
+    controller.update_action(curr_state, curr_time)
 
     # Should now be MinMaxNormalizer
     assert isinstance(controller.action_normalizer, MinMaxNormalizer)
