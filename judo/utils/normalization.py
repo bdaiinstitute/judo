@@ -147,9 +147,9 @@ class RunningMeanStdNormalizer(Normalizer):
         self,
         dim: int,
         init_std: float = 1.0,
-        min_std: float = 1e-6,
-        max_std: float = 1e6,
-        eps: float = 1e-8,
+        min_std: float = 1e-5,
+        max_std: float = 1e3,
+        eps: float = 1e-6,
     ) -> None:
         """Initialize the normalizer.
 
