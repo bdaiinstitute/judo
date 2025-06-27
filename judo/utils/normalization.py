@@ -179,21 +179,22 @@ class RunningMeanStdNormalizer(Normalizer):
         Args:
             x: The data to update the running statistics with. Shape=(batch_size, dim).
         """
-        assert x.ndim == 2, f"Expected 2D array (batch_size, dim), but got {x.ndim}D array {x.shape}"
-        assert x.shape[1] == self.dim, f"Expected dimension {self.dim}, but got {x.shape[1]}"
+        assert x.shape[-1] == self.dim, f"Expected dimension {self.dim}, but got {x.shape[-1]}"
 
-        batch_size = x.shape[0]
+        batch_dims = x.shape[:-1]
+        batch_axis = tuple(range(len(batch_dims)))
+        batch_size = np.prod(batch_dims)
         self.count += batch_size
 
         delta = x - self.mean
 
         # Update mean
-        self.mean += np.sum(delta, axis=0) / self.count
+        self.mean += np.sum(delta, axis=batch_axis) / self.count
 
         delta2 = x - self.mean
 
         # Update M2
-        self.M2 += np.sum(delta * delta2, axis=0)
+        self.M2 += np.sum(delta * delta2, axis=batch_axis)
         self.M2 = np.maximum(self.M2, 0)
 
         # Update std

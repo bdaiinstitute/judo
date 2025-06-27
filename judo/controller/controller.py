@@ -208,7 +208,7 @@ class Controller:
             nominal_knots_normalized = self.optimizer.update_nominal_knots(candidate_knots_normalized, self.rewards)
 
             # Update action normalizer
-            self.action_normalizer.update(self.candidate_knots.reshape(-1, self.model.nu))
+            self.action_normalizer.update(self.candidate_knots)
 
             i += 1
 
