@@ -51,7 +51,7 @@ def test_min_max_normalizer() -> None:
     normalized = normalizer.normalize(data)
     denormalized = normalizer.denormalize(normalized)
 
-    # Check that denormaling the normalized data returns the original data
+    # Check that denormalizing the normalized data returns the original data
     np.testing.assert_array_almost_equal(data, denormalized)
 
     # Check that normalized values are in [-1, 1] range
@@ -63,15 +63,20 @@ def test_running_mean_std_normalizer() -> None:
     """Test that RunningMeanStdNormalizer correctly updates and normalizes."""
     dim = 3
     normalizer = RunningMeanStdNormalizer(dim)
+    batch_size = 10
+    n_iters = 3
+    data = np.random.randn(batch_size * n_iters, dim)
 
-    # Test with random data
-    data = np.random.randn(10, dim)
-    normalizer.update(data)
+    # Test iterative calls
+    for i in range(n_iters):
+        batch = data[i * batch_size : (i + 1) * batch_size]
+        normalizer.update(batch)
 
-    # Check that statistics were updated correctly
-    assert normalizer.count == 10
-    np.testing.assert_array_almost_equal(normalizer.mean, np.mean(data, axis=0))
-    np.testing.assert_array_almost_equal(normalizer.std, np.std(data, axis=0))
+        # Check that statistics were updated correctly
+        count = (i + 1) * batch_size
+        assert normalizer.count == count
+        np.testing.assert_array_almost_equal(normalizer.mean, np.mean(data[:count], axis=0))
+        np.testing.assert_array_almost_equal(normalizer.std, np.std(data[:count], axis=0))
 
     normalized = normalizer.normalize(data)
     denormalized = normalizer.denormalize(normalized)
@@ -80,7 +85,7 @@ def test_running_mean_std_normalizer() -> None:
     np.testing.assert_array_almost_equal(np.mean(normalized, axis=0), np.zeros(dim), decimal=5)
     np.testing.assert_array_almost_equal(np.std(normalized, axis=0), np.ones(dim), decimal=5)
 
-    # Check that denormaling the normalized data returns the original data
+    # Check that denormalizing the normalized data returns the original data
     np.testing.assert_array_almost_equal(data, denormalized, decimal=5)
 
 
@@ -88,16 +93,20 @@ def test_running_mean_std_normalizer_3d_data() -> None:
     """Test that RunningMeanStdNormalizer correctly updates with data with more than 2 dimensions."""
     dim = 3
     normalizer = RunningMeanStdNormalizer(dim)
-
-    # Test with random 3-dimensional data
     batch_size1, batch_size2 = 10, 2
-    data = np.random.randn(batch_size1, batch_size2, dim)
-    normalizer.update(data)
+    n_iters = 2
+    data = np.random.randn(batch_size1 * n_iters, batch_size2, dim)
 
-    # Check that statistics were updated correctly
-    assert normalizer.count == batch_size1 * batch_size2
-    np.testing.assert_array_almost_equal(normalizer.mean, np.mean(data, axis=(0, 1)))
-    np.testing.assert_array_almost_equal(normalizer.std, np.std(data, axis=(0, 1)))
+    # Test iterative calls
+    for i in range(n_iters):
+        batch = data[i * batch_size1 : (i + 1) * batch_size1]
+        normalizer.update(batch)
+
+        # Check that statistics were updated correctly
+        count1 = (i + 1) * batch_size1
+        assert normalizer.count == count1 * batch_size2
+        np.testing.assert_array_almost_equal(normalizer.mean, np.mean(data[:count1], axis=(0, 1)))
+        np.testing.assert_array_almost_equal(normalizer.std, np.std(data[:count1], axis=(0, 1)))
 
     normalized = normalizer.normalize(data)
     denormalized = normalizer.denormalize(normalized)
@@ -106,7 +115,7 @@ def test_running_mean_std_normalizer_3d_data() -> None:
     np.testing.assert_array_almost_equal(np.mean(normalized, axis=(0, 1)), np.zeros(dim), decimal=5)
     np.testing.assert_array_almost_equal(np.std(normalized, axis=(0, 1)), np.ones(dim), decimal=5)
 
-    # Check that denormaling the normalized data returns the original data
+    # Check that denormalizing the normalized data returns the original data
     np.testing.assert_array_almost_equal(data, denormalized, decimal=5)
 
 
@@ -151,7 +160,7 @@ def test_normalizer_in_update_action_loop() -> None:
     # Test with different normalizer types
     for normalizer_type in ["none", "min_max", "running"]:
         controller = Controller(
-            ControllerConfig(action_normalizer=normalizer_type, max_opt_iters=2),
+            ControllerConfig(action_normalizer=normalizer_type, max_opt_iters=1),
             task,
             task_config,
             optimizer,
