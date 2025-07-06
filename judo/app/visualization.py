@@ -11,7 +11,7 @@ from dora_utils.dataclasses import from_arrow, to_arrow
 from dora_utils.node import DoraNode, on_event
 from omegaconf import DictConfig
 from PIL import Image
-from viser import GuiFolderHandle, GuiImageHandle, GuiInputHandle, MeshHandle
+from viser import GuiFolderHandle, GuiImageHandle, GuiInputHandle, IcosphereHandle, MeshHandle
 
 from judo import PACKAGE_ROOT
 from judo.app.structs import MujocoState
@@ -23,7 +23,7 @@ from judo.optimizers import get_registered_optimizers
 from judo.tasks import get_registered_tasks
 from judo.visualizers.model import ViserMjModel
 
-ElementType = GuiImageHandle | GuiInputHandle | GuiFolderHandle | MeshHandle
+ElementType = GuiImageHandle | GuiInputHandle | GuiFolderHandle | MeshHandle | IcosphereHandle
 
 
 class VisualizationNode(DoraNode):

@@ -476,7 +476,15 @@ def add_segments(
         line_width: width of the line, in pixels
         visible: whether or not the lines are initially visible
     """
-    return target.scene.add_line_segments(name, points, rgb, line_width, quat, pos, visible)
+    return target.scene.add_line_segments(
+        name,
+        points,
+        rgb,
+        line_width=line_width,
+        wxyz=quat,
+        position=pos,
+        visible=visible,
+    )
 
 
 def set_mesh_color(mesh: trimesh.Trimesh, rgba: np.ndarray) -> None:
