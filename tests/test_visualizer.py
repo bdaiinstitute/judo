@@ -2,9 +2,6 @@
 
 import mujoco
 import numpy as np
-from trimesh.creation import box
-from viser import ViserServer
-
 from judo import MODEL_PATH
 from judo.visualizers.model import (
     ViserMjModel,
@@ -19,9 +16,11 @@ from judo.visualizers.model import (
     add_spline,
     set_mesh_color,
     set_segment_points,
-    set_spline_positions,
+    set_spline_points,
 )
 from judo.visualizers.utils import rgba_float_to_int, rgba_int_to_float
+from trimesh.creation import box
+from viser import ViserServer
 
 # Create a global ViserServer instance for use by the tests.
 viser_server = ViserServer()
@@ -209,24 +208,23 @@ def test_add_segments() -> None:
 
 
 class DummySpline:
-    """A dummy class to test set_spline_positions."""
+    """A dummy class to test set_spline_points."""
 
     def __init__(self) -> None:
-        """Initialize the dummy spline with no positions."""
-        self.positions = None
+        """Initialize the dummy spline with no points."""
+        self.points = None
 
 
-def test_set_spline_positions() -> None:
-    """Test that set_spline_positions sets the positions correctly."""
+def test_set_spline_points() -> None:
+    """Test that set_spline_points sets the points correctly."""
     dummy = DummySpline()
-    positions_tuple = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
-    set_spline_positions(dummy, positions_tuple)  # type: ignore
-    assert dummy.positions == positions_tuple, "set_spline_positions did not set positions correctly"
+    points_tuple = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
+    set_spline_points(dummy, points_tuple)  # type: ignore
+    assert np.array_equal(dummy.points, np.array(points_tuple)), "set_spline_positions did not set points correctly"  # type: ignore
     # Also test with numpy array input.
-    positions_np = np.array(positions_tuple)
-    set_spline_positions(dummy, positions_np)  # type: ignore
-    expected = tuple(map(tuple, positions_np))
-    assert dummy.positions == expected, "set_spline_positions did not convert numpy array correctly"
+    points_np = np.array(points_tuple)
+    set_spline_points(dummy, points_np)  # type: ignore
+    assert np.array_equal(dummy.points, points_np), "set_spline_Noints did not convert numpy array correctly" # type: ignore
 
 
 class DummySegment:
