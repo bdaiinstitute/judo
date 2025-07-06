@@ -12,6 +12,7 @@
 
 ## Dev
 * Made `pixi-version` use `latest` instead of pinned version in all workflows (@alberthli, #59)
+* Bumped Viser to 1.0.0 (@brentyi, #66)
 
 # v0.0.2
 This release contains bugfixes prior to RSS 2025.
