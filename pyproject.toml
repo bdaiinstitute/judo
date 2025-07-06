@@ -36,7 +36,7 @@ dependencies = [
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
     "scipy",
-    "viser",
+    "viser>=1.0.0",
 ]
 
 [project.urls]
