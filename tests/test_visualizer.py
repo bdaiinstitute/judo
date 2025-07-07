@@ -220,7 +220,7 @@ def test_set_spline_points() -> None:
     dummy = DummySpline()
     points_tuple = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
     set_spline_points(dummy, points_tuple)  # type: ignore
-    assert np.array_equal(dummy.points, np.array(points_tuple)), "set_spline_positions did not set points correctly"  # type: ignore
+    assert np.array_equal(dummy.points, np.array(points_tuple)), "set_spline_points did not set points correctly"  # type: ignore
     # Also test with numpy array input.
     points_np = np.array(points_tuple)
     set_spline_points(dummy, points_np)  # type: ignore
