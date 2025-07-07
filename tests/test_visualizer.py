@@ -225,7 +225,7 @@ def test_set_spline_points() -> None:
     # Also test with numpy array input.
     points_np = np.array(points_tuple)
     set_spline_points(dummy, points_np)  # type: ignore
-    assert np.array_equal(dummy.points, points_np), "set_spline_points did not convert numpy array correctly" # type: ignore
+    assert np.array_equal(dummy.points, points_np), "set_spline_points did not convert numpy array correctly"  # type: ignore
 
 
 class DummySegment:
