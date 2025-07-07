@@ -2,6 +2,9 @@
 
 import mujoco
 import numpy as np
+from trimesh.creation import box
+from viser import ViserServer
+
 from judo import MODEL_PATH
 from judo.visualizers.model import (
     ViserMjModel,
@@ -19,8 +22,6 @@ from judo.visualizers.model import (
     set_spline_points,
 )
 from judo.visualizers.utils import rgba_float_to_int, rgba_int_to_float
-from trimesh.creation import box
-from viser import ViserServer
 
 # Create a global ViserServer instance for use by the tests.
 viser_server = ViserServer()
