@@ -1,6 +1,7 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
 import atexit
+import importlib
 import inspect
 import json
 import os
@@ -70,20 +71,29 @@ def _load_ephemeral_registry() -> None:
 
     for name, info in data.items():
         # load Task class
-        spec = spec_from_file_location(f"_judo_task_{name}", info["task_src"])
-        assert spec is not None, f"Could not load task module {info['task_src']}"
-        mod = module_from_spec(spec)
-        assert spec.loader is not None, f"Could not load task module {info['task_src']}"
-        spec.loader.exec_module(mod)
-        task_cls = getattr(mod, info["task_qn"])
+        task_mod = info.get("task_mod")
+        if task_mod and not task_mod.startswith("__main__"):
+            mod = importlib.import_module(task_mod)  # package import preserves relative imports in that module
+            task_cls = getattr(mod, info["task_qn"])
+        else:
+            # fallback: load by path
+            spec = spec_from_file_location(f"_judo_task_{name}", info["task_src"])
+            assert spec and spec.loader, f"Could not load task module {info['task_src']}"
+            mod = module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            task_cls = getattr(mod, info["task_qn"])
 
         # load Config class
-        spec2 = spec_from_file_location(f"_judo_cfg_{name}", info["cfg_src"])
-        assert spec2 is not None, f"Could not load config module {info['cfg_src']}"
-        mod2 = module_from_spec(spec2)
-        assert spec2.loader is not None, f"Could not load config module {info['cfg_src']}"
-        spec2.loader.exec_module(mod2)
-        cfg_cls = getattr(mod2, info["cfg_qn"])
+        cfg_mod = info.get("cfg_mod")
+        if cfg_mod and not cfg_mod.startswith("__main__"):
+            mod2 = importlib.import_module(cfg_mod)
+            cfg_cls = getattr(mod2, info["cfg_qn"])
+        else:
+            spec2 = spec_from_file_location(f"_judo_cfg_{name}", info["cfg_src"])
+            assert spec2 and spec2.loader, f"Could not load config module {info['cfg_src']}"
+            mod2 = module_from_spec(spec2)
+            spec2.loader.exec_module(mod2)
+            cfg_cls = getattr(mod2, info["cfg_qn"])
 
         _registered_tasks[name] = (task_cls, cfg_cls)
 
