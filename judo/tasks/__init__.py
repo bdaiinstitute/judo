@@ -30,31 +30,41 @@ _builtin_names = set(_registered_tasks.keys())
 
 # set a run ID for this process that is used to persist programmatic registrations
 _run_id = os.environ.get("JUDO_TASK_RUN_ID")
-if _run_id is None:
+_new_run = _run_id is None
+if _new_run:
     _run_id = uuid.uuid4().hex
     os.environ["JUDO_TASK_RUN_ID"] = _run_id
-    _REGISTRY_PATH = Path(f"/tmp/judo_tasks_{_run_id}.json")
+_CUSTOM_REGISTRY_PATH = Path(f"/tmp/judo_tasks_{_run_id}.json")
 
-    def _cleanup_registry_file() -> None:
-        """Remove the ephemeral registry file on exit."""
+# remove any potential stale judo_tasks_*.json files
+for old in _CUSTOM_REGISTRY_PATH.parent.glob("judo_tasks_*.json"):
+    if old.name != _CUSTOM_REGISTRY_PATH.name:
         try:
-            _REGISTRY_PATH.unlink()
-        except FileNotFoundError:
+            old.unlink()
+        except OSError:
             pass
 
-    atexit.register(_cleanup_registry_file)
-else:
-    _REGISTRY_PATH = Path(f"/tmp/judo_tasks_{_run_id}.json")  # subsequent imports will use the same file
 
-_lock = threading.Lock()
+# register a cleanup function to remove the file on exit
+def _cleanup_registry_file() -> None:
+    """Remove the ephemeral registry file on exit of the main."""
+    try:
+        _CUSTOM_REGISTRY_PATH.unlink()
+    except FileNotFoundError:
+        pass
+
+
+atexit.register(_cleanup_registry_file)
+
+_registry_lock = threading.Lock()
 
 
 def _load_ephemeral_registry() -> None:
     """On import, pull in any user-registered tasks from the temp file."""
-    if not _REGISTRY_PATH.is_file():
+    if not _CUSTOM_REGISTRY_PATH.is_file():
         return
     try:
-        data = json.loads(_REGISTRY_PATH.read_text())
+        data = json.loads(_CUSTOM_REGISTRY_PATH.read_text())
     except Exception:
         return
 
@@ -80,7 +90,7 @@ def _load_ephemeral_registry() -> None:
 
 def _persist_ephemeral_registry() -> None:
     """After any register_task(), write the current state of the registry to disk."""
-    with _lock:
+    with _registry_lock:
         out: Dict[str, Dict[str, str]] = {}
         for name, (task_cls, cfg_cls) in _registered_tasks.items():
             if name in _builtin_names:
@@ -94,8 +104,8 @@ def _persist_ephemeral_registry() -> None:
                     "cfg_src": cfg_src,
                     "cfg_qn": cfg_cls.__qualname__,
                 }
-        _REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        _REGISTRY_PATH.write_text(json.dumps(out, indent=2))
+        _CUSTOM_REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _CUSTOM_REGISTRY_PATH.write_text(json.dumps(out, indent=2))
 
 
 # load any ephemeral registrations on import
