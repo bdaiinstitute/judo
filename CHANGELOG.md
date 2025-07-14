@@ -1,3 +1,8 @@
+# v0.0.4
+
+## Fixed
+* Fixed bug after spec changes where unnamed geoms were causing `judo` to crash (@alberthli, #72)
+
 # v0.0.3
 
 ## Added
