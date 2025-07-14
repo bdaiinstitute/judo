@@ -295,45 +295,49 @@ def test_remove() -> None:
     # would require inspection of ViserServer's scene state.
 
 
-@pytest.mark.parametrize(
-    "xml, expected_bodies, expected_geoms",
-    [
-        (
-            # all unnamed
-            """
-        <mujoco>
-          <worldbody>
-            <body><geom type="sphere" size=".1"/></body>
-            <body><geom type="sphere" size=".1"/></body>
-          </worldbody>
-        </mujoco>
-        """,
-            ["JUDO_BODY_0", "JUDO_BODY_1"],
-            ["JUDO_GEOM_0", "JUDO_GEOM_1"],
-        ),
-        (
-            # mixed names
-            """
-        <mujoco>
-          <worldbody>
-            <body name="body_0"><geom type="sphere" size=".1"/></body>
-            <body><geom name="geom_0" type="sphere" size=".1"/></body>
-            <body><geom type="sphere" size=".1"/></body>
-          </worldbody>
-        </mujoco>
-        """,
-            ["body_0", "JUDO_BODY_0", "JUDO_BODY_1"],
-            ["JUDO_GEOM_0", "geom_0", "JUDO_GEOM_1"],
-        ),
-    ],
-)
-def test_body_and_geom_naming(xml: str, expected_bodies: list[str], expected_geoms: list[str]) -> None:
+@pytest.fixture
+def unnamed_case() -> tuple[str, list[str], list[str]]:
+    """Fixture for XML case where all bodies/geoms are unnamed."""
+    xml = """
+    <mujoco>
+      <worldbody>
+        <body><geom type="sphere" size=".1"/></body>
+        <body><geom type="sphere" size=".1"/></body>
+      </worldbody>
+    </mujoco>
+    """
+    expected_bodies = ["JUDO_BODY_0", "JUDO_BODY_1"]
+    expected_geoms = ["JUDO_GEOM_0", "JUDO_GEOM_1"]
+    return xml, expected_bodies, expected_geoms
+
+
+@pytest.fixture
+def mixed_case() -> tuple[str, list[str], list[str]]:
+    """Fixture for case where some bodies/geoms are unnamed."""
+    xml = """
+    <mujoco>
+      <worldbody>
+        <body name="body_0"><geom type="sphere" size=".1"/></body>
+        <body><geom name="geom_0" type="sphere" size=".1"/></body>
+        <body><geom type="sphere" size=".1"/></body>
+      </worldbody>
+    </mujoco>
+    """
+    expected_bodies = ["body_0", "JUDO_BODY_0", "JUDO_BODY_1"]
+    expected_geoms = ["JUDO_GEOM_0", "geom_0", "JUDO_GEOM_1"]
+    return xml, expected_bodies, expected_geoms
+
+
+def test_body_and_geom_naming(
+    unnamed_case: tuple[str, list[str], list[str]], mixed_case: tuple[str, list[str], list[str]]
+) -> None:
     """Tests handling of unnamed bodies/geoms in ViserMjModels."""
-    spec = mujoco.MjSpec.from_string(xml)
-    model = ViserMjModel(viser_server, spec)
+    for xml, expected_bodies, expected_geoms in (unnamed_case, mixed_case):
+        spec = mujoco.MjSpec.from_string(xml)
+        model = ViserMjModel(viser_server, spec)
 
-    # only check the worldbody children
-    bodies = model._spec.bodies[1:]
+        # only check the worldbody children
+        bodies = model._spec.bodies[1:]
 
-    assert [b.name for b in bodies] == expected_bodies
-    assert [g.name for g in spec.geoms] == expected_geoms
+        assert [b.name for b in bodies] == expected_bodies
+        assert [g.name for g in spec.geoms] == expected_geoms
