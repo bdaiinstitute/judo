@@ -292,3 +292,53 @@ def test_remove() -> None:
     assert viser_model._traces == [], "remove did not clear _traces"
     # Note: geometries are removed via their remove() method; further checking
     # would require inspection of ViserServer's scene state.
+
+
+def test_unnamed_geoms() -> None:
+    """Test that model loading works when the XML contains unnamed geoms."""
+    noname_xml = """
+    <mujoco>
+      <worldbody>
+        <body>
+          <geom type="sphere" size=".1"/>
+        </body>
+        <body>
+          <geom type="sphere" size=".1"/>
+        </body>
+      </worldbody>
+    </mujoco>
+    """
+    noname_spec = mujoco.MjSpec.from_string(noname_xml)
+    noname_viser_model = ViserMjModel(viser_server, noname_spec)
+
+    for body_index, body in enumerate(noname_viser_model._spec.bodies[1:]):
+        assert body.name == f"JUDO_BODY_{body_index}"
+
+    for geom_index, geom in enumerate(noname_viser_model._spec.geoms):
+        assert geom.name == f"JUDO_GEOM_{geom_index}"
+
+    mixed_name_xml = """
+    <mujoco>
+      <worldbody>
+        <body name="body_0">
+          <geom type="sphere" size=".1" />
+        </body>
+        <body>
+          <geom name="geom_0" type="sphere" size=".1"/>
+        </body>
+        <body>
+          <geom type="sphere" size=".1"/>
+        </body>
+      </worldbody>
+    </mujoco>
+    """
+    BODY_NAMES = ["body_0", "JUDO_BODY_0", "JUDO_BODY_1"]
+    GEOM_NAMES = ["JUDO_GEOM_0", "geom_0", "JUDO_GEOM_1"]
+    mixed_name_spec = mujoco.MjSpec.from_string(mixed_name_xml)
+    mixed_name_viser_model = ViserMjModel(viser_server, mixed_name_spec)
+
+    for body_index, body in enumerate(mixed_name_viser_model._spec.bodies[1:]):
+        assert body.name == BODY_NAMES[body_index]
+
+    for geom_index, geom in enumerate(mixed_name_viser_model._spec.geoms):
+        assert geom.name == GEOM_NAMES[geom_index]
