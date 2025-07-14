@@ -336,8 +336,18 @@ def test_body_and_geom_naming(
         spec = mujoco.MjSpec.from_string(xml)
         model = ViserMjModel(viser_server, spec)
 
-        # only check the worldbody children
+        # Only check the worldbody children.
         bodies = model._spec.bodies[1:]
 
+        # Check the MjSpec is mutated correctly.
         assert [b.name for b in bodies] == expected_bodies
         assert [g.name for g in spec.geoms] == expected_geoms
+
+        # Check the ViserMjModel gets parsed properly.
+        expected_geom_names = [
+            f"{body_name}/geom_{geom_name}"
+            for (body_name, geom_name) in zip(expected_bodies, expected_geoms, strict=True)
+        ]
+        assert [b.name for b in model._bodies[1:]] == expected_bodies
+        model_geom_names = [g.name for g in model._geoms[1:]]
+        assert model_geom_names == expected_geom_names
