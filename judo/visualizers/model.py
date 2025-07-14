@@ -66,12 +66,12 @@ class ViserMjModel:
                 body.name = body_name
                 _body_placeholder_idx += 1
 
-            for geom in self._spec.geoms:
-                geom_name = geom.name
-                if not geom_name:  # if geom has no name, use a placeholder.
-                    geom_name = f"JUDO_GEOM_{_geom_placeholder_idx}"
-                    geom.name = geom_name
-                    _geom_placeholder_idx += 1
+        for geom in self._spec.geoms:
+            geom_name = geom.name
+            if not geom_name:  # if geom has no name, use a placeholder.
+                geom_name = f"JUDO_GEOM_{_geom_placeholder_idx}"
+                geom.name = geom_name
+                _geom_placeholder_idx += 1
 
         self._model = spec.compile()
 
@@ -89,7 +89,7 @@ class ViserMjModel:
             body_name = body.name
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
-            for geom in self._spec.geoms:
+            for geom in body.geoms:
                 geom_name = f"{body_name}/geom_{geom.name}"
                 if geom_exclude_substring and geom_exclude_substring in geom_name:
                     continue
