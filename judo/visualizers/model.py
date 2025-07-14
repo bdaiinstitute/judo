@@ -62,14 +62,14 @@ class ViserMjModel:
             # Sharp edge: not using the tree structure of the kinematics ...
             body_name = body.name
             if not body_name:
-                body_name = f"body_{_body_placeholder_idx}"
+                body_name = f"JUDO_BODY_{_body_placeholder_idx}"
                 body.name = body_name
                 _body_placeholder_idx += 1
 
             for geom in self._spec.geoms:
                 geom_name = geom.name
                 if not geom_name:  # if geom has no name, use a placeholder.
-                    geom_name = f"{_geom_placeholder_idx}"
+                    geom_name = f"JUDO_GEOM_{_geom_placeholder_idx}"
                     geom.name = geom_name
                     _geom_placeholder_idx += 1
 
