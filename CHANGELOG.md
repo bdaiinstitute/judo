@@ -1,3 +1,8 @@
+# v0.0.4
+
+## Dev
+Bump version to 0.0.4 in pyproject.toml (@alberthli, #73)
+
 # v0.0.3
 
 ## Added
