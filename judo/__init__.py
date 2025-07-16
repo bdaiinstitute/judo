@@ -4,3 +4,4 @@ from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 MODEL_PATH = PACKAGE_ROOT / "models"
+TEST_PATH = PACKAGE_ROOT.parent / "tests"

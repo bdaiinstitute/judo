@@ -108,42 +108,28 @@ class FR3Pick(Task[FR3PickConfig]):
         """Initializes the LEAP cube rotation task."""
         super().__init__(model_path, sim_model_path=sim_model_path)
         self.reset_command = np.array([0, 0, 0, -1.57079, 0, 1.57079, -0.7853, 0.0])
-
         # object indices
-        self.obj_pos_adr = self.model.jnt_qposadr[self.model.joint("object_joint").id]
+        self.obj_pos_adr = self.get_joint_position_start_index("object_joint")
         self.obj_pos_slice = slice(self.obj_pos_adr, self.obj_pos_adr + 3)
 
-        obj_vel_adr = self.model.nq + self.model.jnt_dofadr[self.model.joint("object_joint").id]
+        obj_vel_adr = self.get_joint_velocity_start_index("object_joint")
         self.obj_vel_slice = slice(obj_vel_adr, obj_vel_adr + 3)
 
         obj_angvel_adr = obj_vel_adr + 3
         self.obj_angvel_slice = slice(obj_angvel_adr, obj_angvel_adr + 3)
 
         # robot indices
-        arm_pos_adr = self.model.jnt_qposadr[self.model.joint("fr3_joint1").id]
+        arm_pos_adr = self.get_joint_position_start_index("fr3_joint1")
         self.arm_pos_slice = slice(arm_pos_adr, arm_pos_adr + 9)  # 7 + 2 dofs for the gripper
 
         # sensors
-        self.left_finger_obj_sensor = self.model.sensor("left_finger_obj")
-        self.left_finger_obj_adr = self.left_finger_obj_sensor.adr[0]
-
-        self.right_finger_obj_sensor = self.model.sensor("right_finger_obj")
-        self.right_finger_obj_adr = self.right_finger_obj_sensor.adr[0]
-
-        self.left_finger_table_sensor = self.model.sensor("left_finger_table")
-        self.left_finger_table_adr = self.left_finger_table_sensor.adr[0]
-
-        self.right_finger_table_sensor = self.model.sensor("right_finger_table")
-        self.right_finger_table_adr = self.right_finger_table_sensor.adr[0]
-
-        self.grasp_site_sensor = self.model.sensor("trace_grasp_site")
-        self.grasp_site_adr = self.grasp_site_sensor.adr[0]
-
-        self.obj_table_sensor = self.model.sensor("obj_table")
-        self.obj_table_adr = self.obj_table_sensor.adr[0]
-
-        self.ee_z_sensor = self.model.sensor("ee_z")
-        self.ee_z_adr = self.ee_z_sensor.adr[0]
+        self.left_finger_obj_adr = self.get_sensor_start_index("left_finger_obj")
+        self.right_finger_obj_adr = self.get_sensor_start_index("right_finger_obj")
+        self.left_finger_table_adr = self.get_sensor_start_index("left_finger_table")
+        self.right_finger_table_adr = self.get_sensor_start_index("right_finger_table")
+        self.grasp_site_adr = self.get_sensor_start_index("trace_grasp_site")
+        self.obj_table_adr = self.get_sensor_start_index("obj_table")
+        self.ee_z_adr = self.get_sensor_start_index("ee_z")
         self.ee_z_slice = slice(self.ee_z_adr, self.ee_z_adr + 3)
 
         # metadata that stores the current phase of the task
