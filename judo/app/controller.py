@@ -106,6 +106,7 @@ class ControllerNode(DoraNode):
                     self.task_config,
                     self.optimizer,
                     self.optimizer_config,
+                    rollout_backend=self.rollout_backend,
                 )
 
                 # because the task updated, we need to reinitialize the optimizer
