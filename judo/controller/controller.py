@@ -71,7 +71,12 @@ class Controller:
         if rollout_backend == "mujoco":
             self.rollout_backend = MujocoRolloutBackend(self.model, num_threads=self.optimizer_cfg.num_rollouts)
         elif rollout_backend == "mjwarp":
-            self.rollout_backend = MjwarpRolloutBackend(self.model, num_threads=self.optimizer_cfg.num_rollouts)
+            self.last_num_timesteps = self.num_timesteps
+            self.rollout_backend = MjwarpRolloutBackend(
+                self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+                num_timesteps=self.num_timesteps,
+            )
         else:
             raise ValueError(f"Unknown rollout backend: {rollout_backend}")
 
@@ -148,7 +153,10 @@ class Controller:
         nominal_knots_normalized = self.action_normalizer.normalize(nominal_knots)
 
         # resizing any variables due to changes in the GUI
-        if self.rollout_backend.num_threads != self.optimizer_cfg.num_rollouts:
+        if isinstance(self.rollout_backend, MjwarpRolloutBackend) and self.last_num_timesteps != self.num_timesteps:
+            self.rollout_backend.update(self.optimizer_cfg.num_rollouts, num_timesteps=self.num_timesteps)
+            self.last_num_timesteps = self.num_timesteps
+        elif self.rollout_backend.num_threads != self.optimizer_cfg.num_rollouts:
             self.rollout_backend.update(self.optimizer_cfg.num_rollouts)
 
         normalizer_cls = normalizer_registry.get(self.action_normalizer_type)

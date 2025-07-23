@@ -4,13 +4,14 @@ import mujoco_warp as mjw
 import numpy as np
 import warp as wp
 from mujoco import MjData, MjModel
+from mujoco_warp._src.types import IntegratorType
 
 from judo.rollout.base import AbstractRolloutBackend
 from judo.utils.patch import patch_mj_ccd_iterations
 
 # TEMPORARY: Patch MJ_CCD_ITERATIONS globally for the session
 # Once this PR is resolved, remove the monkey patch logic: https://github.com/google-deepmind/mujoco_warp/issues/456
-patch_mj_ccd_iterations(32)
+patch_mj_ccd_iterations(24)
 
 
 @wp.kernel
@@ -26,110 +27,114 @@ def broadcast_rows(
 class MjwarpRolloutBackend(AbstractRolloutBackend):
     """The rollout backend using MuJoCo Warp."""
 
-    def __init__(self, model: MjModel, num_threads: int) -> None:
+    def __init__(self, model: MjModel, num_threads: int, num_timesteps: int) -> None:
         """Initialize the backend with a number of threads."""
         super().__init__(num_threads)
         self.mjm = model
         self.mjd = MjData(model)
         self.mwm = mjw.put_model(self.mjm)
-        self.setup_mjwarp_backend(num_threads)
+        self.mwm.opt.ls_parallel = True  # critical for speed
+        self.mwm.opt.integrator = IntegratorType.IMPLICITFAST
+        self.setup_mjwarp_backend(num_threads, num_timesteps)
+        self.mwd.time = self.mjd.time  # ensure time is initialized correctly after warmups
 
-    def setup_mjwarp_backend(self, num_threads: int) -> None:
+    def setup_mjwarp_backend(self, num_threads: int, num_timesteps: int) -> None:
         """Setup the mujoco warp backend."""
+        self.num_threads = num_threads
+        self.num_steps = num_timesteps
         self.mwd = mjw.put_data(
             self.mjm,
             self.mjd,
             nworld=num_threads,
-            nconmax=100000,
-            njmax=400000,
+            nconmax=10000,
+            njmax=40000,
         )  # TODO: expose these options as parameters in a rollout backend
-        self.forward_graph = self.create_mjw_forward_graph(self.mwm, self.mwd)
-        self.step_graph = self.create_mjw_step_graph(self.mwm, self.mwd)
-        self.num_threads = num_threads
+        self.reset_graph = self.create_reset_graph(self.mwm, self.mwd)
+        self.rollout_graph = self.create_rollout_graph(self.mwm, self.mwd)
 
-    def create_mjw_forward_graph(self, m: mjw.Model, d: mjw.Data) -> wp.context.Graph:
-        """Create a CUDA graph for MuJoCo Warp forward function.
+    def create_reset_graph(self, m: mjw.Model, d: mjw.Data) -> wp.context.Graph:
+        """Create a CUDA graph for resetting MuJoCo Warp data.
 
         Args:
             m: Mujoco Warp model.
             d: Mujoco Warp data.
-
-        Returns:
-            forward_graph: A CUDA graph that can be used to perform multiple forward passes efficiently.
         """
+        # create qpos and qvel buffers
+        self.qpos_buffer = wp.empty(m.nq, dtype=wp.float32)  # type: ignore
+        self.qvel_buffer = wp.empty(m.nv, dtype=wp.float32)  # type: ignore
+
+        # warmup
         mjw.forward(m, d)
         mjw.forward(m, d)
+
+        # capture reset graph
         with wp.ScopedCapture() as capture:
+            wp.launch(
+                broadcast_rows,
+                dim=(self.mwd.qpos.shape[0], self.mwd.qpos.shape[1]),
+                inputs=[self.mwd.qpos, self.qpos_buffer],
+                device=self.mwd.qpos.device,
+            )
+            wp.launch(
+                broadcast_rows,
+                dim=(self.mwd.qvel.shape[0], self.mwd.qvel.shape[1]),
+                inputs=[self.mwd.qvel, self.qvel_buffer],
+                device=self.mwd.qvel.device,
+            )
             mjw.forward(m, d)
-        forward_graph = capture.graph
-        return forward_graph
+            self.mwd.qfrc_constraint.zero_()  # zero out constraint forces
+        return capture.graph
 
-    def create_mjw_step_graph(self, m: mjw.Model, d: mjw.Data) -> wp.context.Graph:
-        """Create a CUDA graph for MuJoCo Warp step function.
+    def create_rollout_graph(self, m: mjw.Model, d: mjw.Data) -> wp.context.Graph:
+        """Create a CUDA graph for the entire rollout, including recording.
 
         Args:
             m: Mujoco Warp model.
             d: Mujoco Warp data.
-
-        Returns:
-            step_graph: A CUDA graph that can be used to perform multiple steps efficiently.
         """
+        # create buffers
+        self.states_buffer = wp.empty(
+            (self.num_threads, self.num_steps, m.nq + m.nv),
+            dtype=wp.float32,  # type: ignore
+        )
+        self.sensors_buffer = wp.empty(
+            (self.num_threads, self.num_steps, m.nsensordata),
+            dtype=wp.float32,  # type: ignore
+        )
+        self.controls_buffer = wp.empty(
+            (self.num_threads, self.num_steps, m.nu),
+            dtype=wp.float32,  # type: ignore
+        )
+
+        # warmup before graph capture
         mjw.step(m, d)
         mjw.step(m, d)
+
         with wp.ScopedCapture() as capture:
-            mjw.step(m, d)
-        step_graph = capture.graph
-        return step_graph
+            for step in range(self.num_steps):
+                # perform a control step
+                wp.copy(d.ctrl, self.controls_buffer[:, step, :])
+                mjw.step(m, d)
 
-    def reset_mjw_data(self, qpos: np.ndarray, qvel: np.ndarray) -> None:
-        """Resets MuJoCo Warp data to clear any intermediates.
-
-        Args:
-            qpos: Position vector to set for all worlds of shape (nq,).
-            qvel: Velocity vector to set for all worlds of shape (nv,).
-        """
-        wp.launch(
-            broadcast_rows,
-            dim=(self.mwd.qpos.shape[0], self.mwd.qpos.shape[1]),
-            inputs=[self.mwd.qpos, wp.array(qpos, dtype=wp.float32)],
-            device=self.mwd.qpos.device,
-        )
-        wp.launch(
-            broadcast_rows,
-            dim=(self.mwd.qvel.shape[0], self.mwd.qvel.shape[1]),
-            inputs=[self.mwd.qvel, wp.array(qvel, dtype=wp.float32)],
-            device=self.mwd.qvel.device,
-        )
-        wp.capture_launch(self.forward_graph)  # perform forward pass
-        self.mwd.qfrc_constraint.zero_()  # zero out constraint forces
+                # record the result of the step
+                wp.copy(self.states_buffer[:, step, : m.nq], d.qpos)  # type: ignore
+                wp.copy(self.states_buffer[:, step, m.nq :], d.qvel)  # type: ignore
+                wp.copy(self.sensors_buffer[:, step, :], d.sensordata)  # type: ignore
+        return capture.graph
 
     def rollout(self, x0: np.ndarray, controls: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """Conduct a rollout depending on the backend."""
-        num_threads, num_steps, _ = controls.shape  # type: ignore
-        states = wp.empty(
-            (num_threads, num_steps, self.mjm.nq + self.mjm.nv),
-            dtype=wp.float32,  # type: ignore  # typed as float in source code...
-        )
-        sensors = wp.empty(
-            (num_threads, num_steps, self.mjm.nsensordata),
-            dtype=wp.float32,  # type: ignore  # typed as float in source code...
-        )
+        """Conduct a rollout using the MuJoCo Warp backend."""
+        # copy qpos, vel, and controls to pre-allocated buffers
+        wp.copy(self.qpos_buffer, wp.array(x0[: self.mjm.nq], dtype=wp.float32))
+        wp.copy(self.qvel_buffer, wp.array(x0[self.mjm.nq :], dtype=wp.float32))
+        wp.copy(self.controls_buffer, wp.array(controls, dtype=wp.float32))
 
-        # set data
-        self.reset_mjw_data(x0[: self.mwm.nq], x0[self.mwm.nq :])
-        us = wp.array(controls, dtype=wp.float32)  # type: ignore
+        # reset and rollout
+        wp.capture_launch(self.reset_graph)
+        wp.capture_launch(self.rollout_graph)
 
-        for step in range(num_steps):
-            wp.copy(self.mwd.ctrl, us[:, step, :])  # type: ignore
-            wp.capture_launch(self.step_graph)  # perform step
+        return self.states_buffer.numpy(), self.sensors_buffer.numpy()
 
-            # record result of step
-            wp.copy(states[:, step, : self.mjm.nq], self.mwd.qpos)  # type: ignore
-            wp.copy(states[:, step, self.mjm.nq :], self.mwd.qvel)  # type: ignore
-            wp.copy(sensors[:, step, :], self.mwd.sensordata)  # type: ignore
-
-        return states.numpy(), sensors.numpy()
-
-    def update(self, num_threads: int) -> None:
+    def update(self, num_threads: int, num_timesteps: int | None = None) -> None:
         """Update the backend with a new number of threads."""
-        self.setup_mjwarp_backend(num_threads)
+        self.setup_mjwarp_backend(num_threads, num_timesteps or self.num_steps)
