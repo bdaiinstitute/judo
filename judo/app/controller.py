@@ -2,6 +2,7 @@
 
 import time
 from threading import Lock
+from typing import Literal
 
 import numpy as np
 import pyarrow as pa
@@ -27,6 +28,7 @@ class ControllerNode(DoraNode):
         max_workers: int | None = None,
         task_registration_cfg: DictConfig | None = None,
         optimizer_registration_cfg: DictConfig | None = None,
+        rollout_backend: Literal["mujoco", "mjwarp"] = "mjwarp",
     ) -> None:
         """Initialize the controller node."""
         super().__init__(node_id=node_id, max_workers=max_workers)
@@ -41,6 +43,7 @@ class ControllerNode(DoraNode):
         self.lock = Lock()
         self.available_optimizers = get_registered_optimizers()
         self.available_tasks = get_registered_tasks()
+        self.rollout_backend = rollout_backend
         self.setup(init_task, init_optimizer)
 
     def setup(self, task_name: str, optimizer_name: str) -> None:
@@ -69,6 +72,7 @@ class ControllerNode(DoraNode):
             self.task_config,
             self.optimizer,
             self.optimizer_config,
+            rollout_backend=self.rollout_backend,
         )
 
         # Initialize the task data.

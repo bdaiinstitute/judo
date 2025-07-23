@@ -10,7 +10,7 @@ from scipy.interpolate import interp1d
 from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
-from judo.rollout import MujocoRolloutBackend
+from judo.rollout import MjwarpRolloutBackend, MujocoRolloutBackend
 from judo.tasks.base import Task, TaskConfig
 from judo.utils.normalization import (
     IdentityNormalizer,
@@ -46,7 +46,7 @@ class Controller:
         task_config: TaskConfig,
         optimizer: Optimizer,
         optimizer_config: OptimizerConfig,
-        rollout_backend: Literal["mujoco"] = "mujoco",
+        rollout_backend: Literal["mujoco", "mjwarp"] = "mujoco",
     ) -> None:
         """Initialize the controller.
 
@@ -70,6 +70,8 @@ class Controller:
 
         if rollout_backend == "mujoco":
             self.rollout_backend = MujocoRolloutBackend(self.model, num_threads=self.optimizer_cfg.num_rollouts)
+        elif rollout_backend == "mjwarp":
+            self.rollout_backend = MjwarpRolloutBackend(self.model, num_threads=self.optimizer_cfg.num_rollouts)
         else:
             raise ValueError(f"Unknown rollout backend: {rollout_backend}")
 
