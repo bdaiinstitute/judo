@@ -105,19 +105,18 @@ class MjwarpRolloutBackend(AbstractRolloutBackend):
 
     def rollout(self, x0: np.ndarray, controls: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Conduct a rollout depending on the backend."""
-        _, num_steps, _ = controls.shape  # type: ignore
+        num_threads, num_steps, _ = controls.shape  # type: ignore
         states = wp.empty(
-            (controls.shape[0], num_steps, self.mjm.nq + self.mjm.nv),
+            (num_threads, num_steps, self.mjm.nq + self.mjm.nv),
             dtype=wp.float32,  # type: ignore  # typed as float in source code...
         )
         sensors = wp.empty(
-            (controls.shape[0], num_steps, self.mjm.nsensordata),
+            (num_threads, num_steps, self.mjm.nsensordata),
             dtype=wp.float32,  # type: ignore  # typed as float in source code...
         )
 
         # set data
         self.reset_mjw_data(x0[: self.mwm.nq], x0[self.mwm.nq :])
-
         us = wp.array(controls, dtype=wp.float32)  # type: ignore
 
         for step in range(num_steps):
