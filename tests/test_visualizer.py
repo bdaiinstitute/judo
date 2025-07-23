@@ -2,6 +2,7 @@
 
 import mujoco
 import numpy as np
+import pytest
 from trimesh.creation import box
 from viser import ViserServer
 
@@ -292,3 +293,61 @@ def test_remove() -> None:
     assert viser_model._traces == [], "remove did not clear _traces"
     # Note: geometries are removed via their remove() method; further checking
     # would require inspection of ViserServer's scene state.
+
+
+@pytest.fixture
+def unnamed_case() -> tuple[str, list[str], list[str]]:
+    """Fixture for XML case where all bodies/geoms are unnamed."""
+    xml = """
+    <mujoco>
+      <worldbody>
+        <body><geom type="sphere" size=".1"/></body>
+        <body><geom type="sphere" size=".1"/></body>
+      </worldbody>
+    </mujoco>
+    """
+    expected_bodies = ["JUDO_BODY_0", "JUDO_BODY_1"]
+    expected_geoms = ["JUDO_GEOM_0", "JUDO_GEOM_1"]
+    return xml, expected_bodies, expected_geoms
+
+
+@pytest.fixture
+def mixed_case() -> tuple[str, list[str], list[str]]:
+    """Fixture for case where some bodies/geoms are unnamed."""
+    xml = """
+    <mujoco>
+      <worldbody>
+        <body name="body_0"><geom type="sphere" size=".1"/></body>
+        <body><geom name="geom_0" type="sphere" size=".1"/></body>
+        <body><geom type="sphere" size=".1"/></body>
+      </worldbody>
+    </mujoco>
+    """
+    expected_bodies = ["body_0", "JUDO_BODY_0", "JUDO_BODY_1"]
+    expected_geoms = ["JUDO_GEOM_0", "geom_0", "JUDO_GEOM_1"]
+    return xml, expected_bodies, expected_geoms
+
+
+def test_body_and_geom_naming(
+    unnamed_case: tuple[str, list[str], list[str]], mixed_case: tuple[str, list[str], list[str]]
+) -> None:
+    """Tests handling of unnamed bodies/geoms in ViserMjModels."""
+    for xml, expected_bodies, expected_geoms in (unnamed_case, mixed_case):
+        spec = mujoco.MjSpec.from_string(xml)
+        model = ViserMjModel(viser_server, spec)
+
+        # Only check the worldbody children.
+        bodies = model._spec.bodies[1:]
+
+        # Check the MjSpec is mutated correctly.
+        assert [b.name for b in bodies] == expected_bodies
+        assert [g.name for g in spec.geoms] == expected_geoms
+
+        # Check the ViserMjModel gets parsed properly.
+        expected_geom_names = [
+            f"{body_name}/geom_{geom_name}"
+            for (body_name, geom_name) in zip(expected_bodies, expected_geoms, strict=True)
+        ]
+        assert [b.name for b in model._bodies[1:]] == expected_bodies
+        model_geom_names = [g.name for g in model._geoms[1:]]
+        assert model_geom_names == expected_geom_names
