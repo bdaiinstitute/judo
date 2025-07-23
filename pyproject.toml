@@ -53,6 +53,13 @@ allow-direct-references = true
 packages = ["judo"]
 
 [project.optional-dependencies]
+# TODO: stabilize versions
+mjwarp = [
+    "mujoco @ https://py.mujoco.org/mujoco/mujoco-3.3.5.dev785536018-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "warp-lang @ https://pypi.nvidia.com/warp-lang/warp_lang-1.9.0.dev20250722-py3-none-manylinux_2_28_x86_64.whl#sha256=34ac2b4e5db5b7b1765024579ba7cc264276cc040e4d5b89adf2a8d156dd2a04",
+    "mujoco-warp @ git+https://github.com/google-deepmind/mujoco_warp.git",
+    "packaging",
+]
 docs = [
     "furo",
     "m2r2",
@@ -62,7 +69,7 @@ docs = [
     "sphinxcontrib-programoutput-rai",
 ]
 dev = [
-    "judo-rai[docs]",
+    "judo-rai[docs, mjwarp]",
     "pre-commit",
     "pybind11-stubgen",
     "pyright",
@@ -178,4 +185,5 @@ judo-rai = { path = ".", editable = true }
 [tool.pixi.environments]
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
-dev = { features = ["dev", "docs"], solve-group = "default" }
+mjwarp = { features = ["mjwarp"], solve-group = "default" }
+dev = { features = ["dev", "docs", "mjwarp"], solve-group = "default" }
