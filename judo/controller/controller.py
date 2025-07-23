@@ -18,7 +18,7 @@ from judo.utils.normalization import (
     make_normalizer,
     normalizer_registry,
 )
-from judo.utils.rollout import RolloutBackend, make_model_data_pairs
+from judo.utils.rollout import MujocoRolloutBackend
 from judo.visualizers.utils import get_trace_sensors
 
 
@@ -67,9 +67,11 @@ class Controller:
         self.optimizer_cfg = optimizer_config
 
         self.model = task.model
-        self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        if rollout_backend == "mujoco":
+            self.rollout_backend = MujocoRolloutBackend(self.model, num_threads=self.optimizer_cfg.num_rollouts)
+        else:
+            raise ValueError(f"Unknown rollout backend: {rollout_backend}")
 
         self.action_normalizer = self._init_action_normalizer()
 
@@ -144,8 +146,7 @@ class Controller:
         nominal_knots_normalized = self.action_normalizer.normalize(nominal_knots)
 
         # resizing any variables due to changes in the GUI
-        if len(self.model_data_pairs) != self.optimizer_cfg.num_rollouts:
-            self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
+        if self.rollout_backend.num_threads != self.optimizer_cfg.num_rollouts:
             self.rollout_backend.update(self.optimizer_cfg.num_rollouts)
 
         normalizer_cls = normalizer_registry.get(self.action_normalizer_type)
@@ -184,11 +185,7 @@ class Controller:
 
             # Roll out dynamics with action sequences.
             self.task.pre_rollout(curr_state, self.task_cfg)
-            self.states, self.sensors = self.rollout_backend.rollout(
-                self.model_data_pairs,
-                curr_state,
-                self.rollout_controls,
-            )
+            self.states, self.sensors = self.rollout_backend.rollout(curr_state, self.rollout_controls)
             self.task.post_rollout(
                 self.states,
                 self.sensors,
