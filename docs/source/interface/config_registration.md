@@ -11,6 +11,12 @@ if __name__ == "__main__":
     app()
 ```
 
+> ⚠️ **Warning** ⚠️
+>
+> We highly recommend using proper Python package structure when defining your custom tasks/optimizers, or to at least stay away from relative imports in your code. This can give Judo problems when trying to locate your custom module for registration!
+>
+> Further, The above method for custom task/optimizer/config registration only works in the single-machine case due to the way we're handling multi-processing. For the multi-machine case, we recommend using our `hydra`-based config management system, which sends a copy of the configuration to each individual machine. This also allows you to keep using the `judo` CLI.
+
 If you instead want to use the `judo` CLI command to start the app, you can register the task and optimizer using a `hydra` config. We provide a convenient interface to do so. Consider this example:
 ```yaml
 defaults:
