@@ -10,6 +10,7 @@ from scipy.interpolate import interp1d
 from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
+from judo.rollout import MujocoRolloutBackend
 from judo.tasks.base import Task, TaskConfig
 from judo.utils.normalization import (
     IdentityNormalizer,
@@ -18,7 +19,6 @@ from judo.utils.normalization import (
     make_normalizer,
     normalizer_registry,
 )
-from judo.utils.rollout import MujocoRolloutBackend
 from judo.visualizers.utils import get_trace_sensors
 
 
