@@ -5,7 +5,7 @@ import inspect
 import json
 import threading
 from importlib.util import module_from_spec, spec_from_file_location
-from typing import Dict, Tuple, Type
+from typing import Type
 
 from judo.tasks.base import Task, TaskConfig
 from judo.tasks.caltech_leap_cube import CaltechLeapCube, CaltechLeapCubeConfig
@@ -16,7 +16,7 @@ from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
 from judo.tasks.leap_cube_down import LeapCubeDown, LeapCubeDownConfig
 from judo.utils.registration import get_run_id, make_ephemeral_path
 
-_registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
+_registered_tasks: dict[str, tuple[Type[Task], Type[TaskConfig]]] = {
     "cylinder_push": (CylinderPush, CylinderPushConfig),
     "cartpole": (Cartpole, CartpoleConfig),
     "fr3_pick": (FR3Pick, FR3PickConfig),
@@ -73,7 +73,7 @@ def _load_ephemeral_registry() -> None:
 def _persist_ephemeral_registry() -> None:
     """After any register_task(), write the current state of the registry to disk."""
     with _registry_lock:
-        out: Dict[str, Dict[str, str]] = {}
+        out: dict[str, dict[str, str]] = {}
         for name, (task_cls, cfg_cls) in _registered_tasks.items():
             if name in _builtin_names:
                 continue
@@ -94,7 +94,7 @@ def _persist_ephemeral_registry() -> None:
 _load_ephemeral_registry()
 
 
-def get_registered_tasks() -> Dict[str, Tuple[Type[Task], Type[TaskConfig]]]:
+def get_registered_tasks() -> dict[str, tuple[Type[Task], Type[TaskConfig]]]:
     """Get the currently registered tasks."""
     return _registered_tasks
 
