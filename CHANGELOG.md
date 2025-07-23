@@ -1,3 +1,13 @@
+# v0.1.0
+This release adds the much-requested MuJoCo Warp rollout backend, which allows GPU-accelerated rollouts in Judo!
+
+> ⚠️ **Warning** ⚠️
+> This is an **experimental** feature that we are releasing because we think it is useful even if it is not fully polished.
+
+## Added
+* MuJoCo Warp rollout backend (@alberthli, #78)
+    * Additionally slightly refactors the existing rollout backend API to make it more generalizable.
+
 # v0.0.4
 
 ## Fixed
