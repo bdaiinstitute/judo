@@ -13,9 +13,9 @@ from judo.rollout.base import AbstractRolloutBackend
 class MujocoRolloutBackend(AbstractRolloutBackend):
     """The rollout backend using multithreaded Mujoco C."""
 
-    def __init__(self, model: MjModel, num_threads: int) -> None:
+    def __init__(self, model: MjModel, num_threads: int, num_steps: int) -> None:
         """Initialize the backend with a number of threads."""
-        super().__init__(num_threads)
+        super().__init__(num_threads, num_steps)
         self.model = model
         self.setup_mujoco_backend(num_threads)
 
@@ -61,7 +61,8 @@ class MujocoRolloutBackend(AbstractRolloutBackend):
 
         return out_states, out_sensors
 
-    def update(self, num_threads: int) -> None:
+    def update(self, num_threads: int, num_steps: int) -> None:
         """Update the backend with a new number of threads."""
-        self.rollout_obj.close()
-        self.setup_mujoco_backend(num_threads)
+        if num_threads != self.num_threads:  # ignore num_steps for Mujoco backend
+            self.rollout_obj.close()
+            self.setup_mujoco_backend(num_threads)

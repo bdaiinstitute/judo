@@ -23,9 +23,9 @@ def broadcast_rows(
 class MjwarpRolloutBackend(AbstractRolloutBackend):
     """The rollout backend using MuJoCo Warp."""
 
-    def __init__(self, model: MjModel, num_threads: int, num_timesteps: int) -> None:
+    def __init__(self, model: MjModel, num_threads: int, num_steps: int) -> None:
         """Initialize the backend with a number of threads."""
-        super().__init__(num_threads)
+        super().__init__(num_threads, num_steps)
         self.mjm = model
         self.mjd = MjData(model)
         self.mwm = mjw.put_model(self.mjm)
@@ -55,13 +55,13 @@ class MjwarpRolloutBackend(AbstractRolloutBackend):
         # self.mwm.opt.integrator = IntegratorType.EULER
         self.mwm.opt.disableflags = DisableBit.EULERDAMP  # disable euler damping
         # #####################################################################################################
-        self.setup_mjwarp_backend(num_threads, num_timesteps)
+        self.setup_mjwarp_backend(num_threads, num_steps)
         self.mwd.time = self.mjd.time  # ensure time is initialized correctly after warmups
 
-    def setup_mjwarp_backend(self, num_threads: int, num_timesteps: int) -> None:
+    def setup_mjwarp_backend(self, num_threads: int, num_steps: int) -> None:
         """Setup the mujoco warp backend."""
         self.num_threads = num_threads
-        self.num_steps = num_timesteps
+        self.num_steps = num_steps
         self.mwd = mjw.put_data(
             self.mjm,
             self.mjd,
@@ -155,6 +155,6 @@ class MjwarpRolloutBackend(AbstractRolloutBackend):
 
         return self.states_buffer.numpy(), self.sensors_buffer.numpy()
 
-    def update(self, num_threads: int, num_timesteps: int | None = None) -> None:
+    def update(self, num_threads: int, num_steps: int) -> None:
         """Update the backend with a new number of threads."""
-        self.setup_mjwarp_backend(num_threads, num_timesteps or self.num_steps)
+        self.setup_mjwarp_backend(num_threads, num_steps)

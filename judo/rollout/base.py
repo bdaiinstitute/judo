@@ -8,9 +8,10 @@ import numpy as np
 class AbstractRolloutBackend(ABC):
     """Abstract base class for conducting multithreaded rollouts."""
 
-    def __init__(self, num_threads: int) -> None:
-        """Initialize the backend with a number of threads."""
+    def __init__(self, num_threads: int, num_steps: int) -> None:
+        """Initialize the backend with a number of threads and number of steps."""
         self.num_threads = num_threads
+        self.num_steps = num_steps
 
     @abstractmethod
     def rollout(self, x0: np.ndarray, controls: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -22,6 +23,5 @@ class AbstractRolloutBackend(ABC):
         """
 
     @abstractmethod
-    def update(self, num_threads: int) -> None:
+    def update(self, num_threads: int, num_steps: int) -> None:
         """Update the backend with a new number of threads."""
-        pass
