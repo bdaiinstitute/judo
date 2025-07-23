@@ -2,6 +2,8 @@
 
 ## Fixed
 * Fixed bug after spec changes where unnamed geoms were causing `judo` to crash (@alberthli, @pculbertson, #72)
+* Fixed single-machine programmatic cross-process config registration (@alberthli, #69)
+    * NOTE: this does NOT fix programmatic registrations across machines. If you use a multi-machine setup, we recommend using hydra-based config management.
 
 ## Dev
 Bump version to 0.0.4 in pyproject.toml (@alberthli, #73)
