@@ -1,14 +1,10 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
-import atexit
 import importlib
 import inspect
 import json
-import os
 import threading
-import uuid
 from importlib.util import module_from_spec, spec_from_file_location
-from pathlib import Path
 from typing import Dict, Tuple, Type
 
 from judo.tasks.base import Task, TaskConfig
@@ -18,6 +14,7 @@ from judo.tasks.cylinder_push import CylinderPush, CylinderPushConfig
 from judo.tasks.fr3_pick import FR3Pick, FR3PickConfig
 from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
 from judo.tasks.leap_cube_down import LeapCubeDown, LeapCubeDownConfig
+from judo.utils.registration import get_run_id, make_ephemeral_path
 
 _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
     "cylinder_push": (CylinderPush, CylinderPushConfig),
@@ -30,33 +27,8 @@ _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
 _builtin_names = set(_registered_tasks.keys())
 
 # set a run ID for this process that is used to persist programmatic registrations
-_run_id = os.environ.get("JUDO_TASK_RUN_ID")
-_new_run = _run_id is None
-if _new_run:
-    _run_id = uuid.uuid4().hex
-    os.environ["JUDO_TASK_RUN_ID"] = _run_id
-_CUSTOM_REGISTRY_PATH = Path(f"/tmp/judo_tasks_{_run_id}.json")
-
-# remove any potential stale judo_tasks_*.json files
-for old in _CUSTOM_REGISTRY_PATH.parent.glob("judo_tasks_*.json"):
-    if old.name != _CUSTOM_REGISTRY_PATH.name:
-        try:
-            old.unlink()
-        except OSError:
-            pass
-
-
-# register a cleanup function to remove the file on exit
-def _cleanup_registry_file() -> None:
-    """Remove the ephemeral registry file on exit of the main."""
-    try:
-        _CUSTOM_REGISTRY_PATH.unlink()
-    except FileNotFoundError:
-        pass
-
-
-atexit.register(_cleanup_registry_file)
-
+_run_id = get_run_id()
+_CUSTOM_REGISTRY_PATH = make_ephemeral_path("judo_tasks", _run_id)
 _registry_lock = threading.Lock()
 
 

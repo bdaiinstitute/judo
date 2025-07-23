@@ -1,50 +1,23 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
-import atexit
 import importlib
 import inspect
 import json
-import os
 import threading
-import uuid
 import warnings
 from dataclasses import MISSING, dataclass, fields, is_dataclass
 from importlib.util import module_from_spec, spec_from_file_location
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from judo.utils.registration import get_run_id, make_ephemeral_path
+
 _OVERRIDE_REGISTRY: dict[type, dict[str, Any]] = {}
 
 # like in judo/tasks/__init__.py, we use a run ID to create a temporary file for overrides
-_run_id = os.environ.get("JUDO_TASK_RUN_ID")
-_new_run = _run_id is None
-if _new_run:
-    _run_id = uuid.uuid4().hex
-    os.environ["JUDO_TASK_RUN_ID"] = _run_id
-_OVERRIDES_PATH = Path(f"/tmp/judo_overrides_{_run_id}.json")
-
-# remove any potential stale judo_overrides_*.json files
-for old in _OVERRIDES_PATH.parent.glob("judo_overrides_*.json"):
-    if old.name != _OVERRIDES_PATH.name:
-        try:
-            old.unlink()
-        except OSError:
-            pass
-
-
-# register a cleanup function to remove the file on exit
-def _cleanup_registry_file() -> None:
-    """Remove the ephemeral registry file on exit of the main."""
-    try:
-        _OVERRIDES_PATH.unlink()
-    except FileNotFoundError:
-        pass
-
-
-atexit.register(_cleanup_registry_file)
-
+_run_id = get_run_id()
+_OVERRIDES_PATH = make_ephemeral_path("judo_overrides", _run_id)
 _override_lock = threading.Lock()
 
 
