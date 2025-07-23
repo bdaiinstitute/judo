@@ -4,14 +4,10 @@ import mujoco_warp as mjw
 import numpy as np
 import warp as wp
 from mujoco import MjData, MjModel
-from mujoco_warp._src.types import IntegratorType
+from mujoco_warp._src.types import DisableBit, IntegratorType
 
 from judo.rollout.base import AbstractRolloutBackend
 from judo.utils.patch import patch_mj_ccd_iterations
-
-# TEMPORARY: Patch MJ_CCD_ITERATIONS globally for the session
-# Once this PR is resolved, remove the monkey patch logic: https://github.com/google-deepmind/mujoco_warp/issues/456
-patch_mj_ccd_iterations(24)
 
 
 @wp.kernel
@@ -33,8 +29,32 @@ class MjwarpRolloutBackend(AbstractRolloutBackend):
         self.mjm = model
         self.mjd = MjData(model)
         self.mwm = mjw.put_model(self.mjm)
+
+        # [DEBUG] testing various settings - TODO: expose these properly to a rollout config
+        # #####################################################################################################
+        # TEMPORARY: Patch MJ_CCD_ITERATIONS globally for the session
+        # Once this PR is resolved, remove the monkey patch logic:
+        # https://github.com/google-deepmind/mujoco_warp/issues/456
+        patch_mj_ccd_iterations(24)
+
+        # from mujoco_warp._src.types import BroadphaseFilter, BroadphaseType
+
+        # self.mwm.opt.iterations = 200  # default: 100
+        # self.mwm.opt.ls_iterations = 100  # default: 50
+        self.mwm.opt.is_sparse = True  # critical for speed
         self.mwm.opt.ls_parallel = True  # critical for speed
         self.mwm.opt.integrator = IntegratorType.IMPLICITFAST
+        # self.mwm.opt.tolerance = wp.array([1e-6], dtype=wp.float32)  # type: ignore
+        # self.mwm.opt.broadphase = BroadphaseType.NXN
+        # self.mwm.opt.broadphase_filter = (
+        #     BroadphaseFilter.AABB
+        #     | BroadphaseFilter.OBB
+        #     | BroadphaseFilter.PLANE
+        #     | BroadphaseFilter.SPHERE
+        # )
+        # self.mwm.opt.integrator = IntegratorType.EULER
+        self.mwm.opt.disableflags = DisableBit.EULERDAMP  # disable euler damping
+        # #####################################################################################################
         self.setup_mjwarp_backend(num_threads, num_timesteps)
         self.mwd.time = self.mjd.time  # ensure time is initialized correctly after warmups
 
