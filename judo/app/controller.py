@@ -43,7 +43,7 @@ class ControllerNode(DoraNode):
         self.lock = Lock()
         self.available_optimizers = get_registered_optimizers()
         self.available_tasks = get_registered_tasks()
-        self.rollout_backend = rollout_backend
+        self.rollout_backend: Literal["mujoco", "mjwarp"] = rollout_backend
         self.setup(init_task, init_optimizer)
 
     def setup(self, task_name: str, optimizer_name: str) -> None:
