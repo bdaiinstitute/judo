@@ -56,6 +56,9 @@ jobs:
       id-token: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download wheel artifact
         uses: actions/download-artifact@v4
         with:
@@ -67,9 +70,6 @@ jobs:
         with:
           name: sdist-artifact-${{ github.run_id }}
           path: dist
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Set up Python and cache twine
         uses: actions/setup-python@v5
