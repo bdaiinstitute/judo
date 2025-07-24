@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # get the package path WITHOUT importing judo.__init__
+      # store the model path in an env var
       - name: Locate judo.MODEL_PATH
         id: model
         run: |
