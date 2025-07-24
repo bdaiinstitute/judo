@@ -43,6 +43,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-judo_meshes-
 
+      - name: Show cache result
+        run: |
+          echo "mesh cache hit = ${{ steps.restore.outputs.cache-hit }}"
+          echo "restored path = $MODEL_PATH"
+
       - name: Download meshes (cache miss)
         if: steps.restore.outputs.cache-hit != 'true'
         env:
