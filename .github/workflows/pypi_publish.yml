@@ -82,6 +82,46 @@ jobs:
       - name: Install twine
         run: pip install --upgrade twine
 
+      - name: Debug file structure
+        run: |
+          echo "=== Current working directory ==="
+          pwd
+          echo ""
+
+          echo "=== All files and directories in current directory ==="
+          ls -la
+          echo ""
+
+          echo "=== Recursively list all files in wheelhouse ==="
+          if [ -d "wheelhouse" ]; then
+            find wheelhouse -type f -name "*.whl" -exec ls -la {} \;
+            echo "All wheelhouse contents:"
+            find wheelhouse -ls
+          else
+            echo "wheelhouse directory does not exist"
+          fi
+          echo ""
+
+          echo "=== Recursively list all files in dist ==="
+          if [ -d "dist" ]; then
+            find dist -type f -name "*.tar.gz" -exec ls -la {} \;
+            echo "All dist contents:"
+            find dist -ls
+          else
+            echo "dist directory does not exist"
+          fi
+          echo ""
+
+          echo "=== Test the exact twine command ==="
+          echo "Files matching 'dist/*':"
+          ls -la dist/* 2>/dev/null || echo "No files match 'dist/*'"
+          echo "Files matching 'wheelhouse/*':"
+          ls -la wheelhouse/* 2>/dev/null || echo "No files match 'wheelhouse/*'"
+          echo ""
+
+          echo "=== All .whl and .tar.gz files anywhere ==="
+          find . -name "*.whl" -o -name "*.tar.gz" | head -20
+
       - name: Verify package metadata
         run: twine check dist/* wheelhouse/*
 
