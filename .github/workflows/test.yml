@@ -28,20 +28,20 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # # get the package path WITHOUT importing judo.__init__
-    # - name: Locate judo.MODEL_PATH
-    #   id: model
-    #   run: |
-    #     MODEL_DIR=$(python - <<'PY'
-    #     import importlib.util, pathlib, json, sys
-    #     spec = importlib.util.find_spec("judo")
-    #     if spec is None or spec.origin is None:
-    #         sys.exit("judo not found in env!")
-    #     pkg = pathlib.Path(spec.origin).parent          # .../site-packages/judo
-    #     print(pkg / "models")                           # prints full path
-    #     PY
-    #     )
-    #     echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
+    # get the package path WITHOUT importing judo.__init__
+    - name: Locate judo.MODEL_PATH
+      id: model
+      run: |
+        MODEL_DIR=$(python - <<'PY'
+        import importlib.util, pathlib, json, sys
+        spec = importlib.util.find_spec("judo")
+        if spec is None or spec.origin is None:
+            sys.exit("judo not found in env!")
+        pkg = pathlib.Path(spec.origin).parent          # .../site-packages/judo
+        print(pkg / "models")                           # prints full path
+        PY
+        )
+        echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
 
     # # restore (or populate) the cache at that exact path
     # - name: Restore mesh cache
