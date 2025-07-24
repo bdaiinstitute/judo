@@ -54,7 +54,8 @@ jobs:
     # if the directory was empty, download once using the token
     - name: Download meshes (cache miss)
       if: steps.meshcache.outputs.cache-hit != 'true'
-      env: { GITHUB_TOKEN: ${{ github.token }} }
+      env: |
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         python - <<'PY'
         import pathlib, os, requests, zipfile, json
@@ -62,12 +63,12 @@ jobs:
         download_and_extract_meshes(extract_root=os.environ["MODEL_DIR"])
         PY
 
-    # # log for sanity
-    # - name: Show cache outcome
-    #   run: |
-    #     echo "::notice::mesh cache hit = ${{ steps.meshcache.outputs.cache-hit }}"
-    #     echo "::notice::MODEL_DIR = $MODEL_DIR"
-    #     ls -R "$MODEL_DIR" | head
+    # log for sanity
+    - name: Show cache outcome
+      run: |
+        echo "::notice::mesh cache hit = ${{ steps.meshcache.outputs.cache-hit }}"
+        echo "::notice::MODEL_DIR = $MODEL_DIR"
+        ls -R "$MODEL_DIR" | head
 
     # run the tests
     - name: Test with pytest
