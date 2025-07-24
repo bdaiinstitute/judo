@@ -52,15 +52,15 @@ jobs:
         key:  ${{ runner.os }}-judo_meshes
 
     # if the directory was empty, download once using the token
-    - name: Download meshes (cache miss)
-      if: steps.meshcache.outputs.cache-hit != 'true'
-      env: { GITHUB_TOKEN: ${{ github.token }} }
-      run: |
-        python - <<'PY'
-        import pathlib, os, requests, zipfile, json
-        from judo.utils.assets import download_and_extract_meshes
-        download_and_extract_meshes(extract_root=os.environ["MODEL_DIR"])
-        PY
+    # - name: Download meshes (cache miss)
+    #   if: steps.meshcache.outputs.cache-hit != 'true'
+    #   env: { GITHUB_TOKEN: ${{ github.token }} }
+    #   run: |
+    #     python - <<'PY'
+    #     import pathlib, os, requests, zipfile, json
+    #     from judo.utils.assets import download_and_extract_meshes
+    #     download_and_extract_meshes(extract_root=os.environ["MODEL_DIR"])
+    #     PY
 
     # # log for sanity
     # - name: Show cache outcome
@@ -69,6 +69,6 @@ jobs:
     #     echo "::notice::MODEL_DIR = $MODEL_DIR"
     #     ls -R "$MODEL_DIR" | head
 
-    # # run the tests
-    # - name: Test with pytest
-    #   run: pixi run -e dev pytest -rsx
+    # run the tests
+    - name: Test with pytest
+      run: pixi run -e dev pytest -rsx
