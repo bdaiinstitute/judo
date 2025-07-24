@@ -17,13 +17,13 @@ jobs:
       matrix:
         include:
           # Linux (x86_64)
-          - os: "ubuntu-24.04"
+          - os: "ubuntu-latest"
             py: "3.10"
-          - os: "ubuntu-24.04"
+          - os: "ubuntu-latest"
             py: "3.11"
-          - os: "ubuntu-24.04"
+          - os: "ubuntu-latest"
             py: "3.12"
-          - os: "ubuntu-24.04"
+          - os: "ubuntu-latest"
             py: "3.13"
 
           # Windows (AMD64)
@@ -36,24 +36,14 @@ jobs:
           - os: "windows-latest"
             py: "3.13"
 
-          # macOS ARM (native)
-          - os: "macos-14"
+          # macOS (x86_64)
+          - os: "macos-latest"
             py: "3.10"
-          - os: "macos-14"
+          - os: "macos-latest"
             py: "3.11"
-          - os: "macos-14"
+          - os: "macos-latest"
             py: "3.12"
-          - os: "macos-14"
-            py: "3.13"
-
-          # macOS Intel (native)
-          - os: "macos-13"
-            py: "3.10"
-          - os: "macos-13"
-            py: "3.11"
-          - os: "macos-13"
-            py: "3.12"
-          - os: "macos-13"
+          - os: "macos-latest"
             py: "3.13"
 
     steps:
@@ -74,22 +64,9 @@ jobs:
       - name: Build wheel
         run: python -m build --wheel --outdir wheelhouse
 
-      - name: "[DEBUG] List contents of wheelhouse before upload"
-        run: |
-          echo "Contents of 'wheelhouse' directory:"
-          ls -R wheelhouse/
-          echo "--- End wheelhouse contents ---"
-
       - name: Build source distribution
         if: (matrix.os == 'ubuntu-24.04') && (matrix.py == '3.13')  # avoids duplicate sdist builds
         run: python -m build --sdist -o dist
-
-      - name: "[DEBUG] List contents of dist before upload"
-        if: (matrix.os == 'ubuntu-24.04') && (matrix.py == '3.13') # Only for the sdist job
-        run: |
-          echo "Contents of 'dist' directory:"
-          ls -R dist/
-          echo "--- End dist contents ---"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
