@@ -11,57 +11,57 @@ concurrency:
 jobs:
   build-and-publish:
     runs-on: ${{ matrix.os }}
-    if: github.actor == "alberthli" || github.actor == "slecleach" || github.actor == "pculbertson"
+    if: (github.actor == "alberthli") || (github.actor == "slecleach") || (github.actor == "pculbertson")
     strategy:
       fail-fast: false  # run all jobs even if one fails
       matrix:
         # cibw_arch is intentionally not set for non-macOS jobs to avoid accidental misuse later
         include:
             # Linux (x86_64)
-          - os: ubuntu-24.04
+          - os: "ubuntu-24.04"
             py: "3.10"
-          - os: ubuntu-24.04
+          - os: "ubuntu-24.04"
             py: "3.11"
-          - os: ubuntu-24.04
+          - os: "ubuntu-24.04"
             py: "3.12"
-          - os: ubuntu-24.04
+          - os: "ubuntu-24.04"
             py: "3.13"
 
           # Windows (AMD64)
-          - os: windows-latest
+          - os: "windows-latest"
             py: "3.10"
-          - os: windows-latest
+          - os: "windows-latest"
             py: "3.11"
-          - os: windows-latest
+          - os: "windows-latest"
             py: "3.12"
-          - os: windows-latest
+          - os: "windows-latest"
             py: "3.13"
 
           # macOS ARM (native)
-          - os: macos-14
+          - os: "macos-14"
             py: "3.10"
             cibw_arch: "arm64"
-          - os: macos-14
+          - os: "macos-14"
             py: "3.11"
             cibw_arch: "arm64"
-          - os: macos-14
+          - os: "macos-14"
             py: "3.12"
             cibw_arch: "arm64"
-          - os: macos-14
+          - os: "macos-14"
             py: "3.13"
             cibw_arch: "arm64"
 
           # macOS Intel (native)
-          - os: macos-13
+          - os: "macos-13"
             py: "3.10"
             cibw_arch: "x86_64"
-          - os: macos-13
+          - os: "macos-13"
             py: "3.11"
             cibw_arch: "x86_64"
-          - os: macos-13
+          - os: "macos-13"
             py: "3.12"
             cibw_arch: "x86_64"
-          - os: macos-13
+          - os: "macos-13"
             py: "3.13"
             cibw_arch: "x86_64"
 
