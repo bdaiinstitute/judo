@@ -7,7 +7,8 @@
 * Fixed bug after spec changes where unnamed geoms were causing `judo` to crash (@alberthli, @pculbertson, #72)
 
 ## Dev
-Bump version to 0.0.4 in pyproject.toml (@alberthli, #73)
+* Bump version to 0.0.4 in pyproject.toml (@alberthli, #73)
+* Added a workflow to automatically update development dependencies in the pixi lock file (@alberthli, #58)
 
 # v0.0.3
 
@@ -24,9 +25,6 @@ Bump version to 0.0.4 in pyproject.toml (@alberthli, #73)
 ## Dev
 * Made `pixi-version` use `latest` instead of pinned version in all workflows (@alberthli, #59)
 * Bumped Viser to 1.0.0 (@brentyi, #66)
-
-## Dev
-* Added a workflow to automatically update development dependencies in the pixi lock file (@alberthli, #58)
 
 # v0.0.2
 This release contains bugfixes prior to RSS 2025.
