@@ -105,10 +105,12 @@ jobs:
             cibw-${{ runner.os }}-
 
       # build wheels and source distribution
+      - name: Set Python version (no dot)
+        run: echo "PY_NO_DOT=${{ matrix.py }}" | sed 's/\.//g' >> $GITHUB_ENV
       - name: Build wheels
         run: cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD: "cp${{ replace(matrix.py, '.', '') }}-*"
+          CIBW_BUILD: "cp${{ env.PY_NO_DOT }}-*"
           CIBW_SKIP: "*-manylinux_i686 *-musllinux*"
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: pytest
