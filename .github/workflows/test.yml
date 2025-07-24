@@ -24,9 +24,9 @@ jobs:
       with:
         pixi-version: latest
         cache: true
-    # - uses: actions/setup-python@v5
-    #   with:
-    #     python-version: ${{ matrix.python-version }}
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
 
     # # get the package path WITHOUT importing judo.__init__
     # - name: Locate judo.MODEL_PATH
