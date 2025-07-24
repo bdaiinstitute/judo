@@ -54,7 +54,7 @@ jobs:
     # if the directory was empty, download once using the token
     - name: Download meshes (cache miss)
       if: steps.meshcache.outputs.cache-hit != 'true'
-      env: |
+      env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         python - <<'PY'
