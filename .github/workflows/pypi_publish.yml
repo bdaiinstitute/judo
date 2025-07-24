@@ -61,12 +61,14 @@ jobs:
         with:
           pattern: wheel-artifact-*
           path: wheelhouse
+          merge-multiple: true
 
       - name: Download sdist
         uses: actions/download-artifact@v4
         with:
           pattern: sdist-artifact-*
           path: dist
+          merge-multiple: true
 
       - name: Checkout repository
         uses: actions/checkout@v4
