@@ -17,17 +17,55 @@ jobs:
         os: [ubuntu-22.04, ubuntu-24.04]
         python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - uses: prefix-dev/setup-pixi@v0.8.11
-        with:
-          pixi-version: latest
-          cache: true
+    # # create a Pixi env (installs judo into site‑packages)
+    # - uses: prefix-dev/setup-pixi@v0.8.12
+    #   with: { pixi-version: latest, cache: true }
+    # - uses: actions/setup-python@v5
+    #   with: { python-version: ${{ matrix.python-version }} }
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+    # # get the package path WITHOUT importing judo.__init__
+    # - name: Locate judo.MODEL_PATH
+    #   id: model
+    #   run: |
+    #     MODEL_DIR=$(python - <<'PY'
+    #     import importlib.util, pathlib, json, sys
+    #     spec = importlib.util.find_spec("judo")
+    #     if spec is None or spec.origin is None:
+    #         sys.exit("judo not found in env!")
+    #     pkg = pathlib.Path(spec.origin).parent          # .../site-packages/judo
+    #     print(pkg / "models")                           # prints full path
+    #     PY
+    #     )
+    #     echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
 
-      - name: Test with pytest
-        run: pixi run -e dev pytest -rsx
+    # # restore (or populate) the cache at that exact path
+    # - name: Restore mesh cache
+    #   id: meshcache
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: ${{ env.MODEL_DIR }}
+    #     key:  ${{ runner.os }}-judo_meshes
+
+    # # if the directory was empty, download once using the token
+    # - name: Download meshes (cache miss)
+    #   if: steps.meshcache.outputs.cache-hit != 'true'
+    #   env: { GITHUB_TOKEN: ${{ github.token }} }
+    #   run: |
+    #     python - <<'PY'
+    #     import pathlib, os, requests, zipfile, json
+    #     from judo.utils.assets import download_and_extract_meshes
+    #     download_and_extract_meshes(extract_root=os.environ["MODEL_DIR"])
+    #     PY
+
+    # # log for sanity
+    # - name: Show cache outcome
+    #   run: |
+    #     echo "::notice::mesh cache hit = ${{ steps.meshcache.outputs.cache-hit }}"
+    #     echo "::notice::MODEL_DIR = $MODEL_DIR"
+    #     ls -R "$MODEL_DIR" | head
+
+    # # run the tests
+    # - name: Test with pytest
+    #   run: pixi run -e dev pytest -rsx
