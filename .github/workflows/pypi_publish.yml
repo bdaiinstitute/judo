@@ -68,6 +68,9 @@ jobs:
           pattern: sdist-artifact-*
           path: dist
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up Python and cache twine
         uses: actions/setup-python@v5
         with:
