@@ -10,6 +10,49 @@ permissions:
   contents: read
 
 jobs:
+  cache-meshes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      cache-key: ${{ steps.restore.outputs.cache-primary-key }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Export MODEL_PATH
+        id: modelpath
+        run: |
+          MODEL_PATH=$(python - <<'PY'
+          import judo
+          print(judo.MODEL_PATH)
+          PY
+          )
+          echo "MODEL_PATH=$MODEL_PATH" >> "$GITHUB_ENV"
+
+      - name: Fetch latest release tag
+        id: tag
+        run: |
+          echo "tag=$(curl -s https://api.github.com/repos/bdaiinstitute/judo/releases/latest | jq -r .tag_name)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Judo mesh cache
+        id: restore
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.MODEL_PATH }}
+          key: ${{ runner.os }}-judo_meshes-${{ steps.tag.outputs.tag }}
+          restore-keys: |
+            ${{ runner.os }}-judo_meshes-
+
+      - name: Download meshes (cache miss)
+        if: steps.restore.outputs.cache-hit != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import judo
+          from judo.utils.mesh_downloader import download_and_extract_meshes
+          download_and_extract_meshes(extract_root=judo.MODEL_PATH)
+          PY
   test:
     runs-on: ${{ matrix.os }}
     strategy:
