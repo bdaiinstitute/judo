@@ -2,6 +2,7 @@
 
 import mujoco
 import numpy as np
+import pytest
 from trimesh.creation import box
 from viser import ViserServer
 
@@ -17,22 +18,22 @@ from judo.visualizers.model import (
     add_segments,
     add_sphere,
     add_spline,
-    rgba_float_to_int,
-    rgba_int_to_float,
     set_mesh_color,
     set_segment_points,
-    set_spline_positions,
+    set_spline_points,
 )
+from judo.visualizers.utils import rgba_float_to_int, rgba_int_to_float
 
 # Create a global ViserServer instance for use by the tests.
 viser_server = ViserServer()
 model_path = str(MODEL_PATH / "xml/cylinder_push.xml")
-model = mujoco.MjModel.from_xml_path(model_path)
+spec = mujoco.MjSpec.from_file(model_path)
+model = spec.compile()
 
 
 def test_model_loading() -> None:
     """Test that the model loads correctly and creates bodies and geometries."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     assert viser_model is not None, "Failed to create ViserMjModel"
     assert len(viser_model._bodies) == model.nbody, "Incorrect number of bodies"
     assert len(viser_model._geoms) > 0, "No geometries created"
@@ -40,7 +41,7 @@ def test_model_loading() -> None:
 
 def test_set_data() -> None:
     """Test that setting data updates body positions and orientations."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     data = mujoco.MjData(model)
     data.qpos = np.random.randn(model.nq)
     data.qvel = np.random.randn(model.nv)
@@ -53,10 +54,10 @@ def test_set_data() -> None:
 
 def test_ground_plane() -> None:
     """Test that the ground plane can be toggled on and off."""
-    viser_model_with_plane = ViserMjModel(viser_server, model, show_ground_plane=True)
+    viser_model_with_plane = ViserMjModel(viser_server, spec, show_ground_plane=True)
     assert any("ground_plane" in geom.name for geom in viser_model_with_plane._geoms), "Ground plane not found"
 
-    viser_model_no_plane = ViserMjModel(viser_server, model, show_ground_plane=False)
+    viser_model_no_plane = ViserMjModel(viser_server, spec, show_ground_plane=False)
     assert all("ground_plane" not in geom.name for geom in viser_model_no_plane._geoms), "Unexpected ground plane"
 
 
@@ -209,24 +210,23 @@ def test_add_segments() -> None:
 
 
 class DummySpline:
-    """A dummy class to test set_spline_positions."""
+    """A dummy class to test set_spline_points."""
 
     def __init__(self) -> None:
-        """Initialize the dummy spline with no positions."""
-        self.positions = None
+        """Initialize the dummy spline with no points."""
+        self.points = None
 
 
-def test_set_spline_positions() -> None:
-    """Test that set_spline_positions sets the positions correctly."""
+def test_set_spline_points() -> None:
+    """Test that set_spline_points sets the points correctly."""
     dummy = DummySpline()
-    positions_tuple = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
-    set_spline_positions(dummy, positions_tuple)  # type: ignore
-    assert dummy.positions == positions_tuple, "set_spline_positions did not set positions correctly"
+    points_tuple = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
+    set_spline_points(dummy, points_tuple)  # type: ignore
+    assert np.array_equal(dummy.points, np.array(points_tuple)), "set_spline_points did not set points correctly"  # type: ignore
     # Also test with numpy array input.
-    positions_np = np.array(positions_tuple)
-    set_spline_positions(dummy, positions_np)  # type: ignore
-    expected = tuple(map(tuple, positions_np))
-    assert dummy.positions == expected, "set_spline_positions did not convert numpy array correctly"
+    points_np = np.array(points_tuple)
+    set_spline_points(dummy, points_np)  # type: ignore
+    assert np.array_equal(dummy.points, points_np), "set_spline_points did not convert numpy array correctly"  # type: ignore
 
 
 class DummySegment:
@@ -251,7 +251,7 @@ def test_set_segment_points() -> None:
 
 def test_remove_traces() -> None:
     """Test that remove_traces clears the traces list."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     # Ensure _traces is defined.
     assert hasattr(viser_model, "_traces"), "Model does not have _traces attribute"
     # Remove the traces.
@@ -261,7 +261,7 @@ def test_remove_traces() -> None:
 
 def test_set_traces() -> None:
     """Test that set_traces correctly sets the traces and handles them."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     # Create a dummy trace array with shape (3, 2, 3)
     traces = np.random.rand(3, 2, 3)
     all_traces_rollout_size = 2
@@ -287,9 +287,67 @@ def test_set_traces() -> None:
 
 def test_remove() -> None:
     """Test that remove clears the traces and removes geometries."""
-    viser_model = ViserMjModel(viser_server, model)
+    viser_model = ViserMjModel(viser_server, spec)
     viser_model.remove()
     # Verify that traces are cleared.
     assert viser_model._traces == [], "remove did not clear _traces"
     # Note: geometries are removed via their remove() method; further checking
     # would require inspection of ViserServer's scene state.
+
+
+@pytest.fixture
+def unnamed_case() -> tuple[str, list[str], list[str]]:
+    """Fixture for XML case where all bodies/geoms are unnamed."""
+    xml = """
+    <mujoco>
+      <worldbody>
+        <body><geom type="sphere" size=".1"/></body>
+        <body><geom type="sphere" size=".1"/></body>
+      </worldbody>
+    </mujoco>
+    """
+    expected_bodies = ["JUDO_BODY_0", "JUDO_BODY_1"]
+    expected_geoms = ["JUDO_GEOM_0", "JUDO_GEOM_1"]
+    return xml, expected_bodies, expected_geoms
+
+
+@pytest.fixture
+def mixed_case() -> tuple[str, list[str], list[str]]:
+    """Fixture for case where some bodies/geoms are unnamed."""
+    xml = """
+    <mujoco>
+      <worldbody>
+        <body name="body_0"><geom type="sphere" size=".1"/></body>
+        <body><geom name="geom_0" type="sphere" size=".1"/></body>
+        <body><geom type="sphere" size=".1"/></body>
+      </worldbody>
+    </mujoco>
+    """
+    expected_bodies = ["body_0", "JUDO_BODY_0", "JUDO_BODY_1"]
+    expected_geoms = ["JUDO_GEOM_0", "geom_0", "JUDO_GEOM_1"]
+    return xml, expected_bodies, expected_geoms
+
+
+def test_body_and_geom_naming(
+    unnamed_case: tuple[str, list[str], list[str]], mixed_case: tuple[str, list[str], list[str]]
+) -> None:
+    """Tests handling of unnamed bodies/geoms in ViserMjModels."""
+    for xml, expected_bodies, expected_geoms in (unnamed_case, mixed_case):
+        spec = mujoco.MjSpec.from_string(xml)
+        model = ViserMjModel(viser_server, spec)
+
+        # Only check the worldbody children.
+        bodies = model._spec.bodies[1:]
+
+        # Check the MjSpec is mutated correctly.
+        assert [b.name for b in bodies] == expected_bodies
+        assert [g.name for g in spec.geoms] == expected_geoms
+
+        # Check the ViserMjModel gets parsed properly.
+        expected_geom_names = [
+            f"{body_name}/geom_{geom_name}"
+            for (body_name, geom_name) in zip(expected_bodies, expected_geoms, strict=True)
+        ]
+        assert [b.name for b in model._bodies[1:]] == expected_bodies
+        model_geom_names = [g.name for g in model._geoms[1:]]
+        assert model_geom_names == expected_geom_names

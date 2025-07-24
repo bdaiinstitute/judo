@@ -15,9 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: prefix-dev/setup-pixi@v0.8.10
+      - uses: prefix-dev/setup-pixi@v0.8.12
         with:
-          pixi-version: v0.47.0
+          pixi-version: latest
           cache: true
 
       - name: "Set up Python 3.13"
@@ -27,10 +27,7 @@ jobs:
 
       - name: Building documentation
         run: |
-          pip install uv
-          uv pip install --system -e ".[dev]"
-          uv pip install --system -r docs/requirements.txt
-          sphinx-build docs/source docs/build -b dirhtml
+          pixi run -e dev sphinx-build docs/source docs/build -b dirhtml
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

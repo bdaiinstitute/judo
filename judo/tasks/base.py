@@ -7,7 +7,7 @@ from typing import Any, Generic, TypeVar
 
 import mujoco
 import numpy as np
-from mujoco import MjData, MjModel
+from mujoco import MjData, MjModel, MjSpec
 
 
 @dataclass
@@ -25,7 +25,8 @@ class Task(ABC, Generic[ConfigT]):
         """Initialize the Mujoco task."""
         if not model_path:
             raise ValueError("Model path must be provided.")
-        self.model = MjModel.from_xml_path(str(model_path))
+        self.spec = MjSpec.from_file(str(model_path))
+        self.model = self.spec.compile()
         self.data = MjData(self.model)
         self.model_path = model_path
         self.sim_model = self.model if sim_model_path is None else MjModel.from_xml_path(str(sim_model_path))
@@ -73,9 +74,9 @@ class Task(ABC, Generic[ConfigT]):
     def actuator_ctrlrange(self) -> np.ndarray:
         """Mujoco actuator limits for this task."""
         limits = self.model.actuator_ctrlrange
-        limited: np.ndarray = self.model.actuator_ctrllimited.astype(bool)
+        limited: np.ndarray = self.model.actuator_ctrllimited.astype(bool)  # type: ignore
         limits[~limited] = np.array([-np.inf, np.inf], dtype=limits.dtype)  # if not limited, set to inf
-        return limits
+        return limits  # type: ignore
 
     def reset(self) -> None:
         """Reset behavior for task. Sets config + velocities to zeros."""
@@ -134,3 +135,29 @@ class Task(ABC, Generic[ConfigT]):
         This is used to provide an initial guess for the optimizer when optimizing the task before any iterations.
         """
         return np.zeros(self.nu)
+
+    def get_sensor_start_index(self, sensor_name: str) -> int:
+        """Returns the starting index of a sensor in the 'sensors' array given the sensor's name.
+
+        Args:
+            sensor_name: The name of the sensor to get the index of.
+        """
+        return self.model.sensor(sensor_name).adr[0]
+
+    def get_joint_position_start_index(self, joint_name: str) -> int:
+        """Returns the starting index of a joint's position in the 'states' array given the joint's name.
+
+        Args:
+            joint_name: The name of the joint to get the starting index in the position of the state array.
+        """
+        return self.model.jnt_qposadr[self.model.joint(joint_name).id]
+
+    def get_joint_velocity_start_index(self, joint_name: str) -> int:
+        """Returns the starting index of a joint's velocity in the 'states' array given the joint's name.
+
+        NOTE: This is the index of the joint's velocity in the state array, which is after the position indices!
+
+        Args:
+            joint_name: The name of the joint to get the starting index in the state array of.
+        """
+        return self.model.nq + self.model.jnt_dofadr[self.model.joint(joint_name).id]

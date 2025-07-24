@@ -14,7 +14,7 @@ For developers, run the following commands from this folder after cloning:
 ```bash
 conda create -n judo python=3.13
 conda activate judo
-pip install -e .[dev]
+pip install -e .[dev]  # includes docs dependencies
 pre-commit install
 pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
 ```
@@ -29,7 +29,7 @@ curl -fsSL https://pixi.sh/install.sh | sh
 To create our environment (and activate it each time later), run the following in the repo root:
 ```bash
 # every time you want to activate
-pixi shell -e dev
+pixi shell -e dev  # includes docs dependencies
 
 # first time only
 pre-commit install

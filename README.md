@@ -41,7 +41,7 @@ For developers, run the following commands from this folder after cloning:
 ```bash
 conda create -n judo python=3.13
 conda activate judo
-pip install -e .[dev]
+pip install -e .[dev]  # includes docs dependencies
 pre-commit install
 pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
 ```
@@ -107,6 +107,8 @@ if __name__ == "__main__":
     app()  # this runs the app from your own script
 ```
 
+To see more information about the available tasks, please refer to [the task README](judo/tasks/README.md).
+
 ## 3. Running `judo` as a Dependency
 You can easily install `judo` as a dependency in your own project. A few comments:
 * You can still use the `judo` CLI command from anywhere, so long as you are working in an environment where `judo` is installed.
@@ -125,17 +127,27 @@ Note that the benchmarking program runs the default task and optimizer parameter
 # Docs
 For developers, to build docs locally, run the following in your environment from the repo root. Note that asset paths will be broken locally that work correctly on Github Pages.
 ```bash
-pip install -r docs/requirements.txt
+# using conda
+pip install -e .[docs]  # dev also includes docs
+
+# using pixi
+pixi shell -e docs  # dev also includes docs
+
+# building the docs (both conda and pixi)
 sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
 
+# 🤝 Contributing
+We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
+
+
 # Citation
-If you use `judo` in your research, please use the following citation:
+If you use `judo` in your research, please use the following citation for our [paper](https://arxiv.org/abs/2506.17184):
 ```
 @inproceedings{li2025_judo,
   title     = {Judo: A User-Friendly Open-Source Package for Sampling-Based Model Predictive Control},
-  author    = {Albert Li and Simon Le Cleac'h and Brandon Hung and Aaron D. Ames and Jiuguang Wang and Preston Culbertson},
+  author    = {Albert H. Li and Brandon Hung and Aaron D. Ames and Jiuguang Wang and Simon Le Cleac'h and Preston Culbertson},
   booktitle = {Proceedings of the Workshop on Fast Motion Planning and Control in the Era of Parallelism at Robotics: Science and Systems (RSS)},
   year      = {2025},
   url       = {https://github.com/bdaiinstitute/judo},

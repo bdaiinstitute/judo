@@ -110,40 +110,27 @@ class FR3Pick(Task[FR3PickConfig]):
         self.reset_command = np.array([0, 0, 0, -1.57079, 0, 1.57079, -0.7853, 0.0])
 
         # object indices
-        self.obj_pos_adr = self.model.jnt_qposadr[self.model.joint("object_joint").id]
+        self.obj_pos_adr = self.get_joint_position_start_index("object_joint")
         self.obj_pos_slice = slice(self.obj_pos_adr, self.obj_pos_adr + 3)
 
-        obj_vel_adr = self.model.nq + self.model.jnt_dofadr[self.model.joint("object_joint").id]
+        obj_vel_adr = self.get_joint_velocity_start_index("object_joint")
         self.obj_vel_slice = slice(obj_vel_adr, obj_vel_adr + 3)
 
         obj_angvel_adr = obj_vel_adr + 3
         self.obj_angvel_slice = slice(obj_angvel_adr, obj_angvel_adr + 3)
 
         # robot indices
-        arm_pos_adr = self.model.jnt_qposadr[self.model.joint("fr3_joint1").id]
+        arm_pos_adr = self.get_joint_position_start_index("fr3_joint1")
         self.arm_pos_slice = slice(arm_pos_adr, arm_pos_adr + 9)  # 7 + 2 dofs for the gripper
 
         # sensors
-        self.left_finger_obj_sensor = self.model.sensor("left_finger_obj")
-        self.left_finger_obj_adr = self.left_finger_obj_sensor.adr[0]
-
-        self.right_finger_obj_sensor = self.model.sensor("right_finger_obj")
-        self.right_finger_obj_adr = self.right_finger_obj_sensor.adr[0]
-
-        self.left_finger_table_sensor = self.model.sensor("left_finger_table")
-        self.left_finger_table_adr = self.left_finger_table_sensor.adr[0]
-
-        self.right_finger_table_sensor = self.model.sensor("right_finger_table")
-        self.right_finger_table_adr = self.right_finger_table_sensor.adr[0]
-
-        self.grasp_site_sensor = self.model.sensor("trace_grasp_site")
-        self.grasp_site_adr = self.grasp_site_sensor.adr[0]
-
-        self.obj_table_sensor = self.model.sensor("obj_table")
-        self.obj_table_adr = self.obj_table_sensor.adr[0]
-
-        self.ee_z_sensor = self.model.sensor("ee_z")
-        self.ee_z_adr = self.ee_z_sensor.adr[0]
+        self.left_finger_obj_adr = self.get_sensor_start_index("left_finger_obj")
+        self.right_finger_obj_adr = self.get_sensor_start_index("right_finger_obj")
+        self.left_finger_table_adr = self.get_sensor_start_index("left_finger_table")
+        self.right_finger_table_adr = self.get_sensor_start_index("right_finger_table")
+        self.grasp_site_adr = self.get_sensor_start_index("trace_grasp_site")
+        self.obj_table_adr = self.get_sensor_start_index("obj_table")
+        self.ee_z_adr = self.get_sensor_start_index("ee_z")
         self.ee_z_slice = slice(self.ee_z_adr, self.ee_z_adr + 3)
 
         # metadata that stores the current phase of the task
@@ -204,12 +191,16 @@ class FR3Pick(Task[FR3PickConfig]):
         self._data.qpos[:] = curr_state[: self.model.nq]
         self._data.qvel[:] = curr_state[self.model.nq : self.model.nq + self.model.nv]
         mujoco.mj_forward(self.model, self._data)
-        curr_sensor = self._data.sensordata  # (total_sensor_dim,)
+
+        # BUG: mujoco distance sensor seems to be broken and doesn't always return signed distance, so here we instead
+        # check the object z position
+        # curr_sensor = self._data.sensordata  # (total_sensor_dim,)
 
         phase = Phase.LIFT  # default phase
 
         # check whether the phase is MOVE
-        obj_in_air = curr_sensor[self.obj_table_adr] > 0  # object is not touching the table
+        # obj_in_air = curr_sensor[self.obj_table_adr] > 0  # object is not touching the table
+        obj_in_air = curr_state[self.obj_pos_adr + 2] > 0.02 + 1e-3  # object z position is above the table
         if obj_in_air:
             phase = Phase.MOVE  # if the object is in the air, we are in lift phase
 
@@ -219,8 +210,11 @@ class FR3Pick(Task[FR3PickConfig]):
             phase = Phase.PLACE  # if the object is in the goal xy, we are in place phase
 
         # check whether the phase is HOMING
-        obj_table_dist = curr_sensor[self.obj_table_adr]
-        if in_goal_xy and obj_table_dist <= 0:
+        # obj_table_dist = curr_sensor[self.obj_table_adr]
+        # if in_goal_xy and obj_table_dist <= 0:
+        #     phase = Phase.HOMING
+        obj_z_pos = curr_state[self.obj_pos_adr + 2]  # z position of the object
+        if in_goal_xy and obj_z_pos <= 0.02 + 1e-3:  # the cube is 4cm wide and we allow a tolerance
             phase = Phase.HOMING
 
         self.phase = phase
