@@ -24,6 +24,7 @@
    self
    quickstart
    interface/index
+   docs
    faq
    api/index
 

@@ -1,6 +1,0 @@
-sphinxcontrib-programoutput @ git+https://github.com/brentyi/sphinxcontrib-programoutput.git
-sphinxcontrib-ansi @ git+https://github.com/brentyi/ansi.git
-furo
-m2r2
-sphinx
-sphinx-autoapi

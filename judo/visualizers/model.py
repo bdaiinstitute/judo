@@ -54,6 +54,25 @@ class ViserMjModel:
         """Constructor for ViserMjModel."""
         self._target = target
         self._spec = spec
+
+        # give default names to any unnamed geoms and bodies
+        _geom_placeholder_idx = 0
+        _body_placeholder_idx = 0
+        for body in self._spec.bodies[1:]:
+            # Sharp edge: not using the tree structure of the kinematics ...
+            body_name = body.name
+            if not body_name:
+                body_name = f"JUDO_BODY_{_body_placeholder_idx}"
+                body.name = body_name
+                _body_placeholder_idx += 1
+
+        for geom in self._spec.geoms:
+            geom_name = geom.name
+            if not geom_name:  # if geom has no name, use a placeholder.
+                geom_name = f"JUDO_GEOM_{_geom_placeholder_idx}"
+                geom.name = geom_name
+                _geom_placeholder_idx += 1
+
         self._model = spec.compile()
 
         # Assume first body is root of kinematic tree.
@@ -65,23 +84,13 @@ class ViserMjModel:
             self._geoms.append(add_plane(self._target, "ground_plane"))
 
         # Add coordinate frame for each non-world body in model.
-        _geom_placeholder_idx = 0
-        _body_placeholder_idx = 0
-
         for body in self._spec.bodies[1:]:
             # Sharp edge: not using the tree structure of the kinematics ...
             body_name = body.name
-            if not body_name:
-                body_name = f"body_{_body_placeholder_idx}"
-                _body_placeholder_idx += 1
             self._bodies.append(self._target.scene.add_frame(body_name, show_axes=False))
 
             for geom in body.geoms:
-                suffix = geom.name
-                if not suffix:  # if geom has no name, use a placeholder.
-                    suffix = f"{_geom_placeholder_idx}"
-                    _geom_placeholder_idx += 1
-                geom_name = f"{body_name}/geom_{suffix}"
+                geom_name = f"{body_name}/geom_{geom.name}"
                 if geom_exclude_substring and geom_exclude_substring in geom_name:
                     continue
                 self.add_geom(geom_name, geom)
@@ -476,7 +485,15 @@ def add_segments(
         line_width: width of the line, in pixels
         visible: whether or not the lines are initially visible
     """
-    return target.scene.add_line_segments(name, points, rgb, line_width, quat, pos, visible)
+    return target.scene.add_line_segments(
+        name,
+        points,
+        rgb,
+        line_width=line_width,
+        wxyz=quat,
+        position=pos,
+        visible=visible,
+    )
 
 
 def set_mesh_color(mesh: trimesh.Trimesh, rgba: np.ndarray) -> None:
@@ -495,18 +512,14 @@ def set_mesh_color(mesh: trimesh.Trimesh, rgba: np.ndarray) -> None:
     )
 
 
-def set_spline_positions(
+def set_spline_points(
     handle: SplineCatmullRomHandle,
-    positions: tuple[tuple[float, float, float], ...] | np.ndarray,
+    points: tuple[tuple[float, float, float], ...] | np.ndarray,
 ) -> None:
     """Set the spline waypoints."""
-    # TODO (slecleach): PR this into Viser, look at example from MeshSkinnedBoneHandle
-    if isinstance(positions, np.ndarray):
-        assert len(positions.shape) == 2 and positions.shape[1] == 3
-        positions = tuple(map(tuple, positions))  # type: ignore
-    assert len(positions[0]) == 3
-    assert isinstance(positions, tuple)
-    handle.positions = positions
+    points = np.asarray(points)
+    assert len(points[0]) == 3 and len(points.shape) == 2
+    handle.points = points
 
 
 def set_segment_points(handle: LineSegmentsHandle, points: np.ndarray) -> None:

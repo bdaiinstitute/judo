@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "judo-rai"
 description = "Judo: a hackable sampling-based MPC toolbox"
-version = "0.0.2"
+version = "0.0.4"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
@@ -36,7 +36,7 @@ dependencies = [
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
     "scipy",
-    "viser",
+    "viser>=1.0.0",
 ]
 
 [project.urls]
@@ -53,7 +53,16 @@ allow-direct-references = true
 packages = ["judo"]
 
 [project.optional-dependencies]
+docs = [
+    "furo",
+    "m2r2",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinxcontrib-ansi-rai",
+    "sphinxcontrib-programoutput-rai",
+]
 dev = [
+    "judo-rai[docs]",
     "pixi-diff-to-markdown",
     "pre-commit",
     "pybind11-stubgen",
@@ -169,4 +178,5 @@ judo-rai = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
-dev = { features = ["dev"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+dev = { features = ["dev", "docs"], solve-group = "default" }
