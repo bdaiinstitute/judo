@@ -101,6 +101,19 @@ jobs:
       id-token: write
 
     steps:
+      - name: "[DEBUG] list artifacts in this workflow run"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+            console.log('🔍 Artifacts available in this run:');
+            data.artifacts.forEach(a => console.log(` • ${a.name}`));
+
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
