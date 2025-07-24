@@ -56,6 +56,20 @@ jobs:
       id-token: write
 
     steps:
+      - name: Debug available artifacts
+        run: |
+          echo "=== GitHub context info ==="
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Ref: ${{ github.ref }}"
+          echo ""
+
+      - name: List all available artifacts (this might fail but that's okay)
+        continue-on-error: true
+        run: |
+          echo "=== Trying to list artifacts with gh CLI ==="
+          gh run view ${{ github.run_id }} --json artifacts
+
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
