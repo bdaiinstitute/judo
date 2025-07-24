@@ -12,7 +12,7 @@ from judo.utils.patch import patch_mj_ccd_iterations
 
 @wp.kernel
 def broadcast_rows(
-    mat: wp.array(dtype=wp.float32, ndim=2),  # type: ignore
+    mat: wp.array2d(dtype=wp.float32),  # type: ignore
     vec: wp.array(dtype=wp.float32),  # type: ignore
 ) -> None:
     """Broadcast a vector to each row of a matrix."""
