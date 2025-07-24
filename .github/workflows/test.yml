@@ -19,11 +19,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # # create a Pixi env (installs judo into site‑packages)
-    # - uses: prefix-dev/setup-pixi@v0.8.12
-    #   with: { pixi-version: latest, cache: true }
-    # - uses: actions/setup-python@v5
-    #   with: { python-version: ${{ matrix.python-version }} }
+    # create a Pixi env (installs judo into site‑packages)
+    - uses: prefix-dev/setup-pixi@v0.8.12
+      with: { pixi-version: latest, cache: true }
+    - uses: actions/setup-python@v5
+      with: { python-version: ${{ matrix.python-version }} }
 
     # # get the package path WITHOUT importing judo.__init__
     # - name: Locate judo.MODEL_PATH
