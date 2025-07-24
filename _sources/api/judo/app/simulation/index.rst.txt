@@ -1,0 +1,86 @@
+judo.app.simulation
+===================
+
+.. py:module:: judo.app.simulation
+
+
+
+
+Module Contents
+---------------
+
+.. py:class:: SimulationNode(node_id: str = 'simulation', init_task: str = 'cylinder_push', max_workers: int | None = None, task_registration_cfg: omegaconf.DictConfig | None = None)
+
+   Bases: :py:obj:`dora_utils.node.DoraNode`
+
+
+   
+   The simulation node.
+
+   .. py:attribute:: task_reset_lock
+
+
+   .. py:attribute:: config_lock
+
+
+   .. py:attribute:: control_lock
+
+
+   .. py:attribute:: control
+      :value: None
+
+
+
+   .. py:attribute:: paused
+      :value: False
+
+
+
+   .. py:method:: set_task(task_name: str) -> None
+
+      
+      Helper to initialize task from task name.
+
+
+   .. py:method:: update_task(event: dict) -> None
+
+      
+      Event handler for processing task updates.
+
+
+   .. py:method:: step() -> None
+
+      
+      Step the simulation forward by one timestep.
+
+
+   .. py:method:: spin() -> None
+
+      
+      Spin logic for the simulation node.
+
+
+   .. py:method:: write_states() -> None
+
+      
+      Reads data from simulation and writes to output topic.
+
+
+   .. py:method:: set_paused_status(event: dict) -> None
+
+      
+      Event handler for processing pause status updates.
+
+
+   .. py:method:: reset_task(event: dict) -> None
+
+      
+      Resets the task.
+
+
+   .. py:method:: update_control(event: dict) -> None
+
+      
+      Event handler for processing controls received from controller node.
+
+

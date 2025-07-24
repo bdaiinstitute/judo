@@ -1,0 +1,232 @@
+judo.controller.controller
+==========================
+
+.. py:module:: judo.controller.controller
+
+
+
+
+
+
+Module Contents
+---------------
+
+.. py:class:: ControllerConfig
+
+   Bases: :py:obj:`judo.config.OverridableConfig`
+
+
+   
+   Base controller config.
+
+   .. py:attribute:: horizon
+      :type:  float
+      :value: 1.0
+
+
+
+   .. py:attribute:: spline_order
+      :type:  Literal['zero', 'linear', 'cubic']
+      :value: 'linear'
+
+
+
+   .. py:attribute:: control_freq
+      :type:  float
+      :value: 20.0
+
+
+
+   .. py:attribute:: max_opt_iters
+      :type:  int
+      :value: 1
+
+
+
+   .. py:attribute:: max_num_traces
+      :type:  int
+      :value: 5
+
+
+
+   .. py:attribute:: action_normalizer
+      :type:  Literal['none', 'min_max', 'running']
+      :value: 'none'
+
+
+
+.. py:class:: Controller(controller_config: ControllerConfig, task: judo.tasks.base.Task, task_config: judo.tasks.base.TaskConfig, optimizer: judo.optimizers.Optimizer, optimizer_config: judo.optimizers.OptimizerConfig, rollout_backend: Literal['mujoco'] = 'mujoco')
+
+   
+   The controller object.
+
+   .. py:attribute:: controller_cfg
+
+
+   .. py:attribute:: task
+
+
+   .. py:attribute:: task_cfg
+
+
+   .. py:attribute:: optimizer
+
+
+   .. py:attribute:: optimizer_cfg
+
+
+   .. py:attribute:: model
+
+
+   .. py:attribute:: model_data_pairs
+
+
+   .. py:attribute:: rollout_backend
+
+
+   .. py:attribute:: action_normalizer
+
+
+   .. py:attribute:: system_metadata
+
+
+   .. py:attribute:: states
+
+
+   .. py:attribute:: sensors
+
+
+   .. py:attribute:: rollout_controls
+
+
+   .. py:attribute:: rewards
+
+
+   .. py:attribute:: traces
+      :value: None
+
+
+
+   .. py:attribute:: trace_sensors
+
+
+   .. py:attribute:: num_trace_elites
+
+
+   .. py:attribute:: num_trace_sensors
+
+
+   .. py:attribute:: sensor_rollout_size
+
+
+   .. py:attribute:: all_traces_rollout_size
+
+
+   .. py:property:: horizon
+      :type: float
+
+
+      
+      Helper function to recalculate the horizon for simulation.
+
+
+   .. py:property:: max_num_traces
+      :type: int
+
+
+      
+      Helper function to recalculate the max number of traces for simulation.
+
+
+   .. py:property:: max_opt_iters
+      :type: int
+
+
+      
+      Helper function to recalculate the max number of optimization iterations for simulation.
+
+
+   .. py:property:: spline_order
+      :type: str
+
+
+      
+      Helper function to recalculate the spline order for simulation.
+
+
+   .. py:property:: action_normalizer_type
+      :type: judo.utils.normalization.NormalizerType
+
+
+      
+      Helper function to get the type of action normalizer.
+
+
+   .. py:property:: num_timesteps
+      :type: int
+
+
+      
+      Helper function to recalculate the number of timesteps for simulation.
+
+
+   .. py:property:: rollout_times
+      :type: numpy.ndarray
+
+
+      
+      Helper function to calculate the rollout times based on the horizon length.
+
+
+   .. py:property:: spline_timesteps
+      :type: numpy.ndarray
+
+
+      
+      Helper function to create new timesteps for spline queries.
+
+
+   .. py:method:: update_action(curr_state: numpy.ndarray, curr_time: float) -> None
+
+      
+      Abstract method for updating controller actions from current state/time.
+
+
+   .. py:method:: action(time: float) -> numpy.ndarray
+
+      
+      Current best action of policy.
+
+
+   .. py:method:: update_spline(times: numpy.ndarray, controls: numpy.ndarray) -> None
+
+      
+      Update the spline with new timesteps / controls.
+
+
+   .. py:method:: reset() -> None
+
+      
+      Reset the controls, candidate controls and the spline to their default values.
+
+
+   .. py:method:: update_traces() -> None
+
+      
+      Update traces by extracting data from sensors readings.
+
+      We need to have num_spline_points - 1 line segments. Sensors will initially be of shape
+      (num_rollout x num_timesteps x nsensordata) and needs to end up being in shape
+      (num_elite * num_trace_sensors * size of a single rollout x 2 (first and last point of spline) x 3 (3d pos))
+
+
+.. py:function:: make_spline(times: numpy.ndarray, controls: numpy.ndarray, spline_order: str) -> scipy.interpolate.interp1d
+
+   
+   Helper function for creating spline objects.
+
+   :param times: array of times for knot points, shape (T,).
+   :param controls: (possibly batched) array of controls to interpolate, shape (..., T, m).
+   :param spline_order: Order to use for interpolation. Same as parameter for scipy.interpolate.interp1d.
+   :param extrapolate: Whether to allow extrapolation queries. Default true (for re-initialization).
+

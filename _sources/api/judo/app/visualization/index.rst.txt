@@ -1,0 +1,164 @@
+judo.app.visualization
+======================
+
+.. py:module:: judo.app.visualization
+
+
+
+
+
+
+Module Contents
+---------------
+
+.. py:data:: ElementType
+
+.. py:class:: VisualizationNode(node_id: str = 'visualization', max_workers: int | None = None, init_task: str = 'cylinder_push', init_optimizer: str = 'cem', task_registration_cfg: omegaconf.DictConfig | None = None, optimizer_registration_cfg: omegaconf.DictConfig | None = None, controller_override_cfg: omegaconf.DictConfig | None = None, optimizer_override_cfg: omegaconf.DictConfig | None = None, sim_pause_button: bool = True, geom_exclude_substring: str = 'collision')
+
+   Bases: :py:obj:`dora_utils.node.DoraNode`
+
+
+   
+   The visualization node.
+
+   .. py:attribute:: server
+
+
+   .. py:attribute:: available_tasks
+
+
+   .. py:attribute:: available_optimizers
+
+
+   .. py:attribute:: geom_exclude_substring
+      :value: 'collision'
+
+
+
+   .. py:attribute:: task_name
+      :value: ''
+
+
+
+   .. py:attribute:: optimizer_name
+      :value: ''
+
+
+
+   .. py:attribute:: task_lock
+
+
+   .. py:attribute:: task_updated
+
+
+   .. py:attribute:: sim_pause_button
+      :value: True
+
+
+
+   .. py:method:: register_controller_config_overrides(controller_override_cfg: omegaconf.DictConfig) -> None
+
+      
+      Register task-specific controller config overrides.
+
+      We do this in the Visualization node because this is the "master" node in the dora stack.
+
+
+   .. py:method:: register_optimizer_config_overrides(optimizer_override_cfg: omegaconf.DictConfig) -> None
+
+      
+      Register task-specific optimizer config overrides.
+
+      We do this in the Visualization node because this is the "master" node in the dora stack.
+
+
+   .. py:method:: set_task(task: str, optimizer: str) -> None
+
+      
+      Helper to initialize task from task name.
+
+
+   .. py:method:: setup_gui() -> None
+
+      
+      Set up the GUI for the visualization node.
+
+
+   .. py:method:: remove_handles(handles: list[ElementType] | ElementType) -> None
+
+      
+      Remove GUI handles from the visualization node.
+
+
+   .. py:method:: write_sim_pause() -> None
+
+      
+      Write the sim pause signal to the GUI.
+
+
+   .. py:method:: write_task() -> None
+
+      
+      Write the task name to the GUI.
+
+
+   .. py:method:: write_task_reset() -> None
+
+      
+      Write the task reset signal to the GUI.
+
+
+   .. py:method:: write_optimizer() -> None
+
+      
+      Write the optimizer name to the GUI.
+
+
+   .. py:method:: write_controller_config() -> None
+
+      
+      Write the controller config to the GUI.
+
+
+   .. py:method:: write_optimizer_config() -> None
+
+      
+      Write the optimizer config to the GUI.
+
+
+   .. py:method:: write_task_config() -> None
+
+      
+      Write the task config to the GUI.
+
+
+   .. py:method:: update_states(event: dict) -> None
+
+      
+      Callback to update states on receiving a new state measurement.
+
+
+   .. py:method:: update_traces(event: dict) -> None
+
+      
+      Callback to update traces on receiving a new trace measurement.
+
+
+   .. py:method:: update_plan_time(event: dict) -> None
+
+      
+      Callback to update plan time on receiving a new plan time measurement.
+
+
+   .. py:method:: cleanup() -> None
+
+      
+      Cleanup the visualization node.
+
+
+   .. py:method:: spin() -> None
+
+      
+      Spin logic for the visualization node.
+
+
