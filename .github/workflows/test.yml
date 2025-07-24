@@ -43,8 +43,8 @@ jobs:
           spec = importlib.util.find_spec("judo")
           if spec is None or spec.origin is None:
               sys.exit("judo not found in env!")
-          pkg = pathlib.Path(spec.origin).parent          # .../site-packages/judo
-          print(pkg / "models")                           # prints full path
+          pkg = pathlib.Path(spec.origin).parent  # .../site-packages/judo
+          print(pkg / "models")                   # prints full path
           PY
           )
           echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
