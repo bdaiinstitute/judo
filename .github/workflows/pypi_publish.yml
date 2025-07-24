@@ -56,35 +56,17 @@ jobs:
       id-token: write
 
     steps:
-      - name: Debug available artifacts
-        run: |
-          echo "=== GitHub context info ==="
-          echo "Run ID: ${{ github.run_id }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Ref: ${{ github.ref }}"
-          echo ""
-
-      - name: List all available artifacts (this might fail but that's okay)
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "=== Trying to list artifacts with gh CLI ==="
-          gh run view ${{ github.run_id }} --json artifacts
-
-      - name: Download wheels
+      - name: Download wheel artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: wheel-artifact-*
+          name: wheel-artifact-${{ github.run_id }}
           path: wheelhouse
-          merge-multiple: true
 
-      - name: Download sdist
+      - name: Download sdist artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: sdist-artifact-*
+          name: sdist-artifact-${{ github.run_id }}
           path: dist
-          merge-multiple: true
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -98,48 +80,9 @@ jobs:
       - name: Install twine
         run: pip install --upgrade twine
 
-      - name: Debug file structure
-        run: |
-          echo "=== Current working directory ==="
-          pwd
-          echo ""
-
-          echo "=== All files and directories in current directory ==="
-          ls -la
-          echo ""
-
-          echo "=== Recursively list all files in wheelhouse ==="
-          if [ -d "wheelhouse" ]; then
-            find wheelhouse -type f -name "*.whl" -exec ls -la {} \;
-            echo "All wheelhouse contents:"
-            find wheelhouse -ls
-          else
-            echo "wheelhouse directory does not exist"
-          fi
-          echo ""
-
-          echo "=== Recursively list all files in dist ==="
-          if [ -d "dist" ]; then
-            find dist -type f -name "*.tar.gz" -exec ls -la {} \;
-            echo "All dist contents:"
-            find dist -ls
-          else
-            echo "dist directory does not exist"
-          fi
-          echo ""
-
-          echo "=== Test the exact twine command ==="
-          echo "Files matching 'dist/*':"
-          ls -la dist/* 2>/dev/null || echo "No files match 'dist/*'"
-          echo "Files matching 'wheelhouse/*':"
-          ls -la wheelhouse/* 2>/dev/null || echo "No files match 'wheelhouse/*'"
-          echo ""
-
-          echo "=== All .whl and .tar.gz files anywhere ==="
-          find . -name "*.whl" -o -name "*.tar.gz" | head -20
-
       - name: Verify package metadata
-        run: twine check dist/* wheelhouse/*
+        run: |
+          twine check $(find . -name "*.whl") $(find . -name "*.tar.gz")
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
