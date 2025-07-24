@@ -117,9 +117,7 @@ jobs:
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
-          pattern: |
-            - 'wheels-*'
-            - 'sdist-*'
+          pattern: 'wheels-*,sdist-*'
           merge-multiple: true
           path: wheelhouse
 
