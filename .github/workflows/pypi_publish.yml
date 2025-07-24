@@ -11,7 +11,7 @@ concurrency:
 jobs:
   build-and-publish:
     runs-on: ${{ matrix.os }}
-    if: (github.actor == "alberthli") || (github.actor == "slecleach") || (github.actor == "pculbertson")
+    if: github.actor == 'alberthli' || github.actor == 'slecleach' || github.actor == 'pculbertson'
     strategy:
       fail-fast: false  # run all jobs even if one fails
       matrix:
@@ -116,7 +116,7 @@ jobs:
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: "pytest -q --import-mode=importlib"
       - name: Build source distribution
-        if: matrix.os == "ubuntu-24.04" && matrix.py == "3.13"  # avoids duplicate sdist builds
+        if: matrix.os == 'ubuntu-24.04' && matrix.py == '3.13'  # avoids duplicate sdist builds
         run: |
           python -m build --sdist -o dist
 
@@ -128,7 +128,7 @@ jobs:
           path: wheelhouse/*.whl
           retention-days: 7
       - name: Upload sdist
-        if: matrix.os == "ubuntu-24.04" && matrix.py == "3.13"
+        if: matrix.os == 'ubuntu-24.04' && matrix.py == '3.13'
         uses: actions/upload-artifact@v4
         with:
           name: sdist-${{ github.run_id }}
