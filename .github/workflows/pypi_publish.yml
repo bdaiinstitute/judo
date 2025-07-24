@@ -127,53 +127,38 @@ jobs:
             console.log('🔍 Artifacts available in this run:');
             data.artifacts.forEach(a => console.log(` • ${a.name}`));
 
-      # --- TEMPORARY DEBUG STEP: Download a single, specific artifact ---
-      - name: "[DEBUG] Download a single specific wheel artifact"
+      - name: Download wheels
         uses: actions/download-artifact@v4
         with:
-          # Use one of the exact names from your "🔍 Artifacts available in this run:" output
-          # For example, pick one like 'wheels-ubuntu-24.04-3.13-16505317133'
-          name: wheels-ubuntu-24.04-3.13-${{ github.run_id }} # Use actual run_id for dynamic name
-          path: downloaded-single-artifact
+          pattern: wheels-*
+          merge-multiple: true
+          path: wheelhouse
 
-      - name: "[DEBUG] List contents of downloaded-single-artifact"
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          pattern: sdist-*
+          merge-multiple: true
+          path: dist
+
+      - name: Install twine
+        run: pip install --upgrade twine
+
+      - name: Verify metadata (twine)
+        shell: bash
         run: |
-          echo "Contents of 'downloaded-single-artifact' directory:"
-          ls -R downloaded-single-artifact/
-          echo "--- End downloaded-single-artifact contents ---"
+          shopt -s nullglob
+          files=(wheelhouse/*.whl dist/*.tar.gz)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No files found to check"
+            exit 1
+          fi
+          twine check "${files[@]}"
 
-      # - name: Download wheels
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     pattern: 'wheels-*,sdist-*'
-      #     merge-multiple: true
-      #     path: wheelhouse
-
-      # - name: "[DEBUG] list what's in wheelhouse"
-      #   run: |
-      #     echo "➤ Top-level of workspace:"
-      #     ls -1
-      #     echo "➤ wheelhouse directory tree:"
-      #     find wheelhouse -maxdepth 3 -type f | sed 's/^/  /'
-
-      # - name: Install twine
-      #   run: pip install --upgrade twine
-
-      # - name: Verify metadata (twine)
-      #   shell: bash
-      #   run: |
-      #     shopt -s nullglob
-      #     files=(wheelhouse/*.whl wheelhouse/*.tar.gz)
-      #     if [ ${#files[@]} -eq 0 ]; then
-      #       echo "No files found to check"
-      #       exit 1
-      #     fi
-      #     twine check "${files[@]}"
-
-      # - name: Publish to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     repository-url: https://test.pypi.org/legacy/
-      #     packages_dir: wheelhouse
-      #     skip-existing: true
-      #     provenance: true
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages_dir: wheelhouse
+          skip-existing: true
+          provenance: true
