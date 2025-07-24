@@ -19,63 +19,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # set up python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: pip
           cache-dependency-path: |
             pyproject.toml
 
-      # install the package with dev extras
       - name: Install package (+dev extras)
         run: |
           python -m pip install --upgrade pip
           pip install ".[dev]"
 
-      # store the model path in an env var
       - name: Locate judo.MODEL_PATH
         id: model
         run: |
           MODEL_DIR=$(python - <<'PY'
-          import importlib.util, pathlib, json, sys
+          import importlib.util, pathlib, sys
           spec = importlib.util.find_spec("judo")
           if spec is None or spec.origin is None:
               sys.exit("judo not found in env!")
-          pkg = pathlib.Path(spec.origin).parent  # .../site-packages/judo
-          print(pkg / "models")                   # prints full path
+          print((pathlib.Path(spec.origin).parent / "models").resolve())
           PY
           )
-          echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
+          echo "MODEL_DIR=$MODEL_DIR" >> "$GITHUB_ENV"
+          echo "model_dir=$MODEL_DIR" >> "$GITHUB_OUTPUT"
 
-      # restore (or populate) the cache at that exact path
       - name: Restore mesh cache
         id: meshcache
         uses: actions/cache@v4
         with:
-          path: ${{ env.MODEL_DIR }}
-          key:  ${{ runner.os }}-judo_meshes
+          path: ${{ steps.model.outputs.model_dir }}
+          key:  ${{ runner.os }}-${{ matrix.python-version }}-judo_meshes
 
-      # if the directory was empty, download once using the token
       - name: Download meshes (cache miss)
         if: steps.meshcache.outputs.cache-hit != 'true'
         env:
+          MODEL_DIR: ${{ steps.model.outputs.model_dir }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           python - <<'PY'
-          import pathlib, os, requests, zipfile, json
+          import os
           from judo.utils.assets import download_and_extract_meshes
           download_and_extract_meshes(extract_root=os.environ["MODEL_DIR"])
           PY
 
-      # log for sanity
       - name: Show cache outcome
         run: |
           echo "::notice::mesh cache hit = ${{ steps.meshcache.outputs.cache-hit }}"
-          echo "::notice::MODEL_DIR = $MODEL_DIR"
-          ls -R "$MODEL_DIR" | head
+          echo "::notice::MODEL_DIR = ${{ steps.model.outputs.model_dir }}"
+          ls -R "${{ steps.model.outputs.model_dir }}" | head
 
-      # run the tests
       - name: Test with pytest
         run: pytest -rsx
