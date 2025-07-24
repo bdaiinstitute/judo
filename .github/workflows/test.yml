@@ -50,7 +50,7 @@ jobs:
         run: |
           python - <<'PY'
           import judo
-          from judo.utils.mesh_downloader import download_and_extract_meshes
+          from judo.utils.assets import download_and_extract_meshes
           download_and_extract_meshes(extract_root=judo.MODEL_PATH)
           PY
   test:
