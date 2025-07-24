@@ -43,13 +43,13 @@ jobs:
         )
         echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
 
-    # # restore (or populate) the cache at that exact path
-    # - name: Restore mesh cache
-    #   id: meshcache
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: ${{ env.MODEL_DIR }}
-    #     key:  ${{ runner.os }}-judo_meshes
+    # restore (or populate) the cache at that exact path
+    - name: Restore mesh cache
+      id: meshcache
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.MODEL_DIR }}
+        key:  ${{ runner.os }}-judo_meshes
 
     # # if the directory was empty, download once using the token
     # - name: Download meshes (cache miss)
