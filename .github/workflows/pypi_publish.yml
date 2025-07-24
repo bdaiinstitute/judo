@@ -166,6 +166,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          repository-url: https://test.pypi.org/legacy/
           packages_dir: wheelhouse
           skip-existing: true
           provenance: true
