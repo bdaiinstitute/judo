@@ -66,6 +66,8 @@ jobs:
 
       - name: List all available artifacts (this might fail but that's okay)
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "=== Trying to list artifacts with gh CLI ==="
           gh run view ${{ github.run_id }} --json artifacts
