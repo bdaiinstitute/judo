@@ -11,13 +11,12 @@ concurrency:
 jobs:
   build-and-publish:
     runs-on: ${{ matrix.os }}
-    if: github.actor == 'alberthli' || github.actor == 'slecleach' || github.actor == 'pculbertson'
+    if: (github.actor == 'alberthli') || (github.actor == 'slecleach') || (github.actor == 'pculbertson')
     strategy:
       fail-fast: false  # run all jobs even if one fails
       matrix:
-        # cibw_arch is intentionally not set for non-macOS jobs to avoid accidental misuse later
         include:
-            # Linux (x86_64)
+          # Linux (x86_64)
           - os: "ubuntu-24.04"
             py: "3.10"
           - os: "ubuntu-24.04"
@@ -40,95 +39,54 @@ jobs:
           # macOS ARM (native)
           - os: "macos-14"
             py: "3.10"
-            cibw_arch: "arm64"
           - os: "macos-14"
             py: "3.11"
-            cibw_arch: "arm64"
           - os: "macos-14"
             py: "3.12"
-            cibw_arch: "arm64"
           - os: "macos-14"
             py: "3.13"
-            cibw_arch: "arm64"
 
           # macOS Intel (native)
           - os: "macos-13"
             py: "3.10"
-            cibw_arch: "x86_64"
           - os: "macos-13"
             py: "3.11"
-            cibw_arch: "x86_64"
           - os: "macos-13"
             py: "3.12"
-            cibw_arch: "x86_64"
           - os: "macos-13"
             py: "3.13"
-            cibw_arch: "x86_64"
 
     steps:
-      # initial setup
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py }}
           cache: pip
-      - name: Install build tools
-        run: |  # explicit upgrade first so new wheel lands in the cache
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade build cibuildwheel
 
-      # handle macos separately because passing an empty string can leak to non-mac jobs
-      - name: Set macOS arch env
-        if: startsWith(matrix.os, 'macos')
-        run: echo "CIBW_ARCHS_MACOS=${{ matrix.cibw_arch }}" >> "$GITHUB_ENV"
-
-      # cache cibuildwheel
-      - name: Cache cibuildwheel (Unix)
-        if: runner.os != 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/cibuildwheel
-          key: cibw-${{ runner.os }}-${{ matrix.py }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            cibw-${{ runner.os }}-${{ matrix.py }}-
-            cibw-${{ runner.os }}-
-      - name: Cache cibuildwheel (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\cibuildwheel\Cache
-          key: cibw-${{ runner.os }}-${{ matrix.py }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            cibw-${{ runner.os }}-${{ matrix.py }}-
-            cibw-${{ runner.os }}-
-
-      # build wheels and source distribution
-      - name: Set Python version (no dot)
-        run: echo "PY_NO_DOT=${{ matrix.py }}" | sed 's/\.//g' >> $GITHUB_ENV
-      - name: Build wheels
-        run: cibuildwheel --output-dir wheelhouse
-        env:
-          CIBW_BUILD: "cp${{ env.PY_NO_DOT }}-*"
-          CIBW_SKIP: "*-manylinux_i686 *-musllinux*"
-          CIBW_TEST_EXTRAS: "test"
-          CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: "pytest -q --import-mode=importlib"
-      - name: Build source distribution
-        if: matrix.os == 'ubuntu-24.04' && matrix.py == '3.13'  # avoids duplicate sdist builds
+      - name: Install build
         run: |
-          python -m build --sdist -o dist
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade build
 
-      # upload wheels and sdist
+      - name: Build wheel
+        run: python -m build --wheel --outdir wheelhouse
+
+      - name: Build source distribution
+        if: (matrix.os == 'ubuntu-24.04') && (matrix.py == '3.13')  # avoids duplicate sdist builds
+        run: python -m build --sdist -o dist
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.py }}-${{ github.run_id }}
           path: wheelhouse/*.whl
           retention-days: 7
+
       - name: Upload sdist
-        if: matrix.os == 'ubuntu-24.04' && matrix.py == '3.13'
+        if: (matrix.os == 'ubuntu-24.04') && (matrix.py == '3.13')  # only upload sdist once
         uses: actions/upload-artifact@v4
         with:
           name: sdist-${{ github.run_id }}
@@ -141,6 +99,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
     steps:
       - name: Download wheels
         uses: actions/download-artifact@v4
@@ -151,9 +110,9 @@ jobs:
           merge-multiple: true
           path: wheelhouse
 
-      # verify the metadata before publishing
       - name: Install twine
         run: pip install --upgrade twine
+
       - name: Verify metadata (twine)
         shell: bash
         run: |
