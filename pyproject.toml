@@ -54,10 +54,11 @@ packages = ["judo"]
 
 [project.optional-dependencies]
 # TODO: stabilize versions
+# the next commit in mujoco-warp (ca08923) has a huge performance regression!
 mjwarp = [
-    "mujoco @ https://py.mujoco.org/mujoco/mujoco-3.3.5.dev785536018-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "mujoco @ https://py.mujoco.org/mujoco/mujoco-3.3.5.dev786366034-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
     "warp-lang @ https://pypi.nvidia.com/warp-lang/warp_lang-1.9.0.dev20250722-py3-none-manylinux_2_28_x86_64.whl#sha256=34ac2b4e5db5b7b1765024579ba7cc264276cc040e4d5b89adf2a8d156dd2a04",
-    "mujoco-warp @ git+https://github.com/google-deepmind/mujoco_warp.git",
+    "mujoco-warp @ git+https://github.com/google-deepmind/mujoco_warp.git#e041fe09b5b38d5b71739c879cc49c2fa8bcbd6f",
     "packaging",
 ]
 docs = [
