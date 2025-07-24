@@ -110,6 +110,13 @@ jobs:
           merge-multiple: true
           path: wheelhouse
 
+      - name: "[DEBUG] list what's in wheelhouse"
+        run: |
+          echo "➤ Top-level of workspace:"
+          ls -1
+          echo "➤ wheelhouse directory tree:"
+          find wheelhouse -maxdepth 3 -type f | sed 's/^/  /'
+
       - name: Install twine
         run: pip install --upgrade twine
 
