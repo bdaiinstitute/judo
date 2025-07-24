@@ -82,25 +82,11 @@ jobs:
 
       - name: Verify package metadata
         run: |
-          echo "=== Looking for files everywhere ==="
-          find . -name "*.whl" -o -name "*.tar.gz"
-          echo "=== Checking if find returned anything ==="
-          if find . -name "*.whl" -o -name "*.tar.gz" | grep -q .; then
-            echo "Found files, running twine check"
-            find . -name "*.whl" -o -name "*.tar.gz" | xargs twine check
-          else
-            echo "No files found, twine check would fail"
-            echo "Listing all files in workspace:"
-            find . -type f -name "*" | head -20
-          fi
+          twine check $(find . -name "*.whl") $(find . -name "*.tar.gz")
 
-      # - name: Verify package metadata
-      #   run: |
-      #     twine check $(find . -name "*.whl") $(find . -name "*.tar.gz")
-
-      # - name: Publish to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     repository-url: https://test.pypi.org/legacy/
-      #     skip-existing: true
-      #     provenance: true
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          provenance: true
