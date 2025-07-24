@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "judo-rai-test"
+name = "judo-rai"
 description = "Judo: a hackable sampling-based MPC toolbox"
 version = "0.0.4"
 readme = "README.md"
@@ -62,7 +62,7 @@ docs = [
     "sphinxcontrib-programoutput-rai",
 ]
 dev = [
-    "judo-rai-test[docs]",
+    "judo-rai[docs]",
     "pre-commit",
     "pybind11-stubgen",
     "pyright",
@@ -173,7 +173,7 @@ channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-64"]
 
 [tool.pixi.pypi-dependencies]
-judo-rai-test = { path = ".", editable = true }
+judo-rai = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
