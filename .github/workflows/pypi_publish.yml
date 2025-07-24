@@ -1,39 +1,62 @@
 name: Build and Publish to PyPI
 
+# triggered manually only
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   build-and-publish:
-    name: Build and Publish to PyPI
-    runs-on: ubuntu-24.04  # cibuildwheel handles all target variants internally
+    runs-on: ${{ matrix.os }}
     if: github.actor == 'alberthli' || github.actor == 'slecleach' || github.actor == 'pculbertson'
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04, macos-14, windows-latest]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'  # runner's version; cibuildwheel handles the rest
+          python-version: "3.13"  # we use 3.13 for building wheels, but we support 3.10-3.13
 
       - name: Install cibuildwheel
         run: python -m pip install --upgrade cibuildwheel
-
       - name: Build wheels
-        run: |
-          cibuildwheel --output-dir wheelhouse
+        run: cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD: "cp310-* cp311-* cp312-* cp313-*"
           CIBW_SKIP: "*-manylinux_i686 *-musllinux*"
           CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_ARCHS_MACOS: "universal2"
+          CIBW_ARCHS_WINDOWS: "AMD64"
+      - name: Build source distribution
+        if: matrix.os == 'ubuntu-24.04'  # avoids duplicate sdist build on other OSes
+        run: |
+          python -m pip install build
+          python -m build --sdist -o wheelhouse
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse
+
+  publish:
+    needs: build-and-publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: wheelhouse
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
           packages_dir: wheelhouse
+          skip-existing: true
