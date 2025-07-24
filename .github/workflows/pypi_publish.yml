@@ -74,9 +74,22 @@ jobs:
       - name: Build wheel
         run: python -m build --wheel --outdir wheelhouse
 
+      - name: "[DEBUG] List contents of wheelhouse before upload"
+        run: |
+          echo "Contents of 'wheelhouse' directory:"
+          ls -R wheelhouse/
+          echo "--- End wheelhouse contents ---"
+
       - name: Build source distribution
         if: (matrix.os == 'ubuntu-24.04') && (matrix.py == '3.13')  # avoids duplicate sdist builds
         run: python -m build --sdist -o dist
+
+      - name: "[DEBUG] List contents of dist before upload"
+        if: (matrix.os == 'ubuntu-24.04') && (matrix.py == '3.13') # Only for the sdist job
+        run: |
+          echo "Contents of 'dist' directory:"
+          ls -R dist/
+          echo "--- End dist contents ---"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
