@@ -118,8 +118,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: |
-            wheels-*
-            sdist-*
+            - 'wheels-*'
+            - 'sdist-*'
           merge-multiple: true
           path: wheelhouse
 
