@@ -39,7 +39,7 @@ jobs:
           import importlib.metadata as imd, pathlib, site, sys
 
           try:
-              dist = imd.distribution("judo")
+              dist = imd.distribution("judo-rai")
           except imd.PackageNotFoundError:
               sys.exit("judo not found")
 
@@ -49,13 +49,13 @@ jobs:
           # handle both src layout and wheel layout
           candidate = site_pkg_root / "judo" / "models"
           if candidate.exists():
-              print(candidate)
+              print(str(candidate))
           else:
               # fallback: search all site-packages for safety
               for sp in site.getsitepackages():
                   c = pathlib.Path(sp) / "judo" / "models"
                   if c.exists():
-                      print(c)
+                      print(str(c))
                       break
           PY
           )
