@@ -35,7 +35,7 @@ class MjwarpRolloutBackend(AbstractRolloutBackend):
         # TEMPORARY: Patch MJ_CCD_ITERATIONS globally for the session
         # Once this PR is resolved, remove the monkey patch logic:
         # https://github.com/google-deepmind/mujoco_warp/issues/456
-        patch_mj_ccd_iterations(24)
+        patch_mj_ccd_iterations(12)  # default
 
         # from mujoco_warp._src.types import BroadphaseFilter, BroadphaseType
 
