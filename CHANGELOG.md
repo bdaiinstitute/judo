@@ -10,6 +10,9 @@ This release adds the much-requested MuJoCo Warp rollout backend, which allows G
 
 # v0.0.4
 
+## Added
+* Included functions for simpler model indexing for sensors and joints (@bhung-bdai, @alberthli, #76)
+
 ## Fixed
 * Fixed bug after spec changes where unnamed geoms were causing `judo` to crash (@alberthli, @pculbertson, #72)
 
