@@ -66,8 +66,8 @@ class MjwarpRolloutBackend(AbstractRolloutBackend):
             self.mjm,
             self.mjd,
             nworld=num_threads,
-            nconmax=10000,
-            njmax=40000,
+            nconmax=10000,  # over all worlds
+            njmax=10,  # per world
         )  # TODO: expose these options as parameters in a rollout backend
         self.reset_graph = self.create_reset_graph(self.mwm, self.mwd)
         self.rollout_graph = self.create_rollout_graph(self.mwm, self.mwd)
