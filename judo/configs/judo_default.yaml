@@ -1,5 +1,6 @@
 task: cylinder_push
 optimizer: cem
+rollout_backend: mujoco
 
 dataflow:
   nodes:
@@ -98,6 +99,7 @@ node_definitions:
     init_optimizer: ${optimizer}
     task_registration_cfg: ${custom_tasks}
     optimizer_registration_cfg: ${custom_optimizers}
+    rollout_backend: ${rollout_backend}
 
 custom_tasks: null
 custom_optimizers: null
