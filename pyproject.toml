@@ -63,6 +63,7 @@ docs = [
 ]
 dev = [
     "judo-rai[docs]",
+    "pixi-diff-to-markdown",
     "pre-commit",
     "pybind11-stubgen",
     "pyright",
