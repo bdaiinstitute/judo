@@ -10,8 +10,8 @@ from scipy.interpolate import interp1d
 from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
+from judo.rollout import MjwarpRolloutBackend, MujocoRolloutBackend
 from judo.tasks.base import Task, TaskConfig
-from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
 from judo.utils.normalization import (
     IdentityNormalizer,
     Normalizer,
@@ -46,7 +46,7 @@ class Controller:
         task_config: TaskConfig,
         optimizer: Optimizer,
         optimizer_config: OptimizerConfig,
-        rollout_backend: Literal["mujoco"] = "mujoco",
+        rollout_backend: Literal["mujoco", "mjwarp"] = "mujoco",
     ) -> None:
         """Initialize the controller.
 
@@ -67,9 +67,22 @@ class Controller:
         self.optimizer_cfg = optimizer_config
 
         self.model = task.model
-        self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        self.last_num_timesteps = self.num_timesteps  # for checking whether we should update backend based on timesteps
+        if rollout_backend == "mujoco":
+            self.rollout_backend = MujocoRolloutBackend(
+                self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+                num_steps=self.num_timesteps,
+            )
+        elif rollout_backend == "mjwarp":
+            self.rollout_backend = MjwarpRolloutBackend(
+                self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+                num_steps=self.num_timesteps,
+            )
+        else:
+            raise ValueError(f"Unknown rollout backend: {rollout_backend}")
 
         self.action_normalizer = self._init_action_normalizer()
 
@@ -144,9 +157,11 @@ class Controller:
         nominal_knots_normalized = self.action_normalizer.normalize(nominal_knots)
 
         # resizing any variables due to changes in the GUI
-        if len(self.model_data_pairs) != self.optimizer_cfg.num_rollouts:
-            self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
-            self.rollout_backend.update(self.optimizer_cfg.num_rollouts)
+        threads_changed = self.optimizer_cfg.num_rollouts != self.rollout_backend.num_threads
+        timesteps_changed = self.num_timesteps != self.last_num_timesteps
+        if threads_changed or timesteps_changed:
+            self.rollout_backend.update(self.optimizer_cfg.num_rollouts, num_steps=self.num_timesteps)
+            self.last_num_timesteps = self.num_timesteps
 
         normalizer_cls = normalizer_registry.get(self.action_normalizer_type)
         if normalizer_cls is None:
@@ -184,11 +199,7 @@ class Controller:
 
             # Roll out dynamics with action sequences.
             self.task.pre_rollout(curr_state, self.task_cfg)
-            self.states, self.sensors = self.rollout_backend.rollout(
-                self.model_data_pairs,
-                curr_state,
-                self.rollout_controls,
-            )
+            self.states, self.sensors = self.rollout_backend.rollout(curr_state, self.rollout_controls)
             self.task.post_rollout(
                 self.states,
                 self.sensors,

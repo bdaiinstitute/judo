@@ -44,6 +44,7 @@ conda activate judo
 pip install -e .[dev]  # includes docs dependencies
 pre-commit install
 pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
+pybind11-stubgen warp -o typings/
 ```
 
 #### Pixi
@@ -61,6 +62,7 @@ pixi shell -e dev
 # first time only
 pre-commit install
 pybind11-stubgen mujoco -o typings/
+pybind11-stubgen warp -o typings/
 ```
 
 ## 2. Run the `judo` app!

@@ -38,7 +38,9 @@ jobs:
 
       - name: Generate stubs if cache miss
         if: steps.typings-cache.outputs.cache-hit != 'true'
-        run: pixi run -e dev pybind11-stubgen mujoco -o typings/
+        run: |
+          pixi run -e dev pybind11-stubgen mujoco -o typings/
+          pixi run -e dev pybind11-stubgen warp -o typings/
 
       - name: Run Ruff Linter
         run: pixi run -e dev ruff check judo/ tests/ --output-format=github
