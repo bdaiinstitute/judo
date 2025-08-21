@@ -42,25 +42,34 @@ class MyTask(Task[MyTaskConfig]):
 If the system is our `SimulationNode` object, then there are two copies of the `Task` in the system and the controller respectively. The `SimulationNode` is responsible for stepping the `mujoco` simulation, while the `Controller` is responsible for rolling out the task. We expose functions for modifying the task before and after each of these steps. Additionally, we also allow a task-specific optimizer warm start, which is useful for tasks that require some initial setup before the optimization loop starts. The interface for these functions is as follows:
 ```python
 class MyTask(Task[MyTaskConfig]):
-    def pre_rollout(self, curr_state: np.ndarray, rollout_controls: np.ndarray, config: MyTaskConfig) -> None:
+    def pre_rollout(
+        self,
+        curr_state: np.ndarray,
+        rollout_times: np.ndarray,
+        rollout_controls: np.ndarray,
+        config: MyTaskConfig,
+    ) -> None:
         """Pre-rollout behavior for task (does nothing by default).
 
         Args:
             curr_state: Current state of the task. Shape=(nq + nv,).
+            rollout_times: The rollout times for the current rollout (global time). Shape=(T,).
             rollout_controls: The intended controls to apply during the rollout - can modify in place. Shape=(T, nu).
+            config: The current task config (passed in from the top-level controller).
         """
 
     def post_rollout(
         self,
         states: np.ndarray,
         sensors: np.ndarray,
+        times: np.ndarray,
         controls: np.ndarray,
         config: MyTaskConfig,
         system_metadata: dict[str, Any] | None = None,
     ) -> None:
         """Post-rollout behavior for task (does nothing by default).
 
-        Same inputs as in reward function.
+        Same inputs as in reward function except times, which are the global rollout times associated with controls.
         """
 
     def pre_sim_step(self) -> None:
