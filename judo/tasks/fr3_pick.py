@@ -198,7 +198,7 @@ class FR3Pick(Task[FR3PickConfig]):
         dist = sensors[:, :, i]
         return dist
 
-    def pre_rollout(self, curr_state: np.ndarray, config: FR3PickConfig) -> None:
+    def pre_rollout(self, curr_state: np.ndarray, rollout_controls: np.ndarray, config: FR3PickConfig) -> None:
         """Computes the current phase of the system."""
         # update the data object associated with the current state
         self._data.qpos[:] = curr_state[: self.model.nq]

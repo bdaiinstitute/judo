@@ -89,11 +89,12 @@ class Task(ABC, Generic[ConfigT]):
         """Returns Mujoco physics timestep for default physics task."""
         return self.model.opt.timestep
 
-    def pre_rollout(self, curr_state: np.ndarray, config: ConfigT) -> None:
+    def pre_rollout(self, curr_state: np.ndarray, rollout_controls: np.ndarray, config: ConfigT) -> None:
         """Pre-rollout behavior for task (does nothing by default).
 
         Args:
             curr_state: Current state of the task. Shape=(nq + nv,).
+            rollout_controls: The intended controls to apply during the rollout - can modify in place. Shape=(T, nu).
             config: The current task config (passed in from the top-level controller).
         """
 
