@@ -17,15 +17,15 @@ jobs:
         os: [ubuntu-22.04, ubuntu-24.04]
         python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: prefix-dev/setup-pixi@v0.8.12
+      - uses: prefix-dev/setup-pixi@v0.9.0
         with:
           pixi-version: latest
           cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
