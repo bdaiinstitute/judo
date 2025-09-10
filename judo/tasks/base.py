@@ -94,20 +94,6 @@ class Task(ABC, Generic[ConfigT]):
         """Returns Mujoco physics timestep for default physics task."""
         return self.model.opt.timestep
 
-    def task_to_sim_ctrl(self, controls: np.ndarray) -> np.ndarray:
-        """Maps the controls from the optimizer to the controls used in the simulation.
-
-        This can be overridden by tasks that have different control mappings. By default, it is the identity
-        function.
-
-        Args:
-            controls: The controls from the optimizer. Shape=(num_rollouts, T, nu).
-
-        Returns:
-            mapped_controls: The controls to be used in the simulation. Shape=(num_rollouts, T, nu).
-        """
-        return controls
-
     def pre_rollout(self, curr_state: np.ndarray, config: ConfigT) -> None:
         """Pre-rollout behavior for task (does nothing by default).
 

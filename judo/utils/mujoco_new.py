@@ -1,7 +1,6 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
 import time
-from copy import deepcopy
 from typing import Literal
 
 import numpy as np
@@ -9,12 +8,9 @@ from mujoco import MjData, MjModel, mj_step
 from mujoco.rollout import Rollout
 
 
-def make_model_data_pairs(model: MjModel, num_pairs: int) -> list[tuple[MjModel, MjData]]:
-    """Create model/data pairs for mujoco threaded rollout."""
-    models = [deepcopy(model) for _ in range(num_pairs)]
-    datas = [MjData(m) for m in models]
-    model_data_pairs = list(zip(models, datas, strict=True))
-    return model_data_pairs
+def task_to_sim_ctrl(controls: np.ndarray) -> np.ndarray:
+    """Maps the 3D control input to the 2D control input for Mujoco."""
+    return controls[..., :2]
 
 
 class RolloutBackend:
@@ -57,15 +53,16 @@ class RolloutBackend:
         # shape = (num_rollouts, num_states + 1)
         x0_batched = np.tile(x0, (len(ms), 1))
         full_states = np.concatenate([time.time() * np.ones((len(ms), 1)), x0_batched], axis=-1)
+        processed_controls = task_to_sim_ctrl(controls)
         assert full_states.shape[-1] == nq + nv + 1
         assert full_states.ndim == 2
-        assert controls.ndim == 3
-        assert controls.shape[-1] == nu
-        assert controls.shape[0] == full_states.shape[0]
+        assert processed_controls.ndim == 3
+        assert processed_controls.shape[-1] == nu
+        assert processed_controls.shape[0] == full_states.shape[0]
 
         # rollout
         if self.backend == "mujoco":
-            _states, _out_sensors = self.rollout_func(ms, ds, full_states, controls)
+            _states, _out_sensors = self.rollout_func(ms, ds, full_states, processed_controls)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
         out_states = np.array(_states)[..., 1:]  # remove time from state
@@ -86,5 +83,5 @@ class SimBackend:
 
     def sim(self, sim_model: MjModel, sim_data: MjData, sim_controls: np.ndarray) -> None:
         """Conduct a simulation step."""
-        sim_data.ctrl[:] = sim_controls
+        sim_data.ctrl[:] = task_to_sim_ctrl(sim_controls)
         mj_step(sim_model, sim_data)

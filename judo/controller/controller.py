@@ -69,9 +69,7 @@ class Controller:
         self.model = task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = task.RolloutBackend(
-            num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend, task_to_sim_ctrl=task.task_to_sim_ctrl
-        )
+        self.rollout_backend = task.RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
 
         self.action_normalizer = self._init_action_normalizer()
 

@@ -49,7 +49,7 @@ class SimulationNode(DoraNode):
 
         self.task: Task = task_cls()
         self.task_config = task_config_cls()
-        self.sim_backend = self.task.SimBackend(task_to_sim_ctrl=self.task.task_to_sim_ctrl)
+        self.sim_backend = self.task.SimBackend()
         self.task.reset()
 
     @on_event("INPUT", "task")
