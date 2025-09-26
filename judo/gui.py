@@ -247,7 +247,7 @@ def _get_callback(
         """Updates the config with the new value received from viser."""
         if isinstance(element, GuiSliderHandle):
             # Validate that slider value is never less than 0
-            if element.value <= 0:
+            if element.value <= 0 and element.min > 0:
                 warnings.warn(
                     f"Warning: Slider '{element_name}' value must be greater than 0, Setting {element.value} to {element.min}",
                     stacklevel=2,
