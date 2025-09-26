@@ -12,7 +12,12 @@ from judo.tasks.base import Task, TaskConfig
 
 
 class SimulationData:
-    """The simulation node."""
+    """Data container for the simulation node.
+
+    This class is a small container which includes the data required for a simulation  node to run. This include
+    configurations, a control spline, and task information. Middleware nodes should keep data within this class and
+    implement methods to send, process, and receive data from here.
+    """
 
     def __init__(
         self,

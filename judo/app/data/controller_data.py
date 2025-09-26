@@ -1,5 +1,5 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
-# TODO(@bhung): We need to figure out how to properly test this/
+# TODO(@bhung): We need to figure out how to properly test this.
 
 import time
 from typing import Any
@@ -18,8 +18,8 @@ class ControllerData:
     """Base class that encompasses the minimal amount of data for a controller node to access.
 
     This class is a small container which includes the data required for a node to run. This include configurations,
-    a controller, task information, and an optimizer. Middleware nodes should inherit from this class and implement
-    methods to send, process, and receive data.
+    a controller, task information, and an optimizer. Middleware nodes should keep data within this class and
+    implement methods to send, process, and receive data from here.
     """
 
     def __init__(
