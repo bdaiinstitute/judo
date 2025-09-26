@@ -246,6 +246,21 @@ def _get_callback(
     def gui_callback(_: GuiEvent) -> None:
         """Updates the config with the new value received from viser."""
         if isinstance(element, GuiSliderHandle):
+            # Validate that slider value is never less than 0
+            if element.value <= 0:
+                warnings.warn(
+                    f"Warning: Slider '{element_name}' value must be greater than 0, Setting {element.value} to {element.min}",
+                    stacklevel=2,
+                )
+                element.value = element.min
+
+            elif np.isnan(element.value):
+                warnings.warn(
+                    f"Warning: Slider '{element_name}' value is NaN.  Setting {element.value} to {element.min}",
+                    stacklevel=2,
+                )
+                element.value = element.min
+
             # if value exceeds the bounds, update the bounds
             if element.value < element.min or element.value > element.max:
                 element.min = min(element.min, element.value)
