@@ -1,4 +1,5 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
+# TODO(@bhung): We need to figure out how to properly test this/
 
 import time
 from typing import Any
@@ -9,8 +10,8 @@ from omegaconf import DictConfig
 from judo.app.structs import MujocoState, SplineData
 from judo.app.utils import register_optimizers_from_cfg, register_tasks_from_cfg
 from judo.controller import Controller, ControllerConfig
-from judo.optimizers import get_registered_optimizers
-from judo.tasks import get_registered_tasks
+from judo.optimizers import Optimizer, OptimizerConfig, OptimizerConfigType, OptimizerType, get_registered_optimizers
+from judo.tasks import Task, TaskConfig, TaskConfigType, TaskType, get_registered_tasks
 
 
 class ControllerData:
@@ -71,7 +72,14 @@ class ControllerData:
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])
         self.curr_time = self.task.data.time
 
-    def update_task(self, task_cls: Any, task_config_cls: Any, task: Any, task_config: Any, optimizer: Any) -> None:
+    def update_task(
+        self,
+        task_cls: TaskType,
+        task_config_cls: TaskConfigType,
+        task: Task,
+        task_config: TaskConfig,
+        optimizer: OptimizerType,
+    ) -> None:
         """Updates the task, task config, and optimizer.
 
         Args:
@@ -133,7 +141,11 @@ class ControllerData:
         self.paused = not self.paused
 
     def update_optimizer(
-        self, optimizer: Any, optimizer_config_cls: Any, optimizer_config: Any, optimizer_cls: Any
+        self,
+        optimizer: Optimizer,
+        optimizer_config_cls: OptimizerConfigType,
+        optimizer_config: OptimizerConfig,
+        optimizer_cls: OptimizerType,
     ) -> None:
         """Updates the optimizer based on a given name."""
         self.optimizer = optimizer

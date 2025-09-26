@@ -8,7 +8,7 @@ from dora_utils.dataclasses import from_event, to_arrow
 from dora_utils.node import DoraNode, on_event
 from omegaconf import DictConfig
 
-from judo.app.controller_data import ControllerData
+from judo.app.data.controller_data import ControllerData
 from judo.app.structs import MujocoState
 
 
