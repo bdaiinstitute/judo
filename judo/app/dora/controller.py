@@ -10,6 +10,7 @@ from omegaconf import DictConfig
 
 from judo.app.data.controller_data import ControllerData
 from judo.app.structs import MujocoState
+from judo.controller import ControllerConfig
 
 
 class ControllerNode(DoraNode):
@@ -81,7 +82,7 @@ class ControllerNode(DoraNode):
     @on_event("INPUT", "controller_config")
     def update_controller_config(self, event: dict) -> None:
         """Callback to update controller config on receiving a new config message."""
-        self._data.controller_config = from_event(event, self._data.controller_config_cls)
+        self._data.controller_config = from_event(event, ControllerConfig)
         self._data.controller.controller_cfg = self._data.controller_config
 
     @on_event("INPUT", "optimizer_config")

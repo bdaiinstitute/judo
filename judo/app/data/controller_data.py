@@ -57,8 +57,7 @@ class ControllerData:
         self.optimizer_config = self.optimizer_config_cls()
         self.optimizer = self.optimizer_cls(self.optimizer_config, self.task.nu)
 
-        self.controller_config_cls = ControllerConfig
-        self.controller_config = self.controller_config_cls()
+        self.controller_config = ControllerConfig()
         self.controller_config.set_override(task_name)
         self.controller = Controller(
             self.controller_config,

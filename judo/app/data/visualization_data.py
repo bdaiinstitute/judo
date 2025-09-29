@@ -79,10 +79,9 @@ class VisualizationData:
         """
         # as opposed to the optimizer, there is only one Controller class, so for each task, we simply need to specify
         # the controller parameter overrides
-        cfg_cls = ControllerConfig
         for task_name in controller_override_cfg.keys():
             field_override_values = controller_override_cfg.get(task_name, {})
-            set_config_overrides(str(task_name), cfg_cls, field_override_values)
+            set_config_overrides(str(task_name), ControllerConfig, field_override_values)
 
     def register_optimizer_config_overrides(self, optimizer_override_cfg: DictConfig) -> None:
         """Register task-specific optimizer config overrides.
@@ -122,8 +121,7 @@ class VisualizationData:
 
         self.controller_config_lock = threading.Lock()
         self.controller_config_updated = threading.Event()
-        self.controller_config_cls = ControllerConfig
-        self.controller_config = self.controller_config_cls()
+        self.controller_config = ControllerConfig()
         self.controller_config.set_override(task)
 
         self.optimizer_lock = threading.Lock()

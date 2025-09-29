@@ -1,5 +1,5 @@
 defaults:
-  - judo_default
+  - judo_dora_default
 
 dataflow:
   nodes:
