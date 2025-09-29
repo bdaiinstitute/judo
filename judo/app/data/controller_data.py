@@ -11,7 +11,7 @@ from judo.app.structs import MujocoState, SplineData
 from judo.app.utils import register_optimizers_from_cfg, register_tasks_from_cfg
 from judo.controller import Controller, ControllerConfig
 from judo.optimizers import Optimizer, OptimizerConfig, OptimizerConfigType, OptimizerType, get_registered_optimizers
-from judo.tasks import Task, TaskConfig, TaskConfigType, TaskType, get_registered_tasks
+from judo.tasks import Task, TaskConfig, get_registered_tasks
 
 
 class ControllerData:
@@ -73,8 +73,6 @@ class ControllerData:
 
     def update_task(
         self,
-        task_cls: TaskType,
-        task_config_cls: TaskConfigType,
         task: Task,
         task_config: TaskConfig,
         optimizer: OptimizerType,

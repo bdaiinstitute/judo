@@ -48,7 +48,7 @@ class ControllerNode(DoraNode):
             self._data.optimizer_config.set_override(new_task)
             optimizer = self._data.optimizer_cls(self._data.optimizer_config, task.nu)
             with self.lock:
-                self._data.update_task(task_cls, task_config_cls, task, task_config, optimizer)
+                self._data.update_task(task, task_config, optimizer)
                 self.write_controls()
         else:
             raise ValueError(f"Task {new_task} not found in task registry.")
