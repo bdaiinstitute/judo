@@ -38,9 +38,9 @@ class ControllerData:
         self.paused = False
         self.available_optimizers = get_registered_optimizers()
         self.available_tasks = get_registered_tasks()
-        self.setup(init_task, init_optimizer)
+        self._setup(init_task, init_optimizer)
 
-    def setup(self, task_name: str, optimizer_name: str) -> None:
+    def _setup(self, task_name: str, optimizer_name: str) -> None:
         """Set up the task and optimizer for the controller."""
         task_entry = self.available_tasks.get(task_name)
         optimizer_entry = self.available_optimizers.get(optimizer_name)
@@ -49,11 +49,11 @@ class ControllerData:
         assert optimizer_entry is not None, f"Optimizer {optimizer_name} not found in optimizer registry."
 
         # instantiate the task/optimizer/controller
-        self.task_cls, self.task_config_cls = task_entry
+        task_cls, task_config_cls = task_entry
         self.optimizer_cls, self.optimizer_config_cls = optimizer_entry
 
-        self.task = self.task_cls()
-        self.task_config = self.task_config_cls()
+        self.task = task_cls()
+        self.task_config = task_config_cls()
         self.optimizer_config = self.optimizer_config_cls()
         self.optimizer = self.optimizer_cls(self.optimizer_config, self.task.nu)
 
@@ -88,8 +88,6 @@ class ControllerData:
             task_config: The task config instance.
             optimizer: The optimizer instance.
         """
-        self.task_cls = task_cls
-        self.task_config_cls = task_config_cls
         self.task = task
         self.task_config = task_config
         self.optimizer = optimizer
