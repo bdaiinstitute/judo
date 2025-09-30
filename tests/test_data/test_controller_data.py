@@ -25,7 +25,9 @@ def test_controller_data_update_task() -> None:
     assert controller_data.optimizer is not None
     assert controller_data.controller is not None
     assert isinstance(controller_data.optimizer, CrossEntropyMethod)
-    mppi_opt, _ = controller_data.available_optimizers.get("mppi")
+    res = controller_data.available_optimizers.get("mppi")
+    assert res is not None
+    mppi_opt, _ = res
     controller_data.update_task(
         task=Cartpole(),
         task_config=CartpoleConfig(),

@@ -141,3 +141,8 @@ class VisualizationNode(DoraNode):
                 self.write_task_config()
 
             self.handle(event)
+
+    def cleanup(self) -> None:
+        """Cleanup the visualization node."""
+        self._data.cleanup()
+        super().cleanup()

@@ -77,7 +77,7 @@ class ControllerNode(DoraNode):
             with self.lock:
                 self._data.update_optimizer(optimizer, optimizer_config_cls, optimizer_config, optimizer_cls)
         else:
-            raise ValueError(f"Optimizer {new_optimizer_name} not found in optimizer registry.")
+            raise ValueError(f"Optimizer {new_optimizer} not found in optimizer registry.")
 
     @on_event("INPUT", "controller_config")
     def update_controller_config(self, event: dict) -> None:

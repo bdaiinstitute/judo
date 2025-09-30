@@ -75,7 +75,7 @@ class ControllerData:
         self,
         task: Task,
         task_config: TaskConfig,
-        optimizer: OptimizerType,
+        optimizer: Optimizer,
     ) -> None:
         """Updates the task, task config, and optimizer.
 
@@ -150,6 +150,6 @@ class ControllerData:
         self.optimizer_cls = optimizer_cls
 
     @property
-    def spline_data(self) -> np.ndarray:
+    def spline_data(self) -> SplineData:
         """Returns the spline data for the current state."""
         return SplineData(self.controller.times, self.controller.nominal_knots)

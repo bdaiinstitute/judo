@@ -359,4 +359,3 @@ class VisualizationData:
         self._remove_gui_elements()
         self.server.flush()
         self.server.stop()
-        super().cleanup()

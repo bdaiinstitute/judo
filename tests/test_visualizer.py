@@ -4,6 +4,7 @@ import mujoco
 import numpy as np
 import pytest
 from trimesh.creation import box
+from trimesh.visual import TextureVisuals
 from viser import ViserServer
 
 from judo import MODEL_PATH
@@ -80,6 +81,7 @@ def test_set_mesh_color() -> None:
     expected_int = rgba_float_to_int(rgba)
     # Check a few face colors (all should be set to the same integer color)
     assert mesh.visual is not None, "Mesh visual is None"
+    assert isinstance(mesh.visual, TextureVisuals), "Mesh visual material is not a TextureVisuals"
     assert np.array_equal(mesh.visual.material.main_color, expected_int), (
         "set_mesh_color did not set the color correctly"
     )
