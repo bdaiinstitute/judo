@@ -328,7 +328,6 @@ class VisualizationData:
             self._remove_gui_elements()
 
             # set up the entire visualizer from scratch
-            # TODO(@bhung): Need to know if this actually causes problems or not
             with self.task_lock:
                 self.set_task(self.task_name, self.optimizer_name)
 

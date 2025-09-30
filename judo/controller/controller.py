@@ -22,7 +22,7 @@ from judo.utils.normalization import (
 from judo.visualizers.utils import get_trace_sensors
 
 
-@slider("horizon", 0.1, 10.0)
+@slider("horizon", 0.1, 10.0, bounded=True)
 @slider("control_freq", 0.25, 50.0)
 @dataclass
 class ControllerConfig(OverridableConfig):
