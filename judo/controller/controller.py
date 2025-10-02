@@ -45,7 +45,6 @@ class Controller:
         task: Task,
         task_config: TaskConfig,
         optimizer: Optimizer,
-        optimizer_config: OptimizerConfig,
         rollout_backend: Literal["mujoco"] = "mujoco",
     ) -> None:
         """Initialize the controller.
@@ -55,7 +54,6 @@ class Controller:
             task: The Task object that specifies the environment.
             task_config: The configuration for the task.
             optimizer: The optimizer object that will be used for optimization.
-            optimizer_config: The configuration for the optimizer.
             rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
         """
         self.controller_cfg = controller_config
@@ -64,7 +62,6 @@ class Controller:
         self.task_cfg = task_config
 
         self.optimizer = optimizer
-        self.optimizer_cfg = optimizer_config
 
         self.model = task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
@@ -128,6 +125,11 @@ class Controller:
     def spline_timesteps(self) -> np.ndarray:
         """Helper function to create new timesteps for spline queries."""
         return np.linspace(0, self.horizon, self.optimizer_cfg.num_nodes, endpoint=True)
+
+    @property
+    def optimizer_cfg(self) -> OptimizerConfig:
+        """Helper function to get the optimizer config."""
+        return self.optimizer.config
 
     def update_action(self, curr_state: np.ndarray, curr_time: float) -> None:
         """Abstract method for updating controller actions from current state/time."""

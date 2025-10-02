@@ -52,7 +52,6 @@ def test_max_opt_iters(temp_np_seed: Callable) -> None:
             task,
             task_config,
             opt,
-            ps_config,
             rollout_backend="mujoco",
         )
         return opt, controller
@@ -92,7 +91,6 @@ def test_update_action() -> None:
             task,
             task_config,
             opt,
-            opt_cfg,
             rollout_backend="mujoco",
         )
         return controller

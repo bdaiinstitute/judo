@@ -131,7 +131,6 @@ def test_normalizer_type_change() -> None:
         task,
         task_config,
         optimizer,
-        optimizer_config,
         rollout_backend="mujoco",
     )
 
@@ -164,7 +163,6 @@ def test_normalizer_in_update_action_loop() -> None:
             task,
             task_config,
             optimizer,
-            optimizer_config,
             rollout_backend="mujoco",
         )
 
@@ -188,7 +186,6 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
         task,
         task_config,
         optimizer,
-        optimizer_config,
         rollout_backend="mujoco",
     )
 
@@ -227,7 +224,6 @@ def test_running_normalizer_updates_with_optimizer_data() -> None:
         task,
         task_config,
         optimizer,
-        optimizer_config,
         rollout_backend="mujoco",
     )
 

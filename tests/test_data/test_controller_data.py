@@ -64,15 +64,11 @@ def test_update_optimizer() -> None:
     assert isinstance(controller_data.optimizer, CrossEntropyMethod)
     controller_data.update_optimizer(
         optimizer=MPPI(controller_data.optimizer_config, controller_data.task.nu),
-        optimizer_config_cls=MPPIConfig,
-        optimizer_config=MPPIConfig(),
-        optimizer_cls=MPPI,
     )
     assert isinstance(controller_data.optimizer, MPPI)
     assert isinstance(controller_data.optimizer_config, MPPIConfig)
     assert isinstance(controller_data.controller.optimizer, MPPI)
     assert controller_data.optimizer_cls == MPPI
-    assert controller_data.optimizer_config_cls == MPPIConfig
 
 
 def test_spline_data() -> None:

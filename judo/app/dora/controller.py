@@ -45,7 +45,7 @@ class ControllerNode(DoraNode):
             task_cls, task_config_cls = task_entry
             task = task_cls()
             task_config = task_config_cls()
-            optimizer = self._data.optimizer_cls(self._data.optimizer_config, task.nu, new_task)
+            optimizer = self._data.optimizer_cls(self._data.optimizer_config, task.nu)
             with self.lock:
                 self._data.update_task(task, task_config, optimizer)
                 self.write_controls()
@@ -72,7 +72,7 @@ class ControllerNode(DoraNode):
         if optimizer_entry is not None:
             optimizer_cls, optimizer_config_cls = optimizer_entry
             optimizer_config = optimizer_config_cls()
-            optimizer = optimizer_cls(optimizer_config, self._data.task.nu, self._data.task.name)
+            optimizer = optimizer_cls(optimizer_config, self._data.task.nu)
             with self.lock:
                 self._data.update_optimizer(optimizer)
         else:

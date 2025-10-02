@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 from judo.app.structs import MujocoState, SplineData
 from judo.app.utils import register_optimizers_from_cfg, register_tasks_from_cfg
 from judo.controller import Controller, ControllerConfig
-from judo.optimizers import Optimizer, get_registered_optimizers
+from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
 from judo.tasks import Task, TaskConfig, get_registered_tasks
 
 
@@ -56,8 +56,8 @@ class ControllerData:
 
         self.task = task_cls()
         self.task_config = task_config_cls()
-        self.optimizer_config = optimizer_config_cls()
-        self.optimizer = optimizer_cls(self.optimizer_config, self.task.nu)
+        optimizer_config = optimizer_config_cls()
+        optimizer = optimizer_cls(optimizer_config, self.task.nu)
 
         self.controller_config = ControllerConfig()
         self.controller_config.set_override(task_name)
@@ -65,8 +65,7 @@ class ControllerData:
             self.controller_config,
             self.task,
             self.task_config,
-            self.optimizer,
-            self.optimizer_config,
+            optimizer,
         )
 
         # Initialize the task data.
@@ -74,14 +73,24 @@ class ControllerData:
         self.curr_time = self.task.data.time
 
     @property
+    def optimizer(self) -> Optimizer:
+        """Returns the optimizer, which is uniquely defined by the controller."""
+        return self.controller.optimizer
+
+    @property
+    def optimizer_config(self) -> OptimizerConfig:
+        """Returns the optimizer config, which is uniquely defined by the controller."""
+        return self.controller.optimizer_cfg
+
+    @property
     def optimizer_cls(self) -> type:
         """Returns the optimizer class."""
-        return self.optimizer.__class__
+        return self.controller.optimizer.__class__
 
     @property
     def optimizer_config_cls(self) -> type:
         """Returns the optimizer config class."""
-        return self.optimizer_config.__class__
+        return self.controller.optimizer_cfg.__class__
 
     def update_task(
         self,
@@ -100,13 +109,11 @@ class ControllerData:
         """
         self.task = task
         self.task_config = task_config
-        self.optimizer = optimizer
         self.controller = Controller(
             self.controller_config,
             self.task,
             self.task_config,
-            self.optimizer,
-            self.optimizer_config,
+            optimizer,
         )
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])
         self.curr_time = self.task.data.time
@@ -120,9 +127,7 @@ class ControllerData:
 
     def update_optimizer_config(self, optimizer_cfg: Any) -> None:
         """Updates the optimizer config."""
-        self.optimizer_config = optimizer_cfg
-        self.controller.optimizer.config = self.optimizer_config
-        self.controller.optimizer_cfg = self.optimizer_config
+        self.controller.optimizer.config = optimizer_cfg
 
     def update_states(self, state_msg: MujocoState) -> None:
         """Updates the states."""
@@ -152,8 +157,6 @@ class ControllerData:
         optimizer: Optimizer,
     ) -> None:
         """Updates the optimizer based on a given name."""
-        self.optimizer_config = optimizer.optimizer_config
-        self.optimizer = optimizer
         self.controller.optimizer = optimizer
 
     @property
