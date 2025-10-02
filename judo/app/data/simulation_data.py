@@ -1,11 +1,13 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
 from typing import Callable
+import logging
+import time
 
 from mujoco import mj_step
 from omegaconf import DictConfig
 
-from judo.app.structs import MujocoState
+from judo.app.structs import MujocoState, SplineData
 from judo.app.utils import register_tasks_from_cfg
 from judo.tasks import get_registered_tasks
 from judo.tasks.base import Task, TaskConfig
@@ -31,39 +33,49 @@ class SimulationData:
 
         self.control = None
         self.paused = False
-        self.set_task(init_task)
 
-    def set_task(self, task_name: str) -> None:
+    def update_task(self, task_name: str) -> None:
         """Helper to initialize task from task name."""
+        logging.info("Updating task to %s", task_name)
         task_entry = get_registered_tasks().get(task_name)
         if task_entry is None:
-            raise ValueError(f"Init task {task_name} not found in task registry")
+            raise ValueError(f"Unknown task {task_name}")
 
         task_cls, task_config_cls = task_entry
 
         self.task: Task = task_cls()
         self.task_config: TaskConfig = task_config_cls()
         self.task.reset()
-        self._set_state()
+        logging.info("Task has been updated to %s", task_name)
 
-    def step(self) -> None:
+    def reset_task(self, _: int) -> None:
+        """Resets the task."""
+        logging.info("Resetting task")
+        self.task.reset()
+
+    def pause(self, _: int) -> None:
+        """Event handler for processing pause status updates."""
+        self.paused = not self.paused
+
+    def step(self, control: SplineData | None) -> MujocoState:
         """Step the simulation forward by one timestep."""
-        if self.control is not None and not self.paused:
+        if self.paused:
+            raise ValueError("Simulation is paused.")
+        if control is not None:
+            self.control = control
+
+        if self.control is not None:
+            self._wait_for("task")
             try:
-                self.task.data.ctrl[:] = self.control(self.task.data.time)
-                self.task.pre_sim_step()
-                mj_step(self.task.sim_model, self.task.data)
-                self.task.post_sim_step()
+                self.task.data.ctrl[:] = self.control.spline()(self.task.data.time)
             except ValueError:
-                # we're switching tasks and the new task has a different number of actuators
                 pass
+        self._wait_for("task")
+        self.task.pre_sim_step()
+        mj_step(self.task.sim_model, self.task.data)
+        self.task.post_sim_step()
 
-        # Sets the internal state message based on the control and simuilation output
-        self._set_state()
-
-    def _set_state(self) -> None:
-        """Set the state of the simulation."""
-        self.sim_state = MujocoState(
+        return MujocoState(
             time=self.task.data.time,
             qpos=self.task.data.qpos,  # type: ignore
             qvel=self.task.data.qvel,  # type: ignore
@@ -74,14 +86,6 @@ class SimulationData:
             sim_metadata=self.task.get_sim_metadata(),
         )
 
-    def pause(self) -> None:
-        """Event handler for processing pause status updates."""
-        self.paused = not self.paused
-
-    def reset_task(self) -> None:
-        """Resets the task."""
-        self.task.reset()
-
-    def update_control(self, control_spline: Callable) -> None:
-        """Event handler for processing controls received from controller node."""
-        self.control = control_spline
+    def _wait_for(self, attr_name: str) -> None:
+        while not hasattr(self, attr_name):
+            time.sleep(0.1)

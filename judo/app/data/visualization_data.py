@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
 import threading
-
+import logging
 import mujoco
 import numpy as np
 import viser
@@ -15,8 +15,12 @@ from judo.config import set_config_overrides
 from judo.controller import ControllerConfig
 from judo.gui import create_gui_elements
 from judo.optimizers import get_registered_optimizers
+from judo.optimizers.base import OptimizerConfig
 from judo.tasks import get_registered_tasks
+from judo.tasks.base import TaskConfig
 from judo.visualizers.model import ViserMjModel
+from judo.app.structs import MujocoState
+from judo.unlocked.const import const_cast
 
 ElementType = GuiImageHandle | GuiInputHandle | GuiFolderHandle | MeshHandle | IcosphereHandle
 
@@ -71,6 +75,82 @@ class VisualizationData:
             self.register_optimizer_config_overrides(optimizer_override_cfg)
 
         self.set_task(init_task, init_optimizer)
+
+    def write_sim_pause(self) -> int:
+        while not self.sim_pause_updated.is_set():
+            self.sim_pause_updated.wait(timeout=0.1)
+        self.sim_pause_updated.clear()
+        return 1
+
+    def write_task(self) -> str:
+        """Write the task name to the GUI."""
+        while not self.task_updated.is_set():
+            self.task_updated.wait(timeout=0.1)
+        self.task_updated.clear()
+        return self.task_name
+
+    def write_task_reset(self) -> int:
+        """Write the task reset signal to the GUI."""
+        while not self.task_reset_updated.is_set():
+            self.task_reset_updated.wait(timeout=0.1)
+        self.task_reset_updated.clear()
+        return 1
+
+    def write_optimizer(self) -> str:
+        """Write the optimizer name to the GUI."""
+        while not self.optimizer_updated.is_set():
+            self.optimizer_updated.wait(timeout=0.1)
+        self.optimizer_updated.clear()
+        return self.optimizer_name
+
+    def write_controller_config(self) -> ControllerConfig:
+        """Write the controller config to the GUI."""
+        while not self.controller_config_updated.is_set():
+            self.controller_config_updated.wait(timeout=0.1)
+        self.controller_config_updated.clear()
+        return self.controller_config
+
+    def write_optimizer_config(self) -> OptimizerConfig:
+        """Write the optimizer config to the GUI."""
+        while not self.optimizer_config_updated.is_set():
+            self.optimizer_config_updated.wait(timeout=0.1)
+        self.optimizer_config_updated.clear()
+        return self.optimizer_config
+
+    def write_task_config(self) -> TaskConfig:
+        """Write the task config to the GUI."""
+        while not self.task_config_updated.is_set():
+            self.task_config_updated.wait(timeout=0.1)
+        self.task_config_updated.clear()
+        return self.task_config
+
+    def update_states(self, state_msg: MujocoState) -> None:
+        """Callback to update states on receiving a new state measurement."""
+        if self.controller_config.spline_order == "cubic" and self.optimizer_config.num_nodes < 4:
+            warnings.warn("Cubic splines require at least 4 nodes. Setting num_nodes=4.", stacklevel=2)
+            for e in self.gui_elements["optimizer_params"]:
+                if e.label == "num_nodes":
+                    e.value = 4
+                    break
+            self.optimizer_config_updated.set()
+
+        try:
+            with self.task_lock:
+                self.data.xpos[:] = state_msg.xpos
+                self.data.xquat[:] = state_msg.xquat
+                self.viser_model.set_data(self.data)
+        except ValueError:
+            # we're switching tasks and the new task has a different number of xpos/xquat
+            return
+
+    def update_traces(self, msg: tuple[np.ndarray, int]) -> None:
+        """Callback to update traces on receiving a new trace measurement."""
+        with self.task_lock:
+            self.viser_model.set_traces(*const_cast(msg))
+
+    def update_plan_time(self, plan_time_s: float) -> None:
+        """Callback to update plan time on receiving a new plan time measurement."""
+        self.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
 
     def register_controller_config_overrides(self, controller_override_cfg: DictConfig) -> None:
         """Register task-specific controller config overrides.
@@ -140,6 +220,8 @@ class VisualizationData:
         self.setup_gui()
 
         # send the configs to the other nodes
+        self.task_updated.set()
+        self.optimizer_updated.set()
         self.controller_config_updated.set()
         self.task_config_updated.set()
         self.optimizer_config_updated.set()

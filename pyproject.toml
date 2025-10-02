@@ -29,7 +29,6 @@ classifiers = [
 ]
 
 dependencies = [
-    "dora-utils",  # dora + qol utils for writing nodes
     "mujoco",
     "numpy",
     "pillow",  # for displaying app logo
@@ -37,6 +36,7 @@ dependencies = [
     "rich",  # for displaying tables in benchmarking
     "scipy",
     "viser>=1.0.0",
+    "colorlog",
 ]
 
 [project.urls]
