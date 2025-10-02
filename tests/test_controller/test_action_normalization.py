@@ -6,7 +6,7 @@ import numpy as np
 
 from judo.controller import Controller, ControllerConfig
 from judo.optimizers import CrossEntropyMethod, CrossEntropyMethodConfig
-from judo.tasks import CylinderPush, CylinderPushConfig
+from judo.tasks import CylinderPush
 from judo.utils.normalization import IdentityNormalizer, MinMaxNormalizer, RunningMeanStdNormalizer
 
 # ##### #
@@ -121,7 +121,6 @@ def test_running_mean_std_normalizer_3d_data() -> None:
 
 def test_normalizer_type_change() -> None:
     """Test that normalizer is re-initialized when type changes."""
-    task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
@@ -129,7 +128,6 @@ def test_normalizer_type_change() -> None:
     controller = Controller(
         ControllerConfig(action_normalizer="none"),
         task,
-        task_config,
         optimizer,
         rollout_backend="mujoco",
     )
@@ -151,7 +149,6 @@ def test_normalizer_type_change() -> None:
 
 def test_normalizer_in_update_action_loop() -> None:
     """Test that normalizers work in the update_action loop."""
-    task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
@@ -161,7 +158,6 @@ def test_normalizer_in_update_action_loop() -> None:
         controller = Controller(
             ControllerConfig(action_normalizer=normalizer_type, max_opt_iters=1),
             task,
-            task_config,
             optimizer,
             rollout_backend="mujoco",
         )
@@ -176,7 +172,6 @@ def test_normalizer_in_update_action_loop() -> None:
 
 def test_min_max_normalizer_with_task_control_ranges() -> None:
     """Test that MinMaxNormalizer correctly uses task's actuator control ranges."""
-    task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
@@ -184,7 +179,6 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
     controller = Controller(
         ControllerConfig(action_normalizer="min_max", max_opt_iters=1),
         task,
-        task_config,
         optimizer,
         rollout_backend="mujoco",
     )
@@ -214,7 +208,6 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
 
 def test_running_normalizer_updates_with_optimizer_data() -> None:
     """Test that running normalizer correctly updates with optimizer data."""
-    task_config = CylinderPushConfig()
     task = CylinderPush()
     optimizer_config = CrossEntropyMethodConfig()
     optimizer = CrossEntropyMethod(optimizer_config, task.nu)
@@ -222,7 +215,6 @@ def test_running_normalizer_updates_with_optimizer_data() -> None:
     controller = Controller(
         ControllerConfig(action_normalizer="running", max_opt_iters=1),
         task,
-        task_config,
         optimizer,
         rollout_backend="mujoco",
     )

@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 from judo.app.structs import MujocoState
 from judo.app.utils import register_tasks_from_cfg
 from judo.tasks import get_registered_tasks
-from judo.tasks.base import Task, TaskConfig
+from judo.tasks.base import Task
 
 
 class SimulationData:
@@ -39,10 +39,8 @@ class SimulationData:
         if task_entry is None:
             raise ValueError(f"Init task {task_name} not found in task registry")
 
-        task_cls, task_config_cls = task_entry
-
+        task_cls, _ = task_entry
         self.task: Task = task_cls()
-        self.task_config: TaskConfig = task_config_cls()
         self.task.reset()
         self._set_state()
 

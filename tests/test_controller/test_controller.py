@@ -6,7 +6,7 @@ import numpy as np
 
 from judo.controller import Controller, ControllerConfig
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
-from judo.tasks import CylinderPush, CylinderPushConfig
+from judo.tasks import CylinderPush
 
 # ##### #
 # MOCKS #
@@ -44,13 +44,11 @@ def test_max_opt_iters(temp_np_seed: Callable) -> None:
     def _setup_controller(max_opt_iters: int) -> tuple[MockOptimizerTrackNominalKnots, Controller]:
         """Helper function to set up the controller."""
         task = CylinderPush()
-        task_config = CylinderPushConfig()
         ps_config = OptimizerConfig()
         opt = MockOptimizerTrackNominalKnots(ps_config, task.nu)
         controller = Controller(
             ControllerConfig(max_opt_iters=max_opt_iters),
             task,
-            task_config,
             opt,
             rollout_backend="mujoco",
         )
@@ -84,12 +82,10 @@ def test_update_action() -> None:
     def _setup_controller(opt_cls: type[Optimizer], opt_cfg: OptimizerConfig) -> Controller:
         """Helper function to set up the controller."""
         task = CylinderPush()
-        task_config = CylinderPushConfig()
         opt = opt_cls(opt_cfg, task.nu)
         controller = Controller(
             ControllerConfig(max_opt_iters=2),
             task,
-            task_config,
             opt,
             rollout_backend="mujoco",
         )

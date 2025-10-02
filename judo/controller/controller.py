@@ -10,7 +10,7 @@ from scipy.interpolate import interp1d
 from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
-from judo.tasks.base import Task, TaskConfig
+from judo.tasks.base import Task
 from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
 from judo.utils.normalization import (
     IdentityNormalizer,
@@ -43,7 +43,6 @@ class Controller:
         self,
         controller_config: ControllerConfig,
         task: Task,
-        task_config: TaskConfig,
         optimizer: Optimizer,
         rollout_backend: Literal["mujoco"] = "mujoco",
     ) -> None:
@@ -52,14 +51,12 @@ class Controller:
         Args:
             controller_config: The configuration for the controller.
             task: The Task object that specifies the environment.
-            task_config: The configuration for the task.
             optimizer: The optimizer object that will be used for optimization.
             rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
         """
         self.controller_cfg = controller_config
 
         self.task = task
-        self.task_cfg = task_config
 
         self.optimizer = optimizer
 
@@ -185,7 +182,7 @@ class Controller:
             self.rollout_controls = candidate_splines(curr_time + self.rollout_times)
 
             # Roll out dynamics with action sequences.
-            self.task.pre_rollout(curr_state, self.task_cfg)
+            self.task.pre_rollout(curr_state)
             self.states, self.sensors = self.rollout_backend.rollout(
                 self.model_data_pairs,
                 curr_state,
@@ -195,14 +192,12 @@ class Controller:
                 self.states,
                 self.sensors,
                 self.rollout_controls,
-                self.task_cfg,
                 self.system_metadata,
             )
             self.rewards = self.task.reward(
                 self.states,
                 self.sensors,
                 self.rollout_controls,
-                self.task_cfg,
                 self.system_metadata,
             )
 

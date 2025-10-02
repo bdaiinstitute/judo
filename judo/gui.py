@@ -149,7 +149,6 @@ def _get_gui_element(
             step=step_float,
             initial_value=init_value,
         )
-        print(field.metadata)
         if "bounded" in field.metadata and field.metadata["bounded"]:
             return GuiBoundedSliderHandle(slider)
         else:

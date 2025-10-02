@@ -100,7 +100,6 @@ class VisualizationData:
         """Helper to initialize task from task name."""
         self.task_name = task
         self.optimizer_name = optimizer
-        print(self.available_tasks)
 
         task_entry = self.available_tasks.get(task)
         if task_entry is None:

@@ -105,10 +105,11 @@ class FR3Pick(Task[FR3PickConfig]):
     """Defines the FR3 pick task."""
 
     name: str = "fr3_pick"
+    config_t: type[FR3PickConfig] = FR3PickConfig
 
     def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
-        super().__init__(model_path, sim_model_path=sim_model_path)
+        super().__init__(model_path=model_path, sim_model_path=sim_model_path)
         self.reset_command = np.array([0, 0, 0, -1.57079, 0, 1.57079, -0.7853, 0.0])
 
         # object indices
@@ -141,7 +142,7 @@ class FR3Pick(Task[FR3PickConfig]):
 
         self.reset()
 
-    def in_goal_xy(self, curr_state: np.ndarray, config: FR3PickConfig) -> np.ndarray:
+    def in_goal_xy(self, curr_state: np.ndarray) -> np.ndarray:
         """Checks if the object is somewhere in the tube above the goal position of radius r.
 
         Args:
@@ -152,8 +153,8 @@ class FR3Pick(Task[FR3PickConfig]):
             in_goal: A bool indicating whether the object is in the goal region. Shape=(,).
         """
         obj_pos = curr_state[self.obj_pos_adr : self.obj_pos_adr + 2]  # (2,)
-        dist = np.linalg.norm(obj_pos - config.goal_pos)
-        in_goal = dist <= config.goal_radius
+        dist = np.linalg.norm(obj_pos - self.config.goal_pos)
+        in_goal = dist <= self.config.goal_radius
         return in_goal
 
     def check_sensor_dists(
@@ -187,7 +188,7 @@ class FR3Pick(Task[FR3PickConfig]):
         dist = sensors[:, :, i]
         return dist
 
-    def pre_rollout(self, curr_state: np.ndarray, config: FR3PickConfig) -> None:
+    def pre_rollout(self, curr_state: np.ndarray) -> None:
         """Computes the current phase of the system."""
         # update the data object associated with the current state
         self._data.qpos[:] = curr_state[: self.model.nq]
@@ -207,7 +208,7 @@ class FR3Pick(Task[FR3PickConfig]):
             phase = Phase.MOVE  # if the object is in the air, we are in lift phase
 
         # check whether the phase is PLACE
-        in_goal_xy = self.in_goal_xy(curr_state, config)
+        in_goal_xy = self.in_goal_xy(curr_state)
         if in_goal_xy and obj_in_air:
             phase = Phase.PLACE  # if the object is in the goal xy, we are in place phase
 
@@ -226,7 +227,6 @@ class FR3Pick(Task[FR3PickConfig]):
         states: np.ndarray,
         sensors: np.ndarray,
         controls: np.ndarray,
-        config: FR3PickConfig,
         system_metadata: dict[str, Any] | None = None,
     ) -> np.ndarray:
         """Implements the LEAP cube rotation tracking task reward.
@@ -261,8 +261,8 @@ class FR3Pick(Task[FR3PickConfig]):
         # distances and errors
         q_arm_goal = QPOS_HOME[self.arm_pos_slice]  # (9,)
         grasp_dist = ((grasp_site_pos - obj_pos) ** 2).sum(-1)  # (num_rollouts, T)
-        pick_height_err = (z_obj - config.pick_height) ** 2  # (num_rollouts, T)
-        obj_goal_pos_dist = np.linalg.norm(xy_pos - config.goal_pos, axis=-1)  # (num_rollouts, T)
+        pick_height_err = (z_obj - self.config.pick_height) ** 2  # (num_rollouts, T)
+        obj_goal_pos_dist = np.linalg.norm(xy_pos - self.config.goal_pos, axis=-1)  # (num_rollouts, T)
         home_dist = np.linalg.norm(arm_pos - q_arm_goal, axis=-1)  # (num_rollouts, T)
 
         # contact checks
@@ -272,20 +272,20 @@ class FR3Pick(Task[FR3PickConfig]):
 
         # lift rewards
         if self.phase == Phase.LIFT:
-            w_lift_close = config.lift_weights.w_lift_close
-            w_lift_height = config.lift_weights.w_lift_height
+            w_lift_close = self.config.lift_weights.w_lift_close
+            w_lift_height = self.config.lift_weights.w_lift_height
             rewards = -(w_lift_close * grasp_dist + w_lift_height * pick_height_err).sum(axis=-1)
 
         # move rewards
         elif self.phase == Phase.MOVE:
-            w_move_goal = config.move_weights.w_move_goal
-            w_move_close = config.move_weights.w_move_close
+            w_move_goal = self.config.move_weights.w_move_goal
+            w_move_close = self.config.move_weights.w_move_close
             rewards = -(w_move_goal * obj_goal_pos_dist + w_move_close * grasp_dist).sum(axis=-1)
 
         # place rewards
         elif self.phase == Phase.PLACE:
-            w_place_table = config.place_weights.w_place_table
-            w_place_goal = config.place_weights.w_place_goal
+            w_place_table = self.config.place_weights.w_place_table
+            w_place_goal = self.config.place_weights.w_place_goal
             rewards = -(+w_place_table * obj_table_dist + w_place_goal * obj_goal_pos_dist).sum(axis=-1)
 
         # homing rewards
@@ -296,10 +296,10 @@ class FR3Pick(Task[FR3PickConfig]):
             raise ValueError(f"Invalid phase: {self.phase}. Must be one of {list(Phase)}.")
 
         # global rewards
-        w_upright = config.global_weights.w_upright
-        w_coll = config.global_weights.w_coll
-        w_qvel = config.global_weights.w_qvel
-        w_open = config.global_weights.w_open
+        w_upright = self.config.global_weights.w_upright
+        w_coll = self.config.global_weights.w_coll
+        w_qvel = self.config.global_weights.w_qvel
+        w_open = self.config.global_weights.w_open
 
         rew_upright = -np.linalg.norm(ee_z_axis - np.array([[[0.0, 0.0, -1.0]]]), axis=-1).sum(axis=-1)
         rew_coll = (1 - hand_touching).sum(axis=-1)  # (num_rollouts,)

@@ -51,11 +51,9 @@ class ControllerData:
 
         # instantiate the task/optimizer/controller
         task_cls, task_config_cls = task_entry
-        # self.optimizer_cls, self.optimizer_config_cls = optimizer_entry
         optimizer_cls, optimizer_config_cls = optimizer_entry
 
         self.task = task_cls()
-        self.task_config = task_config_cls()
         optimizer_config = optimizer_config_cls()
         optimizer = optimizer_cls(optimizer_config, self.task.nu)
 
@@ -64,13 +62,17 @@ class ControllerData:
         self.controller = Controller(
             self.controller_config,
             self.task,
-            self.task_config,
             optimizer,
         )
 
         # Initialize the task data.
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])
         self.curr_time = self.task.data.time
+
+    @property
+    def task_config(self) -> TaskConfig:
+        """Returns the task config, which is uniquely defined by the task."""
+        return self.task.config
 
     @property
     def optimizer(self) -> Optimizer:
@@ -95,7 +97,6 @@ class ControllerData:
     def update_task(
         self,
         task: Task,
-        task_config: TaskConfig,
         optimizer: Optimizer,
     ) -> None:
         """Updates the task, task config, and optimizer.
@@ -108,11 +109,9 @@ class ControllerData:
             optimizer: The optimizer instance.
         """
         self.task = task
-        self.task_config = task_config
         self.controller = Controller(
             self.controller_config,
             self.task,
-            self.task_config,
             optimizer,
         )
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])

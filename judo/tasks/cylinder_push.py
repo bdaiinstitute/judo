@@ -40,10 +40,11 @@ class CylinderPush(Task[CylinderPushConfig]):
     """Defines the cylinder push balancing task."""
 
     name: str = "cylinder_push"
+    config_t: type[CylinderPushConfig] = CylinderPushConfig
 
     def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = None) -> None:
         """Initializes the cylinder push task."""
-        super().__init__(model_path, sim_model_path=sim_model_path)
+        super().__init__(model_path=model_path, sim_model_path=sim_model_path)
         self.reset()
 
     def reward(
@@ -51,7 +52,6 @@ class CylinderPush(Task[CylinderPushConfig]):
         states: np.ndarray,
         sensors: np.ndarray,
         controls: np.ndarray,
-        config: CylinderPushConfig,
         system_metadata: dict[str, Any] | None = None,
     ) -> np.ndarray:
         """Implements the cylinder push reward from MJPC.
@@ -70,21 +70,21 @@ class CylinderPush(Task[CylinderPushConfig]):
         pusher_pos = states[..., 0:2]
         cart_pos = states[..., 2:4]
         pusher_vel = states[..., 4:6]
-        cart_goal = config.goal_pos[0:2]
+        cart_goal = self.config.goal_pos[0:2]
 
         cart_to_goal = cart_goal - cart_pos
         cart_to_goal_norm = np.linalg.norm(cart_to_goal, axis=-1, keepdims=True)
         cart_to_goal_direction = cart_to_goal / cart_to_goal_norm
 
-        pusher_goal = cart_pos - config.pusher_goal_offset * cart_to_goal_direction
+        pusher_goal = cart_pos - self.config.pusher_goal_offset * cart_to_goal_direction
 
         pusher_proximity = quadratic_norm(pusher_pos - pusher_goal)
-        pusher_reward = -config.w_pusher_proximity * pusher_proximity.sum(-1)
+        pusher_reward = -self.config.w_pusher_proximity * pusher_proximity.sum(-1)
 
-        velocity_reward = -config.w_pusher_velocity * quadratic_norm(pusher_vel).sum(-1)
+        velocity_reward = -self.config.w_pusher_velocity * quadratic_norm(pusher_vel).sum(-1)
 
         goal_proximity = quadratic_norm(cart_pos - cart_goal)
-        goal_reward = -config.w_cart_position * goal_proximity.sum(-1)
+        goal_reward = -self.config.w_cart_position * goal_proximity.sum(-1)
 
         assert pusher_reward.shape == (batch_size,)
         assert velocity_reward.shape == (batch_size,)

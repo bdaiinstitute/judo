@@ -19,11 +19,11 @@ def test_simulation_data_basics() -> None:
 def test_simulation_data_update_task() -> None:
     """Test the simulation data update task."""
     simulation_data = SimulationData(init_task="cylinder_push")
-    assert isinstance(simulation_data.task_config, CylinderPushConfig)
+    assert isinstance(simulation_data.task.config, CylinderPushConfig)
     assert isinstance(simulation_data.task, CylinderPush)
     simulation_data.set_task("cartpole")
     assert simulation_data.task.nu == 1
-    assert isinstance(simulation_data.task_config, CartpoleConfig)
+    assert isinstance(simulation_data.task.config, CartpoleConfig)
     assert isinstance(simulation_data.task, Cartpole)
 
 

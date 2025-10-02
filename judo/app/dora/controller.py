@@ -42,12 +42,11 @@ class ControllerNode(DoraNode):
         new_task = event["value"].to_numpy(zero_copy_only=False)[0]
         task_entry = self._data.available_tasks.get(new_task)
         if task_entry is not None:
-            task_cls, task_config_cls = task_entry
+            task_cls, _ = task_entry
             task = task_cls()
-            task_config = task_config_cls()
             optimizer = self._data.optimizer_cls(self._data.optimizer_config, task.nu)
             with self.lock:
-                self._data.update_task(task, task_config, optimizer)
+                self._data.update_task(task, optimizer)
                 self.write_controls()
         else:
             raise ValueError(f"Task {new_task} not found in task registry.")
@@ -92,8 +91,7 @@ class ControllerNode(DoraNode):
     @on_event("INPUT", "task_config")
     def update_task_config(self, event: dict) -> None:
         """Callback to update optimizer task config on receiving a new config message."""
-        self._data.task_config = from_event(event, type(self._data.task_config))
-        self._data.controller.task_cfg = self._data.task_config
+        self._data.controller.task.config = from_event(event, type(self._data.controller.task.config))
 
     def write_controls(self) -> None:
         """Util that publishes the current controller spline."""

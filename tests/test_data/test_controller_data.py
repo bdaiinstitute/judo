@@ -5,7 +5,7 @@ import numpy as np
 from judo.app.data.controller_data import ControllerData
 from judo.optimizers.cem import CrossEntropyMethod
 from judo.optimizers.mppi import MPPI, MPPIConfig
-from judo.tasks import Cartpole, CartpoleConfig
+from judo.tasks import Cartpole
 
 
 def test_controller_data_basics() -> None:
@@ -30,10 +30,10 @@ def test_controller_data_update_task() -> None:
     mppi_opt, _ = res
     controller_data.update_task(
         task=Cartpole(),
-        task_config=CartpoleConfig(),
-        optimizer=mppi_opt(controller_data.optimizer_config, controller_data.task.nu),
+        optimizer=mppi_opt(MPPIConfig(), controller_data.task.nu),
     )
     assert isinstance(controller_data.optimizer, MPPI)
+    assert isinstance(controller_data.optimizer_config, MPPIConfig)
 
 
 def test_controller_data_reset_task() -> None:
@@ -63,7 +63,7 @@ def test_update_optimizer() -> None:
     controller_data = ControllerData(init_task="cylinder_push", init_optimizer="cem")
     assert isinstance(controller_data.optimizer, CrossEntropyMethod)
     controller_data.update_optimizer(
-        optimizer=MPPI(controller_data.optimizer_config, controller_data.task.nu),
+        optimizer=MPPI(MPPIConfig(), controller_data.task.nu),
     )
     assert isinstance(controller_data.optimizer, MPPI)
     assert isinstance(controller_data.optimizer_config, MPPIConfig)
