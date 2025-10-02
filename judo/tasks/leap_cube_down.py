@@ -33,6 +33,8 @@ class LeapCubeDownConfig(LeapCubeConfig):
 class LeapCubeDown(LeapCube):
     """Defines the LEAP cube with palm down rotation task."""
 
+    name: str = "leap_cube_down"
+
     def __init__(self, model_path: str = XML_PATH, sim_model_path: str = SIM_XML_PATH) -> None:
         """Initializes the LEAP cube rotation task."""
         super(LeapCube, self).__init__(model_path, sim_model_path=sim_model_path)

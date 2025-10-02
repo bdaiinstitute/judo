@@ -37,6 +37,8 @@ class LeapCubeConfig(TaskConfig):
 class LeapCube(Task[LeapCubeConfig]):
     """Defines the LEAP cube rotation task."""
 
+    name: str = "leap_cube"
+
     def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = SIM_XML_PATH) -> None:
         """Initializes the LEAP cube rotation task."""
         super().__init__(model_path, sim_model_path=sim_model_path)

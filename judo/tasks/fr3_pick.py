@@ -104,6 +104,8 @@ class FR3PickConfig(TaskConfig):
 class FR3Pick(Task[FR3PickConfig]):
     """Defines the FR3 pick task."""
 
+    name: str = "fr3_pick"
+
     def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
         super().__init__(model_path, sim_model_path=sim_model_path)
