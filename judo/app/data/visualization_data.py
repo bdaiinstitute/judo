@@ -105,7 +105,7 @@ class VisualizationData:
         if task_entry is None:
             raise ValueError(f"Task {task} not found in the task registry.")
 
-        task_cls, self.task_config_cls = task_entry
+        task_cls, _ = task_entry
         self.task = task_cls()
         self.data = mujoco.MjData(self.task.model)
         self.viser_model = ViserMjModel(
@@ -131,7 +131,6 @@ class VisualizationData:
         self.optimizer_config_lock = threading.Lock()
         self.optimizer_config_updated = threading.Event()
 
-        self.task_config = self.task_config_cls()
         self.task_config_lock = threading.Lock()
         self.task_config_updated = threading.Event()
 
@@ -188,7 +187,6 @@ class VisualizationData:
             # reset configs to (task) defaults
             self.controller_config.set_override(self.task_name)
             self.optimizer_config.set_override(self.task_name)
-            self.task_config = self.task_config_cls()
 
             # reset gui elements
             for handle in self.gui_elements["controller_params"]:
@@ -214,7 +212,7 @@ class VisualizationData:
             with self.gui_elements["task_tab"]:
                 self.gui_elements["task_params"] = create_gui_elements(
                     self.server,
-                    self.task_config,
+                    self.task.config,
                     self.task_config_updated,
                     self.task_config_lock,
                 )
@@ -270,7 +268,7 @@ class VisualizationData:
         with task_tab:
             self.gui_elements["task_params"] = create_gui_elements(
                 self.server,
-                self.task_config,
+                self.task.config,
                 self.task_config_updated,
                 self.task_config_lock,
             )
@@ -295,9 +293,9 @@ class VisualizationData:
             self.optimizer_name = optimizer_dropdown.value
 
             # update config
-            optimizer_entry = self.available_optimizers.get(optimizer_dropdown.value)
+            optimizer_entry = self.available_optimizers.get(self.optimizer_name)
             assert optimizer_entry is not None
-            _optimizer, optimizer_config_cls = optimizer_entry
+            optimizer_config_cls = optimizer_entry[1]
             self.optimizer_config = optimizer_config_cls()
             self.optimizer_config.set_override(self.task_name)
             self.optimizer_config_updated.set()

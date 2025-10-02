@@ -29,7 +29,6 @@ class TestTask(Task[TestConfig]):
         states: np.ndarray,
         sensors: np.ndarray,
         controls: np.ndarray,
-        config: TestConfig,
         system_metadata: dict[str, Any] | None = None,
     ) -> np.ndarray:
         """Blank reward function for testing."""
