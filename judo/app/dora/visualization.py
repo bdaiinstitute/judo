@@ -82,7 +82,7 @@ class VisualizationNode(DoraNode):
     def write_task_config(self) -> None:
         """Write the task config to the GUI."""
         with self._data.task_config_lock:
-            self.node.send_output("task_config", *to_arrow(self._data.task.config))
+            self.node.send_output("task_config", *to_arrow(self._data.task_config))
         self._data.task_config_updated.clear()
 
     @on_event("INPUT", "states")

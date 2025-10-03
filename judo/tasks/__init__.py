@@ -10,9 +10,6 @@ from judo.tasks.fr3_pick import FR3Pick, FR3PickConfig
 from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
 from judo.tasks.leap_cube_down import LeapCubeDown, LeapCubeDownConfig
 
-TaskType = Type[Task]
-TaskConfigType = Type[TaskConfig]
-
 _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
     CylinderPush.name: (CylinderPush, CylinderPushConfig),
     Cartpole.name: (Cartpole, CartpoleConfig),
@@ -38,8 +35,6 @@ __all__ = [
     "register_task",
     "Task",
     "TaskConfig",
-    "TaskType",
-    "TaskConfigType",
     "CaltechLeapCube",
     "CaltechLeapCubeConfig",
     "Cartpole",

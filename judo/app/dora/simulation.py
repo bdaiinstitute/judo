@@ -1,6 +1,5 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
-import threading
 import time
 import warnings
 
@@ -24,12 +23,7 @@ class SimulationNode(DoraNode):
     ) -> None:
         """Initialize the simulation node."""
         super().__init__(node_id=node_id, max_workers=max_workers)
-
         self._data = SimulationData(init_task=init_task, task_registration_cfg=task_registration_cfg)
-
-        self.task_reset_lock = threading.Lock()
-        self.config_lock = threading.Lock()
-        self.control_lock = threading.Lock()
         self.write_states()
 
     @on_event("INPUT", "task")
@@ -74,13 +68,11 @@ class SimulationNode(DoraNode):
     @on_event("INPUT", "task_reset")
     def reset_task(self, event: dict) -> None:
         """Resets the task."""
-        with self.task_reset_lock:
-            self._data.reset_task()
+        self._data.reset_task()
 
     @on_event("INPUT", "controls")
     def update_control(self, event: dict) -> None:
         """Event handler for processing controls received from controller node."""
         spline_data = from_arrow(event["value"], event["metadata"], SplineData)
         control = spline_data.spline()
-        with self.control_lock:
-            self._data.update_control(control)
+        self._data.update_control(control)

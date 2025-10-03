@@ -96,40 +96,42 @@ class VisualizationData:
                 field_override_values = optimizer_override_cfg[task_name].get(optimizer_name, {})
                 set_config_overrides(str(task_name), cfg_cls, field_override_values)
 
-    def set_task(self, task: str, optimizer: str) -> None:
+    def set_task(self, task_name: str, optimizer_name: str) -> None:
         """Helper to initialize task from task name."""
-        self.task_name = task
-        self.optimizer_name = optimizer
+        self.task_name = task_name
+        self.optimizer_name = optimizer_name
 
-        task_entry = self.available_tasks.get(task)
+        task_entry = self.available_tasks.get(task_name)
         if task_entry is None:
-            raise ValueError(f"Task {task} not found in the task registry.")
+            raise ValueError(f"Task {task_name} not found in the task registry.")
 
         task_cls, _ = task_entry
-        self.task = task_cls()
-        self.data = mujoco.MjData(self.task.model)
+        task = task_cls()
+        self.task_config = task.config
+        self.data = mujoco.MjData(task.model)
         self.viser_model = ViserMjModel(
             self.server,
-            self.task.spec,
+            task.spec,
             geom_exclude_substring=self.geom_exclude_substring,
         )
 
-        optimizer_entry = self.available_optimizers.get(optimizer)
+        optimizer_entry = self.available_optimizers.get(optimizer_name)
         if optimizer_entry is None:
-            raise ValueError(f"Optimizer {optimizer} not found in optimizer registry.")
+            raise ValueError(f"Optimizer {optimizer_name} not found in optimizer registry.")
         _, optimizer_config_cls = optimizer_entry
 
         self.controller_config_lock = threading.Lock()
         self.controller_config_updated = threading.Event()
         self.controller_config = ControllerConfig()
-        self.controller_config.set_override(task)
+        self.controller_config.set_override(task_name)
 
         self.optimizer_lock = threading.Lock()
         self.optimizer_updated = threading.Event()
-        self.optimizer_config = optimizer_config_cls()
-        self.optimizer_config.set_override(task)
+
         self.optimizer_config_lock = threading.Lock()
         self.optimizer_config_updated = threading.Event()
+        self.optimizer_config = optimizer_config_cls()
+        self.optimizer_config.set_override(task_name)
 
         self.task_config_lock = threading.Lock()
         self.task_config_updated = threading.Event()
@@ -187,6 +189,7 @@ class VisualizationData:
             # reset configs to (task) defaults
             self.controller_config.set_override(self.task_name)
             self.optimizer_config.set_override(self.task_name)
+            self.task_config = self.task_config.__class__()
 
             # reset gui elements
             for handle in self.gui_elements["controller_params"]:
@@ -212,7 +215,7 @@ class VisualizationData:
             with self.gui_elements["task_tab"]:
                 self.gui_elements["task_params"] = create_gui_elements(
                     self.server,
-                    self.task.config,
+                    self.task_config,
                     self.task_config_updated,
                     self.task_config_lock,
                 )
@@ -268,7 +271,7 @@ class VisualizationData:
         with task_tab:
             self.gui_elements["task_params"] = create_gui_elements(
                 self.server,
-                self.task.config,
+                self.task_config,
                 self.task_config_updated,
                 self.task_config_lock,
             )

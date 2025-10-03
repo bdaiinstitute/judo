@@ -90,7 +90,7 @@ class ControllerNode(DoraNode):
     @on_event("INPUT", "task_config")
     def update_task_config(self, event: dict) -> None:
         """Callback to update optimizer task config on receiving a new config message."""
-        self._data.task_config = from_event(event, type(self._data.task.config))
+        self._data.task_config = from_event(event, type(self._data.task_config))
 
     def write_controls(self) -> None:
         """Util that publishes the current controller spline."""

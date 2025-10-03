@@ -41,7 +41,7 @@ class SimulationData:
 
         task_cls, _ = task_entry
         self.task: Task = task_cls()
-        self.task.reset()
+        self.reset_task()
         self._set_state()
 
     def step(self) -> None:
