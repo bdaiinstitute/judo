@@ -128,6 +128,11 @@ class Controller:
         """Helper function to get the optimizer config."""
         return self.optimizer.config
 
+    @optimizer_cfg.setter
+    def optimizer_cfg(self, optimizer_cfg: OptimizerConfig) -> None:
+        """Helper function to set the optimizer config."""
+        self.optimizer.config = optimizer_cfg
+
     def update_action(self, curr_state: np.ndarray, curr_time: float) -> None:
         """Abstract method for updating controller actions from current state/time."""
         assert curr_state.shape == (self.model.nq + self.model.nv,)

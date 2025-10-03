@@ -73,7 +73,7 @@ class ControllerNode(DoraNode):
             optimizer_config = optimizer_config_cls()
             optimizer = optimizer_cls(optimizer_config, self._data.task.nu)
             with self.lock:
-                self._data.update_optimizer(optimizer)
+                self._data.optimizer = optimizer
         else:
             raise ValueError(f"Optimizer {new_optimizer} not found in optimizer registry.")
 
@@ -81,17 +81,16 @@ class ControllerNode(DoraNode):
     def update_controller_config(self, event: dict) -> None:
         """Callback to update controller config on receiving a new config message."""
         self._data.controller_config = from_event(event, ControllerConfig)
-        self._data.controller.controller_cfg = self._data.controller_config
 
     @on_event("INPUT", "optimizer_config")
     def update_optimizer_config(self, event: dict) -> None:
         """Callback to update optimizer config on receiving a new config message."""
-        self._data.update_optimizer_config(from_event(event, self._data.optimizer_config_cls))
+        self._data.optimizer_config = from_event(event, self._data.optimizer_config_cls)
 
     @on_event("INPUT", "task_config")
     def update_task_config(self, event: dict) -> None:
         """Callback to update optimizer task config on receiving a new config message."""
-        self._data.controller.task.config = from_event(event, type(self._data.controller.task.config))
+        self._data.task_config = from_event(event, type(self._data.task.config))
 
     def write_controls(self) -> None:
         """Util that publishes the current controller spline."""

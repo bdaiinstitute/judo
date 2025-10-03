@@ -41,10 +41,10 @@ def test_controller_data_reset_task() -> None:
     np.random.seed(17)
     controller_data = ControllerData(init_task="cylinder_push", init_optimizer="cem")
     original_states = np.copy(controller_data.states)
-    original_time = controller_data.curr_time
+    original_time = controller_data.task.time
     controller_data.reset_task()
     assert not np.allclose(controller_data.states, original_states)
-    assert controller_data.curr_time == original_time
+    assert controller_data.task.time == original_time
 
 
 def test_step() -> None:
@@ -62,9 +62,7 @@ def test_update_optimizer() -> None:
     """Test the controller data update optimizer."""
     controller_data = ControllerData(init_task="cylinder_push", init_optimizer="cem")
     assert isinstance(controller_data.optimizer, CrossEntropyMethod)
-    controller_data.update_optimizer(
-        optimizer=MPPI(MPPIConfig(), controller_data.task.nu),
-    )
+    controller_data.optimizer = MPPI(MPPIConfig(), controller_data.task.nu)
     assert isinstance(controller_data.optimizer, MPPI)
     assert isinstance(controller_data.optimizer_config, MPPIConfig)
     assert isinstance(controller_data.controller.optimizer, MPPI)

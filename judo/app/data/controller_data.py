@@ -2,7 +2,6 @@
 # TODO(@bhung): We need to figure out how to properly test this.
 
 import time
-from typing import Any
 
 import numpy as np
 from omegaconf import DictConfig
@@ -53,36 +52,60 @@ class ControllerData:
         task_cls, task_config_cls = task_entry
         optimizer_cls, optimizer_config_cls = optimizer_entry
 
-        self.task = task_cls()
+        task = task_cls()
         optimizer_config = optimizer_config_cls()
-        optimizer = optimizer_cls(optimizer_config, self.task.nu)
+        optimizer = optimizer_cls(optimizer_config, task.nu)
 
-        self.controller_config = ControllerConfig()
-        self.controller_config.set_override(task_name)
+        controller_config = ControllerConfig()
+        controller_config.set_override(task_name)
         self.controller = Controller(
-            self.controller_config,
-            self.task,
+            controller_config,
+            task,
             optimizer,
         )
 
         # Initialize the task data.
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])
-        self.curr_time = self.task.data.time
+
+    @property
+    def controller_config(self) -> ControllerConfig:
+        """Returns the controller config."""
+        return self.controller.controller_cfg
+
+    @controller_config.setter
+    def controller_config(self, controller_cfg: ControllerConfig) -> None:
+        """Sets the controller config."""
+        self.controller.controller_cfg = controller_cfg
 
     @property
     def task_config(self) -> TaskConfig:
         """Returns the task config, which is uniquely defined by the task."""
         return self.task.config
 
+    @task_config.setter
+    def task_config(self, task_cfg: TaskConfig) -> None:
+        """Sets the task config."""
+        self.task.config = task_cfg
+
     @property
     def optimizer(self) -> Optimizer:
         """Returns the optimizer, which is uniquely defined by the controller."""
         return self.controller.optimizer
 
+    @optimizer.setter
+    def optimizer(self, optimizer: Optimizer) -> None:
+        """Sets the optimizer."""
+        self.controller.optimizer = optimizer
+
     @property
     def optimizer_config(self) -> OptimizerConfig:
         """Returns the optimizer config, which is uniquely defined by the controller."""
         return self.controller.optimizer_cfg
+
+    @optimizer_config.setter
+    def optimizer_config(self, optimizer_cfg: OptimizerConfig) -> None:
+        """Sets the optimizer config."""
+        self.controller.optimizer_cfg = optimizer_cfg
 
     @property
     def optimizer_cls(self) -> type:
@@ -94,46 +117,40 @@ class ControllerData:
         """Returns the optimizer config class."""
         return self.controller.optimizer_cfg.__class__
 
+    @property
+    def task(self) -> Task:
+        """Returns the task."""
+        return self.controller.task
+
     def update_task(
         self,
         task: Task,
         optimizer: Optimizer,
     ) -> None:
-        """Updates the task, task config, and optimizer.
+        """Updates the task and optimizer.
 
         Args:
-            task_cls: The class of the task.
-            task_config_cls: The class of the task config.
             task: The task instance.
-            task_config: The task config instance.
             optimizer: The optimizer instance.
         """
-        self.task = task
         self.controller = Controller(
             self.controller_config,
-            self.task,
+            task,
             optimizer,
         )
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])
-        self.curr_time = self.task.data.time
 
     def reset_task(self) -> None:
         """Resets the task and controller, setting the states to the default values."""
         self.task.reset()
         self.controller.reset()
         self.states = np.concatenate([self.task.data.qpos, self.task.data.qvel])
-        self.curr_time = self.task.data.time
-
-    def update_optimizer_config(self, optimizer_cfg: Any) -> None:
-        """Updates the optimizer config."""
-        self.controller.optimizer.config = optimizer_cfg
 
     def update_states(self, state_msg: MujocoState) -> None:
         """Updates the states."""
         self.states = np.concatenate([state_msg.qpos, state_msg.qvel])
-        self.curr_time = state_msg.time
+        self.task.time = state_msg.time
         self.controller.system_metadata = state_msg.sim_metadata
-        self.controller.task.time = state_msg.time
 
     def step(self) -> None:
         """Updates the controls state internally."""
@@ -143,20 +160,13 @@ class ControllerData:
             return
 
         start = time.perf_counter()
-        self.controller.update_action(self.states, self.curr_time)
+        self.controller.update_action(self.states, self.task.time)
         end = time.perf_counter()
         self.last_plan_time = end - start
 
     def pause(self) -> None:
         """Pauses or starts the controller."""
         self.paused = not self.paused
-
-    def update_optimizer(
-        self,
-        optimizer: Optimizer,
-    ) -> None:
-        """Updates the optimizer based on a given name."""
-        self.controller.optimizer = optimizer
 
     @property
     def spline_data(self) -> SplineData:
