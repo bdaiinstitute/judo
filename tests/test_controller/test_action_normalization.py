@@ -195,8 +195,8 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
     assert isinstance(controller.action_normalizer, MinMaxNormalizer)
 
     # Check that the normalizer is initialized with correct control ranges
-    np.testing.assert_array_almost_equal(controller.action_normalizer.min, controller.task.actuator_ctrlrange[:, 0])
-    np.testing.assert_array_almost_equal(controller.action_normalizer.max, controller.task.actuator_ctrlrange[:, 1])
+    np.testing.assert_array_almost_equal(controller.action_normalizer.min, controller.task.ctrlrange[:, 0])
+    np.testing.assert_array_almost_equal(controller.action_normalizer.max, controller.task.ctrlrange[:, 1])
 
     # Run optimization loop
     curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
@@ -204,12 +204,12 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
     controller.update_action(curr_state, curr_time)
 
     # Check that all candidate actions are within the control range bounds
-    assert np.all(controller.candidate_knots >= controller.task.actuator_ctrlrange[:, 0] - 1e-6)
-    assert np.all(controller.candidate_knots <= controller.task.actuator_ctrlrange[:, 1] + 1e-6)
+    assert np.all(controller.candidate_knots >= controller.task.ctrlrange[:, 0] - 1e-6)
+    assert np.all(controller.candidate_knots <= controller.task.ctrlrange[:, 1] + 1e-6)
 
     # Check that normalized actions are within the normalized control range bounds
-    min_normalized = controller.action_normalizer.normalize(controller.task.actuator_ctrlrange[:, 0])
-    max_normalized = controller.action_normalizer.normalize(controller.task.actuator_ctrlrange[:, 1])
+    min_normalized = controller.action_normalizer.normalize(controller.task.ctrlrange[:, 0])
+    max_normalized = controller.action_normalizer.normalize(controller.task.ctrlrange[:, 1])
     candidate_knots_normalized = controller.action_normalizer.normalize(controller.candidate_knots)
     assert np.all(candidate_knots_normalized >= min_normalized - 1e-6)
     assert np.all(candidate_knots_normalized <= max_normalized + 1e-6)

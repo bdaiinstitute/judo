@@ -11,7 +11,7 @@ from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig
 from judo.tasks.base import Task, TaskConfig
-from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
+from judo.utils.mujoco import make_model_data_pairs
 from judo.utils.normalization import (
     IdentityNormalizer,
     Normalizer,
@@ -69,7 +69,7 @@ class Controller:
         self.model = task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        self.rollout_backend = task.RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
 
         self.action_normalizer = self._init_action_normalizer()
 
@@ -78,7 +78,7 @@ class Controller:
 
         self.states = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nq + self.model.nv))
         self.sensors = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nsensordata))
-        self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nu))
+        self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.task.nu))
         self.rewards = np.zeros((self.optimizer_cfg.num_rollouts,))
         self.reset()
 
@@ -173,8 +173,8 @@ class Controller:
             candidate_knots_normalized = self.optimizer.sample_control_knots(nominal_knots_normalized)
             candidate_knots_normalized = np.clip(
                 candidate_knots_normalized,
-                self.action_normalizer.normalize(self.task.actuator_ctrlrange[:, 0]),
-                self.action_normalizer.normalize(self.task.actuator_ctrlrange[:, 1]),
+                self.action_normalizer.normalize(self.task.ctrlrange[:, 0]),
+                self.action_normalizer.normalize(self.task.ctrlrange[:, 1]),
             )
             self.candidate_knots = self.action_normalizer.denormalize(candidate_knots_normalized)
 
@@ -283,11 +283,11 @@ class Controller:
         """Initialize the action normalizer."""
         action_normalizer_kwargs = {}
         if self.action_normalizer_type == "min_max":
-            action_normalizer_kwargs["min"] = self.task.actuator_ctrlrange[:, 0]
-            action_normalizer_kwargs["max"] = self.task.actuator_ctrlrange[:, 1]
+            action_normalizer_kwargs["min"] = self.task.ctrlrange[:, 0]
+            action_normalizer_kwargs["max"] = self.task.ctrlrange[:, 1]
         elif self.action_normalizer_type == "running":
             action_normalizer_kwargs["init_std"] = 1.0  # TODO(yunhai): make this configurable
-        return make_normalizer(self.action_normalizer_type, self.model.nu, **action_normalizer_kwargs)
+        return make_normalizer(self.action_normalizer_type, self.task.nu, **action_normalizer_kwargs)
 
 
 def make_spline(times: np.ndarray, controls: np.ndarray, spline_order: str) -> interp1d:

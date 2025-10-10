@@ -5,7 +5,7 @@ from copy import deepcopy
 from typing import Literal
 
 import numpy as np
-from mujoco import MjData, MjModel
+from mujoco import MjData, MjModel, mj_step
 from mujoco.rollout import Rollout
 
 
@@ -79,3 +79,12 @@ class RolloutBackend:
             self.setup_mujoco_backend(num_threads)
         else:
             raise ValueError(f"Unknown backend: {self.backend}")
+
+
+class SimBackend:
+    """The backend for conducting simulation."""
+
+    def step(self, sim_model: MjModel, sim_data: MjData, sim_controls: np.ndarray) -> None:
+        """Conduct a simulation step."""
+        sim_data.ctrl[:] = sim_controls
+        mj_step(sim_model, sim_data)
