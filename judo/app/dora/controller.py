@@ -9,7 +9,7 @@ from dora_utils.node import DoraNode, on_event
 from omegaconf import DictConfig
 
 from judo.app.structs import MujocoState
-from judo.controller import Controller
+from judo.controller import Controller, make_controller
 
 
 class ControllerNode(DoraNode):
@@ -26,7 +26,7 @@ class ControllerNode(DoraNode):
     ) -> None:
         """Initialize the controller node."""
         super().__init__(node_id=node_id, max_workers=max_workers)
-        self.controller = Controller(
+        self.controller = make_controller(
             init_task=init_task,
             init_optimizer=init_optimizer,
             task_registration_cfg=task_registration_cfg,
@@ -42,10 +42,12 @@ class ControllerNode(DoraNode):
         new_task = event["value"].to_numpy(zero_copy_only=False)[0]
         task_entry = self.controller.available_tasks.get(new_task)
         if task_entry is not None:
+            task_cls, _ = task_entry
             with self.lock:
                 self.controller = Controller(
-                    new_task,
-                    self.controller.optimizer_name,
+                    controller_config=self.controller.controller_cfg,
+                    task=task_cls(),
+                    optimizer=self.controller.optimizer,
                 )
                 self.write_controls()
         else:

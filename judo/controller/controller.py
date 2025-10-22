@@ -12,8 +12,8 @@ from judo.app.structs import MujocoState, SplineData
 from judo.app.utils import register_optimizers_from_cfg, register_tasks_from_cfg
 from judo.config import OverridableConfig
 from judo.gui import slider
-from judo.optimizers import OptimizerConfig, get_registered_optimizers
-from judo.tasks import TaskConfig, get_registered_tasks
+from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
+from judo.tasks import Task, TaskConfig, get_registered_tasks
 from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
 from judo.utils.normalization import (
     IdentityNormalizer,
@@ -44,52 +44,31 @@ class Controller:
 
     def __init__(
         self,
-        init_task: str,
-        init_optimizer: str,
-        task_registration_cfg: DictConfig | None = None,
-        optimizer_registration_cfg: DictConfig | None = None,
+        controller_config: ControllerConfig,
+        task: Task,
+        optimizer: Optimizer,
         rollout_backend: Literal["mujoco"] = "mujoco",
     ) -> None:
         """Initialize the controller.
 
         Args:
-            init_task: The name of the task to initialize.
-            init_optimizer: The name of the optimizer to initialize.
-            task_registration_cfg: The configuration for the task registration.
-            optimizer_registration_cfg: The configuration for the optimizer registration.
+            controller_config: The controller configuration.
+            task: The task to use.
+            optimizer: The optimizer to use.
             rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
         """
-        self.task_name = init_task
-        self.optimizer_name = init_optimizer
+        # Define
+        self._controller_cfg = controller_config
+        self.task = task
+        self.optimizer = optimizer
+
         self.available_optimizers = get_registered_optimizers()
         self.available_tasks = get_registered_tasks()
-        if task_registration_cfg is not None:
-            register_tasks_from_cfg(task_registration_cfg)
-        if optimizer_registration_cfg is not None:
-            register_optimizers_from_cfg(optimizer_registration_cfg)
-
-        task_entry = self.available_tasks.get(self.task_name)
-        optimizer_entry = self.available_optimizers.get(self.optimizer_name)
-
-        assert task_entry is not None, f"Task {self.task_name} not found in task registry."
-        assert optimizer_entry is not None, f"Optimizer {self.optimizer_name} not found in optimizer registry."
-
-        # instantiate the task/optimizer/controller
-        task_cls, _ = task_entry
-        optimizer_cls, optimizer_config_cls = optimizer_entry
-
-        self.controller_cfg = ControllerConfig()
-        self.controller_cfg.set_override(self.task_name)
-
-        self.task = task_cls()
-
-        self.optimizer = optimizer_cls(optimizer_config_cls(), self.task.nu)
 
         self.model = self.task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
         self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
-
         self.action_normalizer = self._init_action_normalizer()
 
         # a container for any metadata from the system that we want to pass to the task
@@ -198,6 +177,17 @@ class Controller:
     def time(self, value: float) -> None:
         """Sets the current simulation time."""
         self.task.time = value
+
+    @property
+    def controller_cfg(self) -> ControllerConfig:
+        """Returns the controller config."""
+        return self._controller_cfg
+
+    @controller_cfg.setter
+    def controller_cfg(self, controller_cfg: ControllerConfig) -> None:
+        """Sets the controller config."""
+        self._controller_cfg = controller_cfg
+        self.action_normalizer = self._init_action_normalizer()
 
     def update_action(self) -> None:
         """Abstract method for updating controller actions from current state/time."""
@@ -383,4 +373,43 @@ def make_spline(times: np.ndarray, controls: np.ndarray, spline_order: str) -> i
         copy=False,
         fill_value=fill_value,  # interp1d is incorrectly typed # type: ignore
         bounds_error=False,
+    )
+
+
+def make_controller(
+    init_task: str,
+    init_optimizer: str,
+    task_registration_cfg: DictConfig | None = None,
+    optimizer_registration_cfg: DictConfig | None = None,
+    rollout_backend: Literal["mujoco"] = "mujoco",
+) -> Controller:
+    """Make a controller."""
+    available_optimizers = get_registered_optimizers()
+    available_tasks = get_registered_tasks()
+    if task_registration_cfg is not None:
+        register_tasks_from_cfg(task_registration_cfg)
+    if optimizer_registration_cfg is not None:
+        register_optimizers_from_cfg(optimizer_registration_cfg)
+
+    task_entry = available_tasks.get(init_task)
+    optimizer_entry = available_optimizers.get(init_optimizer)
+
+    assert task_entry is not None, f"Task {init_task} not found in task registry."
+    assert optimizer_entry is not None, f"Optimizer {init_optimizer} not found in optimizer registry."
+
+    # instantiate the task/optimizer/controller
+    task_cls, _ = task_entry
+    task = task_cls()
+
+    optimizer_cls, optimizer_config_cls = optimizer_entry
+    optimizer = optimizer_cls(optimizer_config_cls(), task.nu)
+
+    controller_cfg = ControllerConfig()
+    controller_cfg.set_override(init_task)
+
+    return Controller(
+        controller_config=controller_cfg,
+        task=task,
+        optimizer=optimizer,
+        rollout_backend=rollout_backend,
     )
