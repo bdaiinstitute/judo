@@ -44,10 +44,12 @@ class ControllerNode(DoraNode):
         if task_entry is not None:
             task_cls, _ = task_entry
             with self.lock:
+                task = task_cls()
+                optimizer = self.controller.optimizer_cls(self.controller.optimizer_config_cls(), task.nu)
                 self.controller = Controller(
                     controller_config=self.controller.controller_cfg,
-                    task=task_cls(),
-                    optimizer=self.controller.optimizer,
+                    task=task,
+                    optimizer=optimizer,
                 )
                 self.write_controls()
         else:

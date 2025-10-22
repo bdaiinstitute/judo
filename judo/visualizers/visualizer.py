@@ -21,8 +21,8 @@ from judo.visualizers.model import ViserMjModel
 ElementType = GuiImageHandle | GuiInputHandle | GuiFolderHandle | MeshHandle | IcosphereHandle
 
 
-class VisualizationData:
-    """Data container for the visualization node.
+class Visualizer:
+    """Visualizer for a visualization node to reference.
 
     This class is a small container which includes the data required for a visualization node to run. This includes all
     of the locks and events required to run. Middleware nodes should keep data within this class and implement methods

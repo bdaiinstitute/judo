@@ -8,8 +8,8 @@ from dora_utils.node import DoraNode, on_event
 from omegaconf import DictConfig
 from viser import GuiFolderHandle, GuiImageHandle, GuiInputHandle, IcosphereHandle, MeshHandle
 
-from judo.app.data.visualization_data import VisualizationData
 from judo.app.structs import MujocoState
+from judo.visualizers.visualizer import Visualizer
 
 ElementType = GuiImageHandle | GuiInputHandle | GuiFolderHandle | MeshHandle | IcosphereHandle
 
@@ -32,7 +32,7 @@ class VisualizationNode(DoraNode):
     ) -> None:
         """Initialize the visualization node."""
         super().__init__(node_id=node_id, max_workers=max_workers)
-        self._data = VisualizationData(
+        self.visualizer = Visualizer(
             init_task=init_task,
             init_optimizer=init_optimizer,
             task_registration_cfg=task_registration_cfg,
@@ -45,63 +45,63 @@ class VisualizationNode(DoraNode):
 
     def write_sim_pause(self) -> None:
         """Write the sim pause signal to the GUI."""
-        with self._data.sim_pause_lock:
+        with self.visualizer.sim_pause_lock:
             self.node.send_output("sim_pause", pa.array([1]))  # dummy value
-        self._data.sim_pause_updated.clear()
+        self.visualizer.sim_pause_updated.clear()
 
     def write_task(self) -> None:
         """Write the task name to the GUI."""
-        with self._data.task_lock:
-            self.node.send_output("task", pa.array([self._data.task_name]))
-        self._data.task_updated.clear()
+        with self.visualizer.task_lock:
+            self.node.send_output("task", pa.array([self.visualizer.task_name]))
+        self.visualizer.task_updated.clear()
 
     def write_task_reset(self) -> None:
         """Write the task reset signal to the GUI."""
-        with self._data.task_lock:
+        with self.visualizer.task_lock:
             self.node.send_output("task_reset", pa.array([1]))  # dummy value
-        self._data.task_reset_updated.clear()
+        self.visualizer.task_reset_updated.clear()
 
     def write_optimizer(self) -> None:
         """Write the optimizer name to the GUI."""
-        with self._data.optimizer_lock:
-            self.node.send_output("optimizer", pa.array([self._data.optimizer_name]))
-        self._data.optimizer_updated.clear()
+        with self.visualizer.optimizer_lock:
+            self.node.send_output("optimizer", pa.array([self.visualizer.optimizer_name]))
+        self.visualizer.optimizer_updated.clear()
 
     def write_controller_config(self) -> None:
         """Write the controller config to the GUI."""
-        with self._data.controller_config_lock:
-            self.node.send_output("controller_config", *to_arrow(self._data.controller_config))
-        self._data.controller_config_updated.clear()
+        with self.visualizer.controller_config_lock:
+            self.node.send_output("controller_config", *to_arrow(self.visualizer.controller_config))
+        self.visualizer.controller_config_updated.clear()
 
     def write_optimizer_config(self) -> None:
         """Write the optimizer config to the GUI."""
-        with self._data.optimizer_config_lock:
-            self.node.send_output("optimizer_config", *to_arrow(self._data.optimizer_config))
-        self._data.optimizer_config_updated.clear()
+        with self.visualizer.optimizer_config_lock:
+            self.node.send_output("optimizer_config", *to_arrow(self.visualizer.optimizer_config))
+        self.visualizer.optimizer_config_updated.clear()
 
     def write_task_config(self) -> None:
         """Write the task config to the GUI."""
-        with self._data.task_config_lock:
-            self.node.send_output("task_config", *to_arrow(self._data.task_config))
-        self._data.task_config_updated.clear()
+        with self.visualizer.task_config_lock:
+            self.node.send_output("task_config", *to_arrow(self.visualizer.task_config))
+        self.visualizer.task_config_updated.clear()
 
     @on_event("INPUT", "states")
     def update_states(self, event: dict) -> None:
         """Callback to update states on receiving a new state measurement."""
-        if self._data.controller_config.spline_order == "cubic" and self._data.optimizer_config.num_nodes < 4:
+        if self.visualizer.controller_config.spline_order == "cubic" and self.visualizer.optimizer_config.num_nodes < 4:
             warnings.warn("Cubic splines require at least 4 nodes. Setting num_nodes=4.", stacklevel=2)
-            for e in self._data.gui_elements["optimizer_params"]:
+            for e in self.visualizer.gui_elements["optimizer_params"]:
                 if e.label == "num_nodes":
                     e.value = 4
                     break
-            self._data.optimizer_config_updated.set()
+            self.visualizer.optimizer_config_updated.set()
 
         state_msg = from_arrow(event["value"], event["metadata"], MujocoState)
         try:
-            with self._data.task_lock:
-                self._data.data.xpos[:] = state_msg.xpos
-                self._data.data.xquat[:] = state_msg.xquat
-                self._data.viser_model.set_data(self._data.data)
+            with self.visualizer.task_lock:
+                self.visualizer.data.xpos[:] = state_msg.xpos
+                self.visualizer.data.xquat[:] = state_msg.xquat
+                self.visualizer.viser_model.set_data(self.visualizer.data)
         except ValueError:
             # we're switching tasks and the new task has a different number of xpos/xquat
             return
@@ -113,36 +113,36 @@ class VisualizationNode(DoraNode):
         all_traces_rollout_size = int(event["metadata"]["all_traces_rollout_size"])
         shape = event["metadata"]["shape"]
         traces = traces_flat.reshape(*shape)
-        with self._data.task_lock:
-            self._data.viser_model.set_traces(traces, all_traces_rollout_size)
+        with self.visualizer.task_lock:
+            self.visualizer.viser_model.set_traces(traces, all_traces_rollout_size)
 
     @on_event("INPUT", "plan_time")
     def update_plan_time(self, event: dict) -> None:
         """Callback to update plan time on receiving a new plan time measurement."""
         plan_time_s = event["value"].to_numpy(zero_copy_only=False)[0]
-        self._data.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
+        self.visualizer.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
 
     def spin(self) -> None:
         """Spin logic for the visualization node."""
         for event in self.node:
-            if self._data.sim_pause_updated.is_set():
+            if self.visualizer.sim_pause_updated.is_set():
                 self.write_sim_pause()
-            if self._data.task_updated.is_set():
+            if self.visualizer.task_updated.is_set():
                 self.write_task()
-            if self._data.task_reset_updated.is_set():
+            if self.visualizer.task_reset_updated.is_set():
                 self.write_task_reset()
-            if self._data.optimizer_updated.is_set():
+            if self.visualizer.optimizer_updated.is_set():
                 self.write_optimizer()
-            if self._data.controller_config_updated.is_set():
+            if self.visualizer.controller_config_updated.is_set():
                 self.write_controller_config()
-            if self._data.optimizer_config_updated.is_set():
+            if self.visualizer.optimizer_config_updated.is_set():
                 self.write_optimizer_config()
-            if self._data.task_config_updated.is_set():
+            if self.visualizer.task_config_updated.is_set():
                 self.write_task_config()
 
             self.handle(event)
 
     def cleanup(self) -> None:
         """Cleanup the visualization node."""
-        self._data.cleanup()
+        self.visualizer.cleanup()
         super().cleanup()
