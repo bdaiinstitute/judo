@@ -5,12 +5,15 @@ from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np
+from omegaconf import DictConfig
 from scipy.interpolate import interp1d
 
+from judo.app.structs import MujocoState, SplineData
+from judo.app.utils import register_optimizers_from_cfg, register_tasks_from_cfg
 from judo.config import OverridableConfig
 from judo.gui import slider
-from judo.optimizers import Optimizer, OptimizerConfig
-from judo.tasks.base import Task
+from judo.optimizers import OptimizerConfig, get_registered_optimizers
+from judo.tasks import TaskConfig, get_registered_tasks
 from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
 from judo.utils.normalization import (
     IdentityNormalizer,
@@ -41,26 +44,48 @@ class Controller:
 
     def __init__(
         self,
-        controller_config: ControllerConfig,
-        task: Task,
-        optimizer: Optimizer,
+        init_task: str,
+        init_optimizer: str,
+        task_registration_cfg: DictConfig | None = None,
+        optimizer_registration_cfg: DictConfig | None = None,
         rollout_backend: Literal["mujoco"] = "mujoco",
     ) -> None:
         """Initialize the controller.
 
         Args:
-            controller_config: The configuration for the controller.
-            task: The Task object that specifies the environment.
-            optimizer: The optimizer object that will be used for optimization.
+            init_task: The name of the task to initialize.
+            init_optimizer: The name of the optimizer to initialize.
+            task_registration_cfg: The configuration for the task registration.
+            optimizer_registration_cfg: The configuration for the optimizer registration.
             rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
         """
-        self.controller_cfg = controller_config
+        self.task_name = init_task
+        self.optimizer_name = init_optimizer
+        self.available_optimizers = get_registered_optimizers()
+        self.available_tasks = get_registered_tasks()
+        if task_registration_cfg is not None:
+            register_tasks_from_cfg(task_registration_cfg)
+        if optimizer_registration_cfg is not None:
+            register_optimizers_from_cfg(optimizer_registration_cfg)
 
-        self.task = task
+        task_entry = self.available_tasks.get(self.task_name)
+        optimizer_entry = self.available_optimizers.get(self.optimizer_name)
 
-        self.optimizer = optimizer
+        assert task_entry is not None, f"Task {self.task_name} not found in task registry."
+        assert optimizer_entry is not None, f"Optimizer {self.optimizer_name} not found in optimizer registry."
 
-        self.model = task.model
+        # instantiate the task/optimizer/controller
+        task_cls, _ = task_entry
+        optimizer_cls, optimizer_config_cls = optimizer_entry
+
+        self.controller_cfg = ControllerConfig()
+        self.controller_cfg.set_override(self.task_name)
+
+        self.task = task_cls()
+
+        self.optimizer = optimizer_cls(optimizer_config_cls(), self.task.nu)
+
+        self.model = self.task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
         self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
@@ -71,6 +96,7 @@ class Controller:
         self.system_metadata = {}
 
         self.states = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nq + self.model.nv))
+        self.current_state = np.concatenate([self.task.data.qpos, self.task.data.qvel])
         self.sensors = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nsensordata))
         self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nu))
         self.rewards = np.zeros((self.optimizer_cfg.num_rollouts,))
@@ -89,6 +115,11 @@ class Controller:
         return self.controller_cfg.horizon
 
     @property
+    def nu(self) -> int:
+        """Helper function to get the number of control inputs."""
+        return self.task.nu
+
+    @property
     def max_num_traces(self) -> int:
         """Helper function to recalculate the max number of traces for simulation."""
         return self.controller_cfg.max_num_traces
@@ -102,6 +133,11 @@ class Controller:
     def spline_order(self) -> str:
         """Helper function to recalculate the spline order for simulation."""
         return self.controller_cfg.spline_order
+
+    @property
+    def spline_data(self) -> SplineData:
+        """Helper function to get the spline data."""
+        return SplineData(self.times, self.nominal_knots)
 
     @property
     def action_normalizer_type(self) -> NormalizerType:
@@ -133,9 +169,39 @@ class Controller:
         """Helper function to set the optimizer config."""
         self.optimizer.config = optimizer_cfg
 
-    def update_action(self, curr_state: np.ndarray, curr_time: float) -> None:
+    @property
+    def optimizer_cls(self) -> type:
+        """Returns the optimizer class."""
+        return self.optimizer.__class__
+
+    @property
+    def optimizer_config_cls(self) -> type:
+        """Returns the optimizer config class."""
+        return self.optimizer.config.__class__
+
+    @property
+    def task_config(self) -> TaskConfig:
+        """Returns the task config, which is uniquely defined by the task."""
+        return self.task.config
+
+    @task_config.setter
+    def task_config(self, task_cfg: TaskConfig) -> None:
+        """Sets the task config."""
+        self.task.config = task_cfg
+
+    @property
+    def time(self) -> float:
+        """Returns the current simulation time."""
+        return self.task.time
+
+    @time.setter
+    def time(self, value: float) -> None:
+        """Sets the current simulation time."""
+        self.task.time = value
+
+    def update_action(self) -> None:
         """Abstract method for updating controller actions from current state/time."""
-        assert curr_state.shape == (self.model.nq + self.model.nv,)
+        assert self.current_state.shape == (self.model.nq + self.model.nv,), "Current state must be of shape (nq + nv,)"
         assert self.optimizer_cfg.num_rollouts > 0, "Need at least one rollout!"
 
         if self.optimizer_cfg.num_nodes < 4 and self.spline_order == "cubic":
@@ -143,7 +209,7 @@ class Controller:
             self.optimizer_cfg.num_nodes = 4
 
         # Adjust time + move policy forward.
-        new_times = curr_time + self.spline_timesteps
+        new_times = self.time + self.spline_timesteps
         nominal_knots = self.spline(new_times)
         nominal_knots_normalized = self.action_normalizer.normalize(nominal_knots)
 
@@ -184,13 +250,13 @@ class Controller:
 
             # Evaluate rollout controls at sim timesteps.
             candidate_splines = make_spline(new_times, self.candidate_knots, self.spline_order)
-            self.rollout_controls = candidate_splines(curr_time + self.rollout_times)
+            self.rollout_controls = candidate_splines(self.time + self.rollout_times)
 
             # Roll out dynamics with action sequences.
-            self.task.pre_rollout(curr_state)
+            self.task.pre_rollout(self.current_state)
             self.states, self.sensors = self.rollout_backend.rollout(
                 self.model_data_pairs,
-                curr_state,
+                self.current_state,
                 self.rollout_controls,
             )
             self.task.post_rollout(
@@ -280,6 +346,12 @@ class Controller:
             s1 = np.reshape(sensors[:, :, sensor * 3 : (sensor + 1) * 3], separated_sensors_size)
             elites[sensor :: self.num_trace_sensors] = s1
         self.traces = np.reshape(elites, (total_traces_rollouts, 2, 3))
+
+    def update_states(self, state_msg: MujocoState) -> None:
+        """Updates the states."""
+        self.current_state = np.concatenate([state_msg.qpos, state_msg.qvel])
+        self.time = state_msg.time
+        self.system_metadata = state_msg.sim_metadata
 
     def _init_action_normalizer(self) -> Normalizer:
         """Initialize the action normalizer."""
