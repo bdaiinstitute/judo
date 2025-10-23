@@ -34,16 +34,12 @@ class SimulationNode(DoraNode):
         new_task = event["value"].to_numpy(zero_copy_only=False)[0]
         self.sim.set_task(new_task)
 
-    def step(self) -> None:
-        """Step the simulation forward by one timestep."""
-        self.sim.step()
-
     def spin(self) -> None:
         """Spin logic for the simulation node."""
         while True:
             start_time = time.time()
             self.parse_messages()
-            self.step()
+            self.sim.step()
             self.write_states()
 
             # Force controller to run at fixed rate specified by model dt.
@@ -70,7 +66,7 @@ class SimulationNode(DoraNode):
     @on_event("INPUT", "task_reset")
     def reset_task(self, event: dict) -> None:
         """Resets the task."""
-        self.sim.reset_task()
+        self.sim.task.reset()
 
     @on_event("INPUT", "controls")
     def update_control(self, event: dict) -> None:

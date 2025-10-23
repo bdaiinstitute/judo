@@ -40,24 +40,15 @@ class Simulation:
 
         task_cls, _ = task_entry
         self.task: Task = task_cls()
-        self.reset_task()
-        self._set_state()
+        self.task.reset()
 
     def step(self) -> None:
         """Step the simulation forward by one timestep."""
         raise NotImplementedError("Subclasses must implement this method.")
 
-    def _set_state(self) -> None:
-        """Set the state of the simulation."""
-        raise NotImplementedError("Subclasses must implement this method.")
-
     def pause(self) -> None:
         """Event handler for processing pause status updates."""
         self.paused = not self.paused
-
-    def reset_task(self) -> None:
-        """Resets the task."""
-        self.task.reset()
 
     def update_control(self, control_spline: Callable) -> None:
         """Event handler for processing controls received from controller node."""

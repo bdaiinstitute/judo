@@ -51,13 +51,6 @@ class MJSimulation(Simulation):
             sim_metadata=self.task.get_sim_metadata(),
         )
 
-    def _set_state(self) -> None:
-        """Set the state of the simulation.
-
-        Ignored in mujoco because all the data just comes from the task object and is never internally used.
-        """
-        pass
-
     @property
     def timestep(self) -> float:
         """Returns the simulation timestep."""
