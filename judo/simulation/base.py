@@ -2,21 +2,20 @@
 
 from typing import Callable
 
-from mujoco import mj_step
 from omegaconf import DictConfig
 
-from judo.app.structs import MujocoState
 from judo.app.utils import register_tasks_from_cfg
 from judo.tasks import get_registered_tasks
 from judo.tasks.base import Task
 
 
-class SimulationData:
-    """Data container for the simulation node.
+class Simulation:
+    """Base class for a simulation object.
 
-    This class is a small container which includes the data required for a simulation  node to run. This include
-    configurations, a control spline, and task information. Middleware nodes should keep data within this class and
-    implement methods to send, process, and receive data from here.
+    This class contains the data required to run a simulation. This includes configurations, a control spline, and task
+    information. It can be inherited from to implement specific simulation backends.
+
+    Middleware nodes should instantiate this class and implement methods to send, process, and receive data.
     """
 
     def __init__(
@@ -46,31 +45,11 @@ class SimulationData:
 
     def step(self) -> None:
         """Step the simulation forward by one timestep."""
-        if self.control is not None and not self.paused:
-            try:
-                self.task.data.ctrl[:] = self.control(self.task.data.time)
-                self.task.pre_sim_step()
-                mj_step(self.task.sim_model, self.task.data)
-                self.task.post_sim_step()
-            except ValueError:
-                # we're switching tasks and the new task has a different number of actuators
-                pass
-
-        # Sets the internal state message based on the control and simuilation output
-        self._set_state()
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def _set_state(self) -> None:
         """Set the state of the simulation."""
-        self.sim_state = MujocoState(
-            time=self.task.data.time,
-            qpos=self.task.data.qpos,  # type: ignore
-            qvel=self.task.data.qvel,  # type: ignore
-            xpos=self.task.data.xpos,  # type: ignore
-            xquat=self.task.data.xquat,  # type: ignore
-            mocap_pos=self.task.data.mocap_pos,  # type: ignore
-            mocap_quat=self.task.data.mocap_quat,  # type: ignore
-            sim_metadata=self.task.get_sim_metadata(),
-        )
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def pause(self) -> None:
         """Event handler for processing pause status updates."""
@@ -83,3 +62,8 @@ class SimulationData:
     def update_control(self, control_spline: Callable) -> None:
         """Event handler for processing controls received from controller node."""
         self.control = control_spline
+
+    @property
+    def timestep(self) -> float:
+        """Timestep the simulation expects to run at."""
+        raise NotImplementedError("Subclasses must implement this method.")

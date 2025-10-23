@@ -79,6 +79,7 @@ node_definitions:
     max_workers: null
     init_task: ${task}
     task_registration_cfg: ${custom_tasks}
+    simulation_backend: ${simulation_backend}
   visualization:
     _target_: judo.app.dora.visualization.VisualizationNode
     node_id: visualization
@@ -103,3 +104,4 @@ custom_tasks: null
 custom_optimizers: null
 controller_config_overrides: null
 optimizer_config_overrides: null
+simulation_backend: mujoco
