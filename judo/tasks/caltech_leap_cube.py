@@ -4,12 +4,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from judo import MODEL_PATH
 from judo.gui import slider
 from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
+from judo.utils.assets import retrieve_description_path_from_remote
 
-XML_PATH = str(MODEL_PATH / "xml/caltech_leap_cube.xml")
-SIM_XML_PATH = str(MODEL_PATH / "xml/caltech_leap_cube_sim.xml")
 QPOS_HOME = np.array(
     [
         0.11, 0.005, 0.04, 1.0, 0.0, 0.0, 0.0,  # cube
@@ -31,8 +29,13 @@ class CaltechLeapCubeConfig(LeapCubeConfig):
 class CaltechLeapCube(LeapCube):
     """Defines the LEAP cube rotation task."""
 
-    def __init__(self, model_path: str = XML_PATH, sim_model_path: str = SIM_XML_PATH) -> None:
+    def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
+        leap_cube_path = retrieve_description_path_from_remote("caltech_leap_cube", force=False)
+        if model_path is None:
+            model_path = f"{leap_cube_path}/caltech_leap_cube.xml"
+        if sim_model_path is None:
+            sim_model_path = f"{leap_cube_path}/caltech_leap_cube_sim.xml"
         super(LeapCube, self).__init__(model_path, sim_model_path=sim_model_path)
         self.goal_pos = np.array([0.11, 0.005, 0.03])
         self.goal_quat = np.array([1.0, 0.0, 0.0, 0.0])

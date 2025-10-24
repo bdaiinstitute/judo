@@ -6,13 +6,11 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from judo import MODEL_PATH
 from judo.gui import slider
 from judo.tasks.base import Task, TaskConfig
 from judo.tasks.cost_functions import quadratic_norm
+from judo.utils.assets import retrieve_description_path_from_remote
 from judo.utils.fields import np_1d_field
-
-XML_PATH = str(MODEL_PATH / "xml/cylinder_push.xml")
 
 
 @slider("w_pusher_proximity", 0.0, 5.0, 0.1)
@@ -39,8 +37,10 @@ class CylinderPushConfig(TaskConfig):
 class CylinderPush(Task[CylinderPushConfig]):
     """Defines the cylinder push balancing task."""
 
-    def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = None) -> None:
+    def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the cylinder push task."""
+        if model_path is None:
+            model_path = f"{retrieve_description_path_from_remote('cylinder_push', force=False)}/cylinder_push.xml"
         super().__init__(model_path, sim_model_path=sim_model_path)
         self.reset()
 

@@ -9,6 +9,8 @@ from hydra import compose, initialize_config_dir
 from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
 
+from judo.utils.assets import retrieve_description_path_from_remote
+
 # suppress annoying warning from hydra
 warnings.filterwarnings(
     "ignore",
@@ -27,6 +29,8 @@ CONFIG_PATH = (Path(__file__).parent / "configs").resolve()
 @hydra.main(config_path=str(CONFIG_PATH), config_name="judo_default", version_base="1.3")
 def main_app(cfg: DictConfig) -> None:
     """Main function to run judo via a hydra configuration yaml file."""
+    # Include a download for the default asset
+    retrieve_description_path_from_remote(cfg["task"], force=False)
     run(cfg)
 
 

@@ -112,28 +112,44 @@ class RepoInfo:
 
 
 KNOWN_DESCRIPTIONS = {
-    "spot": RepoInfo(
-        url="", commit_hash=None, description_path="spot", remote_meshes_path="spot/assets", remote_xml_path="spot"
+    # "spot": RepoInfo(
+    #     url="", commit_hash=None, description_path="spot", remote_meshes_path="spot/assets", remote_xml_path="spot"
+    # ),
+    "cylinder_push": RepoInfo(
+        url="https://github.com/bhung-bdai/judo_descriptions_test.git",
+        commit_hash=None,
+        description_path="judo_descriptions_test",
+        remote_model_path="cylinder_push",
+    ),
+    "cartpole": RepoInfo(
+        url="https://github.com/bhung-bdai/judo_descriptions_test.git",
+        commit_hash=None,
+        description_path="judo_descriptions_test",
+        remote_model_path="cartpole",
     ),
     "fr3": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
-        commit_hash="c50e2f3f5d5b151a7a8dd046630235e3733b0689",
+        commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="franka_fr3",
     ),
-    "leap": RepoInfo(
-        url="https://github.com/deepmind/mujoco_menagerie.git",
-        commit_hash="1f2300db40caa341786bffdad5ee02966c5f8d0a",
-        description_path="mujoco_menagerie",
-        remote_meshes_path="leap_hand",
-        remote_xml_path="leap_hand",
+    "leap_cube": RepoInfo(
+        url="https://github.com/bhung-bdai/judo_descriptions_test.git",
+        commit_hash=None,
+        description_path="judo_descriptions_test",
+        remote_model_path="leap_hand",
     ),
-    "dynamixel_2r": RepoInfo(
-        url="https://github.com/deepmind/mujoco_menagerie.git",
-        commit_hash="1f2300db40caa341786bffdad5ee02966c5f8d0a",
-        description_path="mujoco_menagerie",
-        remote_meshes_path="dynamixel_2r/assets",
-        remote_xml_path="dynamixel_2r",
+    "leap_cube_palm_down": RepoInfo(
+        url="https://github.com/bhung-bdai/judo_descriptions_test.git",
+        commit_hash=None,
+        description_path="judo_descriptions_test",
+        remote_model_path="leap_hand",
+    ),
+    "caltech_leap_cube": RepoInfo(
+        url="https://github.com/bhung-bdai/judo_descriptions_test.git",
+        commit_hash=None,
+        description_path="judo_descriptions_test",
+        remote_model_path="leap_hand",
     ),
 }
 
@@ -219,42 +235,3 @@ def retrieve_description_path_from_remote(description_name: str, force: bool = F
         raise ValueError(f"Description {description_name} not found in {get_description_keys()}!") from e
     description_clone = get_description(description_info, force=force)
     return f"{description_clone.working_dir}/{description_info.remote_model_path}"
-
-
-# def import_description_assets(
-#     description_name: str, local_meshes_path: str = MESHES_PATH, local_xml_path: str = XML_PATH
-# ) -> None:
-#     """
-#     Imports assets from a description into the local assets path.
-#     """
-#     try:
-#         description_info = KNOWN_DESCRIPTIONS[description_name]
-#     except KeyError:
-#         raise ValueError(f"Description {description_name} not found in known descriptions!")
-#     description_clone = get_description(description_info)
-
-#     # Copy in the meshes from the description meshes, if it is not None
-#     if description_info.remote_meshes_path is not None:
-#         mesh_path = Path(local_meshes_path)
-#         if not mesh_path.exists():
-#             mesh_path.mkdir(parents=True, exist_ok=True)
-#         mesh_path = mesh_path / description_name
-#         if not mesh_path.exists():
-#             mesh_path.mkdir(parents=True, exist_ok=True)
-
-#         # Copy meshes from the description location into the local meshes path
-#         remote_path = Path(description_clone.working_dir)
-#         remote_meshes_path = remote_path / description_info.remote_meshes_path
-#         if not remote_meshes_path.exists():
-#             raise FileNotFoundError(f"Mesh directory {remote_meshes_path} not found!")
-#         shutil.copytree(remote_meshes_path, mesh_path, dirs_exist_ok=True)
-
-#     # Copy xmls from the description XML location to the local XML path
-#     if description_info.remote_xml_path is not None:
-#         xml_path = Path(local_xml_path)
-#         if not xml_path.exists():
-#             xml_path.mkdir(parents=True, exist_ok=True)
-#         remote_xml_path = remote_path / description_info.remote_xml_path
-#         if not remote_xml_path.exists():
-#             raise FileNotFoundError(f"XML directory {remote_xml_path} not found!")
-#         shutil.copytree(remote_xml_path, xml_path, dirs_exist_ok=True)

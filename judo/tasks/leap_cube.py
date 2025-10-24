@@ -6,13 +6,11 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from judo import MODEL_PATH
 from judo.gui import slider
 from judo.tasks.base import Task, TaskConfig
+from judo.utils.assets import retrieve_description_path_from_remote
 from judo.utils.math_utils import quat_diff, quat_diff_so3
 
-XML_PATH = str(MODEL_PATH / "xml/leap_cube.xml")
-SIM_XML_PATH = str(MODEL_PATH / "xml/leap_cube_sim.xml")
 QPOS_HOME = np.array(
     [
         0.0, 0.03, 0.1, 1.0, 0.0, 0.0, 0.0,  # cube
@@ -37,8 +35,13 @@ class LeapCubeConfig(TaskConfig):
 class LeapCube(Task[LeapCubeConfig]):
     """Defines the LEAP cube rotation task."""
 
-    def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = SIM_XML_PATH) -> None:
+    def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
+        leap_cube_path = retrieve_description_path_from_remote("leap_cube", force=False)
+        if model_path is None:
+            model_path = f"{leap_cube_path}/leap_cube.xml"
+        if sim_model_path is None:
+            sim_model_path = f"{leap_cube_path}/leap_cube_sim.xml"
         super().__init__(model_path, sim_model_path=sim_model_path)
         self.goal_pos = np.array([0.0, 0.03, 0.1])
         self.goal_quat = np.array([1.0, 0.0, 0.0, 0.0])
