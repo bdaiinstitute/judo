@@ -30,6 +30,7 @@ classifiers = [
 
 dependencies = [
     "dora-utils",  # dora + qol utils for writing nodes
+    "GitPython >=3.1.18", # required to clone description assets from remote repositories
     "mujoco",
     "numpy",
     "pillow",  # for displaying app logo

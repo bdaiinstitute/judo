@@ -1,11 +1,21 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
-
+import logging
 import os
+import shutil
 import time
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
 
 import requests
+from git import (
+    GitCommandError,
+    InvalidGitRepositoryError,
+    NoSuchPathError,
+    Repo,
+)
+
+from judo import DESCRIPTION_CACHE_DIR
 
 
 def acquire_lock(lock_path: Path, timeout: int = 60, poll_interval: float = 0.1) -> None:
@@ -52,7 +62,7 @@ def download_and_extract_meshes(
             return
 
         # fetch latest release info
-        print("Mesh assets not detected! Downloading assets now...")
+        logging.info("Mesh assets not detected! Downloading assets now...")
         if tag is None:
             api_url = f"https://api.github.com/repos/{repo}/releases/latest"
         else:
@@ -87,3 +97,164 @@ def download_and_extract_meshes(
 
     finally:
         release_lock(lock_path)
+
+
+@dataclass
+class RepoInfo:
+    """Information required to clone a description from a repository."""
+
+    url: str
+    description_path: str
+    remote_model_path: str | None = None
+    remote_meshes_path: str | None = None
+    remote_xml_path: str | None = None
+    commit_hash: str | None = None
+
+
+KNOWN_DESCRIPTIONS = {
+    "spot": RepoInfo(
+        url="", commit_hash=None, description_path="spot", remote_meshes_path="spot/assets", remote_xml_path="spot"
+    ),
+    "fr3": RepoInfo(
+        url="https://github.com/bhung-bdai/judo_descriptions_test.git",
+        commit_hash="c50e2f3f5d5b151a7a8dd046630235e3733b0689",
+        description_path="judo_descriptions_test",
+        remote_model_path="franka_fr3",
+    ),
+    "leap": RepoInfo(
+        url="https://github.com/deepmind/mujoco_menagerie.git",
+        commit_hash="1f2300db40caa341786bffdad5ee02966c5f8d0a",
+        description_path="mujoco_menagerie",
+        remote_meshes_path="leap_hand",
+        remote_xml_path="leap_hand",
+    ),
+    "dynamixel_2r": RepoInfo(
+        url="https://github.com/deepmind/mujoco_menagerie.git",
+        commit_hash="1f2300db40caa341786bffdad5ee02966c5f8d0a",
+        description_path="mujoco_menagerie",
+        remote_meshes_path="dynamixel_2r/assets",
+        remote_xml_path="dynamixel_2r",
+    ),
+}
+
+
+def delete_assets_cache(cache_dir: Path | None = None) -> None:
+    """Deletes the assets cache."""
+    if cache_dir is None:
+        cache_dir = Path(os.environ.get("JUDO_DESCRIPTION_CACHE_DIR", DESCRIPTION_CACHE_DIR)).expanduser()
+    if not cache_dir.exists():
+        raise FileNotFoundError(f"Cache directory {cache_dir} does not exist!")
+    shutil.rmtree(cache_dir)
+
+
+def get_description_keys() -> list[str]:
+    """Returns a list of the keys of the known descriptions."""
+    return list(KNOWN_DESCRIPTIONS.keys())
+
+
+def add_known_description(description_name: str, description_info: RepoInfo) -> None:
+    """Adds a new description via the RepoInfo to the known descriptions dictionary."""
+    KNOWN_DESCRIPTIONS[description_name] = description_info
+
+
+def get_description(description_info: RepoInfo, force: bool = False) -> Repo:
+    """
+    Clone a description from the provided information and return the path to the cloned repository.
+
+    Args:
+        description_info: The information about the description to clone.
+        force: Forcefully redownload the description, regardless of whether or not it already exists.
+
+    Returns:
+        The path to the cloned description repository.
+    """
+    assert isinstance(description_info, RepoInfo), "description_info must be a RepoInfo object!"
+    description_url = description_info.url
+    description_path = Path(description_info.description_path)
+    commit_hash = description_info.commit_hash
+
+    # Find the directory hosting the cache
+    cache_dir = Path(os.environ.get("JUDO_DESCRIPTION_CACHE_DIR", DESCRIPTION_CACHE_DIR)).expanduser()
+    if commit_hash:
+        description_path = description_path / commit_hash
+    cache_path = cache_dir / description_path
+
+    description_clone = None
+    if force:
+        if cache_path.exists():
+            shutil.rmtree(cache_path)
+        cache_path.mkdir(parents=True, exist_ok=True)
+        logging.info(f"Cloning description from {description_url} into {cache_path}")
+        description_clone = Repo.clone_from(description_url, cache_path)
+    else:
+        try:
+            description_clone = Repo(cache_path)
+        except (InvalidGitRepositoryError, NoSuchPathError, GitCommandError):
+            # Deletes the existing cache path for this repo if it exists and recreates it
+            if cache_path.exists():
+                shutil.rmtree(cache_path)
+            cache_path.mkdir(parents=True, exist_ok=True)
+            logging.info(f"Cloning description from {description_url} into {cache_path}")
+            description_clone = Repo.clone_from(description_url, cache_path)
+
+    if description_clone is None:
+        raise FileNotFoundError(f"Failed to clone description from {description_url} into {cache_path}")
+
+    if commit_hash:
+        try:
+            description_clone.git.checkout(commit_hash)
+        except GitCommandError:
+            description_clone.git.fetch("origin")
+            description_clone.git.checkout(commit_hash)
+
+    logging.info(f"Retrieved description from {description_url} to {description_clone.working_dir}")
+    return description_clone
+
+
+def retrieve_description_path_from_remote(description_name: str, force: bool = False) -> str:
+    """Gets the path to a description from a remote repository, downloaded and stored in cache."""
+    try:
+        description_info = KNOWN_DESCRIPTIONS[description_name]
+    except KeyError as e:
+        raise ValueError(f"Description {description_name} not found in {get_description_keys()}!") from e
+    description_clone = get_description(description_info, force=force)
+    return f"{description_clone.working_dir}/{description_info.remote_model_path}"
+
+
+# def import_description_assets(
+#     description_name: str, local_meshes_path: str = MESHES_PATH, local_xml_path: str = XML_PATH
+# ) -> None:
+#     """
+#     Imports assets from a description into the local assets path.
+#     """
+#     try:
+#         description_info = KNOWN_DESCRIPTIONS[description_name]
+#     except KeyError:
+#         raise ValueError(f"Description {description_name} not found in known descriptions!")
+#     description_clone = get_description(description_info)
+
+#     # Copy in the meshes from the description meshes, if it is not None
+#     if description_info.remote_meshes_path is not None:
+#         mesh_path = Path(local_meshes_path)
+#         if not mesh_path.exists():
+#             mesh_path.mkdir(parents=True, exist_ok=True)
+#         mesh_path = mesh_path / description_name
+#         if not mesh_path.exists():
+#             mesh_path.mkdir(parents=True, exist_ok=True)
+
+#         # Copy meshes from the description location into the local meshes path
+#         remote_path = Path(description_clone.working_dir)
+#         remote_meshes_path = remote_path / description_info.remote_meshes_path
+#         if not remote_meshes_path.exists():
+#             raise FileNotFoundError(f"Mesh directory {remote_meshes_path} not found!")
+#         shutil.copytree(remote_meshes_path, mesh_path, dirs_exist_ok=True)
+
+#     # Copy xmls from the description XML location to the local XML path
+#     if description_info.remote_xml_path is not None:
+#         xml_path = Path(local_xml_path)
+#         if not xml_path.exists():
+#             xml_path.mkdir(parents=True, exist_ok=True)
+#         remote_xml_path = remote_path / description_info.remote_xml_path
+#         if not remote_xml_path.exists():
+#             raise FileNotFoundError(f"XML directory {remote_xml_path} not found!")
+#         shutil.copytree(remote_xml_path, xml_path, dirs_exist_ok=True)
