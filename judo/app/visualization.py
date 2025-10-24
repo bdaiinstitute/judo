@@ -432,6 +432,8 @@ class VisualizationNode(DoraNode):
             else:
                 v.remove()
         self.viser_model.remove()
+        # Ensure the previous GUI elements are totally removed before setting up the new ones
+        self.server.flush()
 
     def cleanup(self) -> None:
         """Cleanup the visualization node."""
