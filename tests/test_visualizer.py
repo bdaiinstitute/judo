@@ -7,7 +7,6 @@ from trimesh.creation import box
 from trimesh.visual import TextureVisuals
 from viser import ViserServer
 
-# from judo import MODEL_PATH
 from judo.utils.assets import retrieve_description_path_from_remote
 from judo.visualizers.model import (
     ViserMjModel,
