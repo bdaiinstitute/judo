@@ -269,7 +269,8 @@ def _get_callback(
     def gui_callback(_: GuiEvent) -> None:
         """Updates the config with the new value received from viser."""
         if isinstance(element, GuiBoundedSliderHandle):
-            # Value is on a bounded slider and cannot exceed the bounds set by the user
+            # Value is on a bounded slider and cannot exceed the bounds set. This differs from the basic slider handle,
+            # which currently accepts arbitrary inputs.
             value = min(max(element.value, element.min), element.max)
             if value != element.value:
                 warnings.warn(
