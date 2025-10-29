@@ -77,8 +77,8 @@ jobs:
         run: |
           python - <<'PY'
           import os
-          from judo.utils.assets import download_and_extract_meshes
-          download_and_extract_meshes(extract_root=os.environ["MODEL_DIR"])
+          from judo.utils.assets import retrieve_model_from_remote
+          retrieve_model_from_remote("cylinder_push", force=True)
           PY
 
       - name: Show cache outcome
