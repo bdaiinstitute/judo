@@ -183,7 +183,7 @@ class Controller:
             self.rollout_controls = candidate_splines(curr_time + self.rollout_times)
 
             # Roll out dynamics with action sequences.
-            self.task.pre_rollout(curr_state, self.task_cfg)
+            self.task.pre_rollout(curr_state, curr_time + self.rollout_times, self.rollout_controls, self.task_cfg)
             self.states, self.sensors = self.rollout_backend.rollout(
                 self.model_data_pairs,
                 curr_state,
@@ -192,6 +192,7 @@ class Controller:
             self.task.post_rollout(
                 self.states,
                 self.sensors,
+                curr_time + self.rollout_times,
                 self.rollout_controls,
                 self.task_cfg,
                 self.system_metadata,
