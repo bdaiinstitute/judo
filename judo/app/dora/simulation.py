@@ -42,7 +42,7 @@ class SimulationNode(DoraNode):
             self.sim.step()
             self.write_states()
 
-            # Force controller to run at fixed rate specified by model dt.
+            # Force simulation node to run at fixed rate specified by simulation timestep (specified in the model).
             dt_des = self.sim.timestep
             dt_elapsed = time.time() - start_time
             if dt_elapsed < dt_des:

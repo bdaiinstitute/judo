@@ -1,5 +1,7 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+from typing import Callable
+
 import numpy as np
 
 from judo.simulation import MJSimulation
@@ -27,17 +29,17 @@ def test_simulation_data_update_task() -> None:
     assert isinstance(simulation_data.task, Cartpole)
 
 
-def test_simulation_data_step() -> None:
+def test_simulation_data_step(temp_np_seed: Callable) -> None:
     """Test the simulation data step."""
-    np.random.seed(4291)
     simulation_data = MJSimulation(init_task="cylinder_push")
 
     def mock_control(t: float) -> np.ndarray:
         return np.zeros(simulation_data.task.nu) + 1.234
 
-    original_ctrl = np.copy(simulation_data.task.data.ctrl)
-    simulation_data.update_control(control_spline=mock_control)
-    assert simulation_data.control is not None
-    simulation_data.step()
-    assert not np.allclose(simulation_data.task.data.ctrl, original_ctrl)
-    assert simulation_data.sim_state is not None
+    with temp_np_seed(42):
+        original_ctrl = np.copy(simulation_data.task.data.ctrl)
+        simulation_data.update_control(control_spline=mock_control)
+        assert simulation_data.control is not None
+        simulation_data.step()
+        assert not np.allclose(simulation_data.task.data.ctrl, original_ctrl)
+        assert simulation_data.sim_state is not None

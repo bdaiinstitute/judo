@@ -57,7 +57,6 @@ class Controller:
             optimizer: The optimizer to use.
             rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
         """
-        # Define
         self._controller_cfg = controller_config
         self.task = task
         self.optimizer = optimizer

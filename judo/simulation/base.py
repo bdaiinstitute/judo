@@ -1,5 +1,6 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+from abc import ABC, abstractmethod
 from typing import Callable
 
 from omegaconf import DictConfig
@@ -9,7 +10,7 @@ from judo.tasks import get_registered_tasks
 from judo.tasks.base import Task
 
 
-class Simulation:
+class Simulation(ABC):
     """Base class for a simulation object.
 
     This class contains the data required to run a simulation. This includes configurations, a control spline, and task
@@ -28,7 +29,7 @@ class Simulation:
         if task_registration_cfg is not None:
             register_tasks_from_cfg(task_registration_cfg)
 
-        self.control = None
+        self.control: Callable | None = None
         self.paused = False
         self.set_task(init_task)
 
@@ -42,9 +43,9 @@ class Simulation:
         self.task: Task = task_cls()
         self.task.reset()
 
+    @abstractmethod
     def step(self) -> None:
         """Step the simulation forward by one timestep."""
-        raise NotImplementedError("Subclasses must implement this method.")
 
     def pause(self) -> None:
         """Event handler for processing pause status updates."""
@@ -55,6 +56,6 @@ class Simulation:
         self.control = control_spline
 
     @property
+    @abstractmethod
     def timestep(self) -> float:
         """Timestep the simulation expects to run at."""
-        raise NotImplementedError("Subclasses must implement this method.")

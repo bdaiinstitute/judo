@@ -79,7 +79,11 @@ class GuiBoundedSliderHandle(GuiSliderHandle):
     """A slider handle that is locked to a value."""
 
     def __init__(self, gui_slider: GuiSliderHandle) -> None:
-        """Creates a bounded slider using the same parameters as the original slider, for safety reasons."""
+        """Creates a bounded slider using the same parameters as the original slider, for safety reasons.
+
+        The basic slider handle can accept values outside of its initial bounds when the user inputs a value in the box.
+        This class wraps the slider in a new class that checks and clips the values against its initial bounds.
+        """
         self.__dict__.update(gui_slider.__dict__)
 
 

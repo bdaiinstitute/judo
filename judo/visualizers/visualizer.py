@@ -106,12 +106,12 @@ class Visualizer:
             raise ValueError(f"Task {task_name} not found in the task registry.")
 
         task_cls, _ = task_entry
-        task = task_cls()
-        self.task_config = task.config
-        self.data = mujoco.MjData(task.model)
+        self.task = task_cls()
+        self.task_config = self.task.config
+        self.data = mujoco.MjData(self.task.model)
         self.viser_model = ViserMjModel(
             self.server,
-            task.spec,
+            self.task.spec,
             geom_exclude_substring=self.geom_exclude_substring,
         )
 
