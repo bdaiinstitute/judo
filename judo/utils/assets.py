@@ -95,8 +95,7 @@ def add_known_description(description_name: str, description_info: RepoInfo) -> 
 
 
 def get_description(description_info: RepoInfo, force: bool = False) -> Repo:
-    """
-    Clone a description from the provided information and return the path to the cloned repository.
+    """Clone a description from the provided information and return the path to the cloned repository.
 
     Args:
         description_info: The information about the description to clone.
