@@ -27,10 +27,12 @@ OptimizerConfigT = TypeVar("OptimizerConfigT", bound=OptimizerConfig)
 class Optimizer(ABC, Generic[OptimizerConfigT]):
     """Base class for all optimizers."""
 
-    def __init__(self, config: OptimizerConfigT, nu: int) -> None:
+    def __init__(self, config: OptimizerConfigT, nu: int, override_task_name: str | None = None) -> None:
         """Initialize the optimizer."""
         self.config = config
         self.nu = nu
+        if override_task_name is not None:
+            self.config.set_override(override_task_name)
 
     @property
     def num_rollouts(self) -> int:

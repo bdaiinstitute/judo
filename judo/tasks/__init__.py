@@ -11,12 +11,12 @@ from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
 from judo.tasks.leap_cube_down import LeapCubeDown, LeapCubeDownConfig
 
 _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
-    "cylinder_push": (CylinderPush, CylinderPushConfig),
-    "cartpole": (Cartpole, CartpoleConfig),
-    "fr3_pick": (FR3Pick, FR3PickConfig),
-    "leap_cube": (LeapCube, LeapCubeConfig),
-    "leap_cube_down": (LeapCubeDown, LeapCubeDownConfig),
-    "caltech_leap_cube": (CaltechLeapCube, CaltechLeapCubeConfig),
+    CylinderPush.name: (CylinderPush, CylinderPushConfig),
+    Cartpole.name: (Cartpole, CartpoleConfig),
+    FR3Pick.name: (FR3Pick, FR3PickConfig),
+    LeapCube.name: (LeapCube, LeapCubeConfig),
+    LeapCubeDown.name: (LeapCubeDown, LeapCubeDownConfig),
+    CaltechLeapCube.name: (CaltechLeapCube, CaltechLeapCubeConfig),
 }
 
 

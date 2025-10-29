@@ -29,9 +29,12 @@ class CaltechLeapCubeConfig(LeapCubeConfig):
 class CaltechLeapCube(LeapCube):
     """Defines the LEAP cube rotation task."""
 
+    name: str = "caltech_leap_cube"
+    config_t: type[CaltechLeapCubeConfig] = CaltechLeapCubeConfig
+
     def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
-        default_model_path, default_sim_model_path = retrieve_model_from_remote("caltech_leap_cube", force=False)
+        default_model_path, default_sim_model_path = retrieve_model_from_remote(self.name, force=False)
         if model_path is None:
             model_path = default_model_path
         if sim_model_path is None:

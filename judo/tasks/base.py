@@ -21,10 +21,13 @@ ConfigT = TypeVar("ConfigT", bound=TaskConfig)
 class Task(ABC, Generic[ConfigT]):
     """Task definition."""
 
+    config_t: type[ConfigT]
+
     def __init__(self, model_path: Path | str = "", sim_model_path: Path | str | None = None) -> None:
         """Initialize the Mujoco task."""
         if not model_path:
             raise ValueError("Model path must be provided.")
+        self.config = self.config_t()
         self.spec = MjSpec.from_file(str(model_path))
         self.model = self.spec.compile()
         self.data = MjData(self.model)
@@ -47,7 +50,6 @@ class Task(ABC, Generic[ConfigT]):
         states: np.ndarray,
         sensors: np.ndarray,
         controls: np.ndarray,
-        config: ConfigT,
         system_metadata: dict[str, Any] | None = None,
     ) -> np.ndarray:
         """Abstract reward function for task.
@@ -89,12 +91,11 @@ class Task(ABC, Generic[ConfigT]):
         """Returns Mujoco physics timestep for default physics task."""
         return self.model.opt.timestep
 
-    def pre_rollout(self, curr_state: np.ndarray, config: ConfigT) -> None:
+    def pre_rollout(self, curr_state: np.ndarray) -> None:
         """Pre-rollout behavior for task (does nothing by default).
 
         Args:
             curr_state: Current state of the task. Shape=(nq + nv,).
-            config: The current task config (passed in from the top-level controller).
         """
 
     def post_rollout(
@@ -102,7 +103,6 @@ class Task(ABC, Generic[ConfigT]):
         states: np.ndarray,
         sensors: np.ndarray,
         controls: np.ndarray,
-        config: ConfigT,
         system_metadata: dict[str, Any] | None = None,
     ) -> None:
         """Post-rollout behavior for task (does nothing by default).

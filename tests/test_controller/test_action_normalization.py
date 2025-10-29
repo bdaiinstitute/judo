@@ -4,9 +4,7 @@ from contextlib import nullcontext as does_not_raise
 
 import numpy as np
 
-from judo.controller import Controller, ControllerConfig
-from judo.optimizers import CrossEntropyMethod, CrossEntropyMethodConfig
-from judo.tasks import CylinderPush, CylinderPushConfig
+from judo.controller import ControllerConfig, make_controller
 from judo.utils.normalization import IdentityNormalizer, MinMaxNormalizer, RunningMeanStdNormalizer
 
 # ##### #
@@ -121,17 +119,9 @@ def test_running_mean_std_normalizer_3d_data() -> None:
 
 def test_normalizer_type_change() -> None:
     """Test that normalizer is re-initialized when type changes."""
-    task_config = CylinderPushConfig()
-    task = CylinderPush()
-    optimizer_config = CrossEntropyMethodConfig()
-    optimizer = CrossEntropyMethod(optimizer_config, task.nu)
-
-    controller = Controller(
-        ControllerConfig(action_normalizer="none"),
-        task,
-        task_config,
-        optimizer,
-        optimizer_config,
+    controller = make_controller(
+        init_task="cylinder_push",
+        init_optimizer="cem",
         rollout_backend="mujoco",
     )
 
@@ -142,9 +132,9 @@ def test_normalizer_type_change() -> None:
     controller.controller_cfg.action_normalizer = "min_max"
 
     # Run action update loop once
-    curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
-    curr_time = 0.0
-    controller.update_action(curr_state, curr_time)
+    controller.current_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
+    controller.time = 0.0
+    controller.update_action()
 
     # Should now be MinMaxNormalizer
     assert isinstance(controller.action_normalizer, MinMaxNormalizer)
@@ -152,45 +142,31 @@ def test_normalizer_type_change() -> None:
 
 def test_normalizer_in_update_action_loop() -> None:
     """Test that normalizers work in the update_action loop."""
-    task_config = CylinderPushConfig()
-    task = CylinderPush()
-    optimizer_config = CrossEntropyMethodConfig()
-    optimizer = CrossEntropyMethod(optimizer_config, task.nu)
-
     # Test with different normalizer types
     for normalizer_type in ["none", "min_max", "running"]:
-        controller = Controller(
-            ControllerConfig(action_normalizer=normalizer_type, max_opt_iters=1),
-            task,
-            task_config,
-            optimizer,
-            optimizer_config,
+        controller = make_controller(
+            init_task="cylinder_push",
+            init_optimizer="cem",
             rollout_backend="mujoco",
         )
+        controller.controller_cfg = ControllerConfig(action_normalizer=normalizer_type)
 
-        curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
-        curr_time = 0.0
+        controller.current_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
+        controller.time = 0.0
 
         # This should run without error
         with does_not_raise():
-            controller.update_action(curr_state, curr_time)
+            controller.update_action()
 
 
 def test_min_max_normalizer_with_task_control_ranges() -> None:
     """Test that MinMaxNormalizer correctly uses task's actuator control ranges."""
-    task_config = CylinderPushConfig()
-    task = CylinderPush()
-    optimizer_config = CrossEntropyMethodConfig()
-    optimizer = CrossEntropyMethod(optimizer_config, task.nu)
-
-    controller = Controller(
-        ControllerConfig(action_normalizer="min_max", max_opt_iters=1),
-        task,
-        task_config,
-        optimizer,
-        optimizer_config,
+    controller = make_controller(
+        init_task="cylinder_push",
+        init_optimizer="cem",
         rollout_backend="mujoco",
     )
+    controller.controller_cfg = ControllerConfig(action_normalizer="min_max", max_opt_iters=1)
 
     assert isinstance(controller.action_normalizer, MinMaxNormalizer)
 
@@ -199,9 +175,9 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
     np.testing.assert_array_almost_equal(controller.action_normalizer.max, controller.task.actuator_ctrlrange[:, 1])
 
     # Run optimization loop
-    curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
-    curr_time = 0.0
-    controller.update_action(curr_state, curr_time)
+    controller.current_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
+    controller.time = 0.0
+    controller.update_action()
 
     # Check that all candidate actions are within the control range bounds
     assert np.all(controller.candidate_knots >= controller.task.actuator_ctrlrange[:, 0] - 1e-6)
@@ -217,29 +193,21 @@ def test_min_max_normalizer_with_task_control_ranges() -> None:
 
 def test_running_normalizer_updates_with_optimizer_data() -> None:
     """Test that running normalizer correctly updates with optimizer data."""
-    task_config = CylinderPushConfig()
-    task = CylinderPush()
-    optimizer_config = CrossEntropyMethodConfig()
-    optimizer = CrossEntropyMethod(optimizer_config, task.nu)
-
-    controller = Controller(
-        ControllerConfig(action_normalizer="running", max_opt_iters=1),
-        task,
-        task_config,
-        optimizer,
-        optimizer_config,
+    controller = make_controller(
+        init_task="cylinder_push",
+        init_optimizer="cem",
         rollout_backend="mujoco",
     )
+    controller.controller_cfg = ControllerConfig(action_normalizer="running", max_opt_iters=1)
 
     # Check initial state
     assert isinstance(controller.action_normalizer, RunningMeanStdNormalizer)
     assert controller.action_normalizer.count == 0
 
-    curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
-    curr_time = 0.0
-
     # Run optimization loop
-    controller.update_action(curr_state, curr_time)
+    controller.current_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
+    controller.time = 0.0
+    controller.update_action()
 
     # Check that the normalizer was updated with the correct number of samples
     assert controller.action_normalizer.count == controller.optimizer.num_rollouts * controller.optimizer.num_nodes

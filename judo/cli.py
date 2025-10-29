@@ -26,7 +26,9 @@ CONFIG_PATH = (Path(__file__).parent / "configs").resolve()
 # ### #
 
 
-@hydra.main(config_path=str(CONFIG_PATH), config_name="judo_default", version_base="1.3")
+# The default configuration file assumes the user is using Dora-RS as a middleware. The Judo app is designed to be
+# compatible with different middleware options (e.g. Dora-RS, ZeroMQ, ROS2, etc.).
+@hydra.main(config_path=str(CONFIG_PATH), config_name="judo_dora_default", version_base="1.3")
 def main_app(cfg: DictConfig) -> None:
     """Main function to run judo via a hydra configuration yaml file."""
     # Include a download for the default asset to cache the description repository
@@ -36,11 +38,11 @@ def main_app(cfg: DictConfig) -> None:
 
 def app() -> None:
     """Entry point for the judo CLI."""
-    # we store judo_default in the config store so that custom configs located outside of judo can inherit from it
+    # we store judo_dora_default in the config store so that custom dora configs outside of judo can inherit from it
     cs = ConfigStore.instance()
     with initialize_config_dir(config_dir=str(CONFIG_PATH), version_base="1.3"):
-        default_cfg = compose(config_name="judo_default")
-        cs.store("judo", default_cfg)  # don't name this judo_default so it doesn't clash
+        default_cfg = compose(config_name="judo_dora_default")
+        cs.store("judo_dora", default_cfg)  # don't name this judo_dora_default so it doesn't clash
     main_app()
 
 

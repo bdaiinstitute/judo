@@ -4,9 +4,9 @@ from typing import Callable
 
 import numpy as np
 
-from judo.controller import Controller, ControllerConfig
+from judo.controller import Controller, ControllerConfig, make_controller
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
-from judo.tasks import CylinderPush, CylinderPushConfig
+from judo.tasks import CylinderPush
 
 # ##### #
 # MOCKS #
@@ -44,32 +44,30 @@ def test_max_opt_iters(temp_np_seed: Callable) -> None:
     def _setup_controller(max_opt_iters: int) -> tuple[MockOptimizerTrackNominalKnots, Controller]:
         """Helper function to set up the controller."""
         task = CylinderPush()
-        task_config = CylinderPushConfig()
         ps_config = OptimizerConfig()
         opt = MockOptimizerTrackNominalKnots(ps_config, task.nu)
-        controller = Controller(
-            ControllerConfig(max_opt_iters=max_opt_iters),
-            task,
-            task_config,
-            opt,
-            ps_config,
+        controller = make_controller(
+            init_task="cylinder_push",
+            init_optimizer="cem",
             rollout_backend="mujoco",
         )
+        controller.controller_cfg = ControllerConfig(max_opt_iters=max_opt_iters)
+        controller.optimizer = opt
         return opt, controller
 
     # generate a solution using max_opt_iters=1
     with temp_np_seed(42):
         opt1, controller1 = _setup_controller(max_opt_iters=1)
-        curr_state1 = np.random.rand(controller1.task.model.nq + controller1.task.model.nv)
-        curr_time = 0.0
-        controller1.update_action(curr_state1, curr_time)
+        controller1.current_state = np.random.rand(controller1.task.model.nq + controller1.task.model.nv)
+        controller1.time = 0.0
+        controller1.update_action()
 
     # generate a solution using max_opt_iters=2
     with temp_np_seed(42):
         opt2, controller2 = _setup_controller(max_opt_iters=2)
-        curr_state2 = np.random.rand(controller2.task.model.nq + controller2.task.model.nv)
-        curr_time = 0.0
-        controller2.update_action(curr_state2, curr_time)
+        controller2.current_state = np.random.rand(controller2.task.model.nq + controller2.task.model.nv)
+        controller2.time = 0.0
+        controller2.update_action()
 
     # check that the initial knots match in the optimization iterations
     assert np.array_equal(opt1.received_knots_history[0], opt2.received_knots_history[0])
@@ -85,26 +83,23 @@ def test_update_action() -> None:
     def _setup_controller(opt_cls: type[Optimizer], opt_cfg: OptimizerConfig) -> Controller:
         """Helper function to set up the controller."""
         task = CylinderPush()
-        task_config = CylinderPushConfig()
         opt = opt_cls(opt_cfg, task.nu)
-        controller = Controller(
-            ControllerConfig(max_opt_iters=2),
-            task,
-            task_config,
-            opt,
-            opt_cfg,
+        controller = make_controller(
+            init_task="cylinder_push",
+            init_optimizer="cem",
             rollout_backend="mujoco",
         )
+        controller.optimizer = opt
         return controller
 
     # test with all registered optimizers
     for _opt_name, (opt_cls, opt_cfg) in get_registered_optimizers().items():
         controller = _setup_controller(opt_cls, opt_cfg)
-        curr_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
-        curr_time = 0.0
+        controller.current_state = np.random.rand(controller.task.model.nq + controller.task.model.nv)
+        controller.time = 0.0
 
         # check that update_action runs without error
-        controller.update_action(curr_state, curr_time)
+        controller.update_action()
 
         # check that the nominal knots have the correct shape
         assert controller.nominal_knots.shape == (controller.optimizer.num_nodes, controller.optimizer.nu)

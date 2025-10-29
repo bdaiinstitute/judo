@@ -29,12 +29,15 @@ class CartpoleConfig(TaskConfig):
 class Cartpole(Task[CartpoleConfig]):
     """Defines the cartpole balancing task."""
 
+    name: str = "cartpole"
+    config_t: type[CartpoleConfig] = CartpoleConfig
+
     def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the cartpole task."""
-        default_model_path, _ = retrieve_model_from_remote("cartpole", force=False)
+        default_model_path, _ = retrieve_model_from_remote(self.name, force=False)
         if model_path is None:
             model_path = default_model_path
-        super().__init__(model_path, sim_model_path=sim_model_path)
+        super().__init__(model_path=model_path, sim_model_path=sim_model_path)
         self.reset()
 
     def reward(
@@ -42,7 +45,6 @@ class Cartpole(Task[CartpoleConfig]):
         states: np.ndarray,
         sensors: np.ndarray,
         controls: np.ndarray,
-        config: CartpoleConfig,
         system_metadata: dict[str, Any] | None = None,
     ) -> np.ndarray:
         """Implements the cartpole reward from MJPC.
@@ -62,10 +64,12 @@ class Cartpole(Task[CartpoleConfig]):
         """
         batch_size = states.shape[0]
 
-        vertical_rew = -config.w_vertical * smooth_l1_norm(np.cos(states[..., 1]) - 1, config.p_vertical).sum(-1)
-        centered_rew = -config.w_centered * smooth_l1_norm(states[..., 0], config.p_centered).sum(-1)
-        velocity_rew = -config.w_velocity * quadratic_norm(states[..., 2:]).sum(-1)
-        control_rew = -config.w_control * quadratic_norm(controls).sum(-1)
+        vertical_rew = -self.config.w_vertical * smooth_l1_norm(np.cos(states[..., 1]) - 1, self.config.p_vertical).sum(
+            -1
+        )
+        centered_rew = -self.config.w_centered * smooth_l1_norm(states[..., 0], self.config.p_centered).sum(-1)
+        velocity_rew = -self.config.w_velocity * quadratic_norm(states[..., 2:]).sum(-1)
+        control_rew = -self.config.w_control * quadratic_norm(controls).sum(-1)
 
         assert vertical_rew.shape == (batch_size,)
         assert centered_rew.shape == (batch_size,)

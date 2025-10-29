@@ -27,6 +27,7 @@ def slider(
     min: int | float,
     max: int | float,
     step: float | None = None,
+    bounded: bool = False,
 ) -> Callable[[type], type]:
     """Decorator that adds slider metadata to desired dataclass fields.
 
@@ -35,6 +36,7 @@ def slider(
         min: minimum value for slider.
         max: maximum value for slider.
         step: step for slider handle. If not set, defaults to constant 0.01 for floats and 1 for ints.
+        bounded: whether or not we lock the slider from exceeding the min and max bounds set by the user.
     """
     if step is None:
         step = DEFAULT_SLIDER_STEP_INT if isinstance(min, int) else DEFAULT_SLIDER_STEP_FLOAT
@@ -47,6 +49,7 @@ def slider(
             meta = dict(f.metadata)
             if f.name == parameter_name:
                 meta["ui_config"] = (min, max, step)
+                meta["bounded"] = bounded
             new_fields.append(
                 (
                     f.name,
@@ -70,6 +73,18 @@ def slider(
         return new_cls
 
     return wrapper
+
+
+class GuiBoundedSliderHandle(GuiSliderHandle):
+    """A slider handle that is locked to a value."""
+
+    def __init__(self, gui_slider: GuiSliderHandle) -> None:
+        """Creates a bounded slider using the same parameters as the original slider, for safety reasons.
+
+        The basic slider handle can accept values outside of its initial bounds when the user inputs a value in the box.
+        This class wraps the slider in a new class that checks and clips the values against its initial bounds.
+        """
+        self.__dict__.update(gui_slider.__dict__)
 
 
 def _get_gui_element(
@@ -102,13 +117,17 @@ def _get_gui_element(
             min_float = min(min_int, init_value)
             max_float = max(max_int, init_value)
 
-        return server.gui.add_slider(
+        slider = server.gui.add_slider(
             field.name,
             min=min_int,
             max=max_int,
             step=step_int,
             initial_value=init_value,
         )
+        if "bounded" in field.metadata and field.metadata["bounded"]:
+            return GuiBoundedSliderHandle(slider)
+        else:
+            return slider
 
     # Create a slider for a float-valued param.
     elif field.type is float:
@@ -127,13 +146,17 @@ def _get_gui_element(
             min_float = min(min_float, init_value)
             max_float = max(max_float, init_value)
 
-        return server.gui.add_slider(
+        slider = server.gui.add_slider(
             field.name,
             min=min_float,
             max=max_float,
             step=step_float,
             initial_value=init_value,
         )
+        if "bounded" in field.metadata and field.metadata["bounded"]:
+            return GuiBoundedSliderHandle(slider)
+        else:
+            return slider
 
     # Create a checkbox for a boolean param.
     elif field.type is bool:
@@ -245,15 +268,40 @@ def _get_callback(
 
     def gui_callback(_: GuiEvent) -> None:
         """Updates the config with the new value received from viser."""
-        if isinstance(element, GuiSliderHandle):
+        if isinstance(element, GuiBoundedSliderHandle):
+            # Value is on a bounded slider and cannot exceed the bounds set. This differs from the basic slider handle,
+            # which currently accepts arbitrary inputs.
+            value = min(max(element.value, element.min), element.max)
+            if value != element.value:
+                warnings.warn(
+                    f"Warning: Slider '{element_name}' value must be between {element.min} and {element.max}, Setting {element.value} to {value}",
+                    stacklevel=2,
+                )
+        elif isinstance(element, GuiSliderHandle):
+            # Validate that slider value is never less than 0
+            check_value = np.float64(element.value)
+            if check_value <= 0 and element.min > 0:
+                warnings.warn(
+                    f"Warning: Slider '{element_name}' value must be greater than 0, Setting {element.value} to {element.min}",
+                    stacklevel=2,
+                )
+                element.value = element.min
+
+            elif np.isnan(check_value):
+                warnings.warn(
+                    f"Warning: Slider '{element_name}' value is NaN.  Setting {element.value} to {element.min}",
+                    stacklevel=2,
+                )
+                element.value = element.min
+
             # if value exceeds the bounds, update the bounds
             if element.value < element.min or element.value > element.max:
                 element.min = min(element.min, element.value)
                 element.max = max(element.max, element.value)
             value = element.value
+
         else:
             value = element.value
-
         # Use lock for thread safety.
         with config_lock:
             if array_name is not None and array_index is not None:

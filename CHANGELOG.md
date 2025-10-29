@@ -1,3 +1,22 @@
+# v0.0.5
+
+## Added
+* Separation between middleware implementation and core functionality
+* Support for different middleware implementations
+* Sliders with enforced bounds to errors caused by unintended values
+* Interface to create controllers from registered tasks and optimizers
+* Abstract interface to implement different simulation backends
+* Removed duplication of objects inside a node to ensure that all references to data point to the same object
+
+## Fixed
+* Fixed bug that would allow certain sliders to be set to arbitrary values that could crash the app
+* Fixed bug that would allow NaN as a valid entry into the slider text box
+* Fixed bug that caused the ControllerConfig to not be recreated when the `TaskConfig` was reset.
+
+## Documentation
+* Added specification between different slider types.
+* Added guidelines on how to use the `Controller`. `Visualizer`, and `Simulation` objects
+
 # v0.0.4
 
 ## Added

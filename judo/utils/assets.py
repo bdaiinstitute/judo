@@ -47,7 +47,7 @@ KNOWN_DESCRIPTIONS = {
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="franka_fr3",
-        remote_model_file="franka_fr3.xml",
+        remote_model_file="fr3_pick.xml",
     ),
     "leap_cube": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",

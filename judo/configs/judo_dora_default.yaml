@@ -74,13 +74,14 @@ dataflow:
 
 node_definitions:
   simulation:
-    _target_: judo.app.simulation.SimulationNode
+    _target_: judo.app.dora.simulation.SimulationNode
     node_id: simulation
     max_workers: null
     init_task: ${task}
     task_registration_cfg: ${custom_tasks}
+    simulation_backend: ${simulation_backend}
   visualization:
-    _target_: judo.app.visualization.VisualizationNode
+    _target_: judo.app.dora.visualization.VisualizationNode
     node_id: visualization
     max_workers: null
     init_task: ${task}
@@ -91,7 +92,7 @@ node_definitions:
     optimizer_override_cfg: ${optimizer_config_overrides}
     sim_pause_button: true
   controller:
-    _target_: judo.app.controller.ControllerNode
+    _target_: judo.app.dora.controller.ControllerNode
     node_id: controller
     max_workers: null
     init_task: ${task}
@@ -103,3 +104,4 @@ custom_tasks: null
 custom_optimizers: null
 controller_config_overrides: null
 optimizer_config_overrides: null
+simulation_backend: mujoco
