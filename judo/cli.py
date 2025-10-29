@@ -29,7 +29,7 @@ CONFIG_PATH = (Path(__file__).parent / "configs").resolve()
 @hydra.main(config_path=str(CONFIG_PATH), config_name="judo_default", version_base="1.3")
 def main_app(cfg: DictConfig) -> None:
     """Main function to run judo via a hydra configuration yaml file."""
-    # Include a download for the default asset
+    # Include a download for the default asset to cache the description repository
     retrieve_description_path_from_remote(cfg["task"], force=False)
     run(cfg)
 

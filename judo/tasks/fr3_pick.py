@@ -9,7 +9,7 @@ import numpy as np
 
 from judo.gui import slider
 from judo.tasks.base import Task, TaskConfig
-from judo.utils.assets import retrieve_description_path_from_remote
+from judo.utils.assets import retrieve_model_from_remote
 from judo.utils.fields import np_1d_field
 
 QPOS_HOME = np.array(
@@ -105,8 +105,9 @@ class FR3Pick(Task[FR3PickConfig]):
 
     def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
+        default_model_path, _ = retrieve_model_from_remote("fr3", force=False)
         if model_path is None:
-            model_path = retrieve_description_path_from_remote("fr3", force=False) + "/fr3_pick.xml"
+            model_path = default_model_path
         super().__init__(model_path, sim_model_path=sim_model_path)
         self.reset_command = np.array([0, 0, 0, -1.57079, 0, 1.57079, -0.7853, 0.0])
 

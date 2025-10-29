@@ -9,7 +9,7 @@ import numpy as np
 from judo.gui import slider
 from judo.tasks.base import Task, TaskConfig
 from judo.tasks.cost_functions import quadratic_norm
-from judo.utils.assets import retrieve_description_path_from_remote
+from judo.utils.assets import retrieve_model_from_remote
 from judo.utils.fields import np_1d_field
 
 
@@ -39,8 +39,9 @@ class CylinderPush(Task[CylinderPushConfig]):
 
     def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the cylinder push task."""
+        default_model_path, _ = retrieve_model_from_remote("cylinder_push", force=False)
         if model_path is None:
-            model_path = f"{retrieve_description_path_from_remote('cylinder_push', force=False)}/cylinder_push.xml"
+            model_path = default_model_path
         super().__init__(model_path, sim_model_path=sim_model_path)
         self.reset()
 

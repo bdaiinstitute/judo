@@ -99,57 +99,62 @@ def download_and_extract_meshes(
         release_lock(lock_path)
 
 
-@dataclass
+@dataclass(frozen=True)
 class RepoInfo:
     """Information required to clone a description from a repository."""
 
     url: str
     description_path: str
-    remote_model_path: str | None = None
-    remote_meshes_path: str | None = None
-    remote_xml_path: str | None = None
+    remote_model_path: str
+    remote_model_file: str  # File name representing the model
+    remote_sim_file: str | None = None  # Optional simulation model in case it's not the same as the model
     commit_hash: str | None = None
 
 
 KNOWN_DESCRIPTIONS = {
-    # "spot": RepoInfo(
-    #     url="", commit_hash=None, description_path="spot", remote_meshes_path="spot/assets", remote_xml_path="spot"
-    # ),
     "cylinder_push": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="cylinder_push",
+        remote_model_file="cylinder_push.xml",
     ),
     "cartpole": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="cartpole",
+        remote_model_file="cartpole.xml",
     ),
     "fr3": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="franka_fr3",
+        remote_model_file="franka_fr3.xml",
     ),
     "leap_cube": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="leap_hand",
+        remote_model_file="leap_cube.xml",
     ),
     "leap_cube_palm_down": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="leap_hand",
+        remote_model_file="leap_cube_palm_down.xml",
+        remote_sim_file="leap_cube_palm_down_sim.xml",
     ),
     "caltech_leap_cube": RepoInfo(
         url="https://github.com/bhung-bdai/judo_descriptions_test.git",
         commit_hash=None,
         description_path="judo_descriptions_test",
         remote_model_path="leap_hand",
+        remote_model_file="caltech_leap_cube.xml",
+        remote_sim_file="caltech_leap_cube_sim.xml",
     ),
 }
 
@@ -228,10 +233,40 @@ def get_description(description_info: RepoInfo, force: bool = False) -> Repo:
 
 
 def retrieve_description_path_from_remote(description_name: str, force: bool = False) -> str:
-    """Gets the path to a description from a remote repository, downloaded and stored in cache."""
+    """Gets the path to a description from a remote repository, downloaded and stored in cache.
+
+    Args:
+        description_name: The name of the description to retrieve.
+        force: Forcefully redownload the description, regardless of whether or not it already exists.
+
+    Returns:
+        The path to the description repository in the local cache.
+    """
     try:
         description_info = KNOWN_DESCRIPTIONS[description_name]
     except KeyError as e:
         raise ValueError(f"Description {description_name} not found in {get_description_keys()}!") from e
     description_clone = get_description(description_info, force=force)
     return f"{description_clone.working_dir}/{description_info.remote_model_path}"
+
+
+def retrieve_model_from_remote(description_name: str, force: bool = False) -> tuple[str, str | None]:
+    """Gets the path to a model (and simulation file, if available) in a remote description, stored in cache.
+
+    Args:
+        description_name: The name of the description to retrieve.
+        force: Forcefully redownload the description, regardless of whether or not it already exists.
+
+    Returns:
+        The path to the description repository in the local cache.
+    """
+    try:
+        description_info = KNOWN_DESCRIPTIONS[description_name]
+    except KeyError as e:
+        raise ValueError(f"Description {description_name} not found in {get_description_keys()}!") from e
+    description_model_path = retrieve_description_path_from_remote(description_name, force=force)
+    description_model_file = f"{description_model_path}/{description_info.remote_model_file}"
+
+    if description_info.remote_sim_file is not None:
+        return (description_model_file, f"{description_model_path}/{description_info.remote_sim_file}")
+    return (description_model_file, None)

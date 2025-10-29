@@ -11,7 +11,7 @@ from judo.tasks.cost_functions import (
     quadratic_norm,
     smooth_l1_norm,
 )
-from judo.utils.assets import retrieve_description_path_from_remote
+from judo.utils.assets import retrieve_model_from_remote
 
 
 @dataclass
@@ -31,8 +31,9 @@ class Cartpole(Task[CartpoleConfig]):
 
     def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the cartpole task."""
+        default_model_path, _ = retrieve_model_from_remote("cartpole", force=False)
         if model_path is None:
-            model_path = f"{retrieve_description_path_from_remote('cartpole', force=False)}/cartpole.xml"
+            model_path = default_model_path
         super().__init__(model_path, sim_model_path=sim_model_path)
         self.reset()
 
