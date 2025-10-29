@@ -66,7 +66,6 @@ jobs:
         id: meshcache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.model.outputs.model_dir }}
           key:  ${{ runner.os }}-${{ matrix.os }}-${{ matrix.python-version }}-judo_meshes
 
       - name: Download meshes (cache miss)
