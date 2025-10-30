@@ -6,7 +6,7 @@
 * Sliders with enforced bounds to errors caused by unintended values
 * Interface to create controllers from registered tasks and optimizers
 * Abstract interface to implement different simulation backends
-* Removed duplication of objects inside a node to ensure that all references to data point to the same objec
+* Removed duplication of objects inside a node to ensure that all references to data point to the same object
 
 ## Fixed
 * Fixed bug that would allow certain sliders to be set to arbitrary values that could crash the app
