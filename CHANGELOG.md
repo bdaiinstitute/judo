@@ -6,7 +6,7 @@
 * Sliders with enforced bounds to errors caused by unintended values
 * Interface to create controllers from registered tasks and optimizers
 * Abstract interface to implement different simulation backends
-* Removed duplication of objects inside a node to ensure that all references to data point to the same object
+* Removed duplication of objects inside a node to ensure that all references to data point to the same objec
 
 ## Fixed
 * Fixed bug that would allow certain sliders to be set to arbitrary values that could crash the app
@@ -16,6 +16,9 @@
 ## Documentation
 * Added specification between different slider types.
 * Added guidelines on how to use the `Controller`. `Visualizer`, and `Simulation` objects
+
+## Dev
+* Modified release process so that any CODEOWNER can publish to pypi
 
 # v0.0.4
 
