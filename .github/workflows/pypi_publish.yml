@@ -15,7 +15,6 @@ jobs:
       is_code_owner: ${{ steps.check.outputs.is_owner }}
     steps:
       - name: Load CODEOWNERS
-          id: owners
           run: |
             owners=$(grep -v '^#' .github/CODEOWNERS | awk '{print $2}')
             echo "owners=$owners" >> $GITHUB_OUTPUT
