@@ -19,9 +19,11 @@ jobs:
 
       - name: Load CODEOWNERS
         run: |
-          cat .github/CODEOWNERS
-          grep -o '@[A-Za-z0-9_/-]*' .github/CODEOWNERS >> $GITHUB_OUTPUT
-          echo "$GITHUB_OUTPUT"
+          {
+            echo "owners<<EOF"
+            grep -o '@[A-Za-z0-9_/-]*' .github/CODEOWNERS | sort -u
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Check actor
         run: |
