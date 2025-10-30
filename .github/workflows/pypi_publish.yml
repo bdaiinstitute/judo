@@ -23,6 +23,7 @@ jobs:
         run: |
           actor=${{ github.actor }}
           echo "Actor: $actor"
+          echo "Owners: ${{ steps.owners.outputs.owners }}"
           if echo "${{ steps.owners.outputs.owners }}" | grep -qw "@$actor"; then
             echo "is_code_owner=true" >> $GITHUB_OUTPUT
             echo "is_code_owner true"
