@@ -45,21 +45,17 @@ jobs:
           cache: pip
 
       - name: Install build
-        if: steps.check-actor.outputs.is_code_owner == 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade build
 
       - name: Build wheel
-        if: steps.check-actor.outputs.is_code_owner == 'true'
         run: python -m build --wheel --outdir wheelhouse
 
       - name: Build source distribution
-        if: steps.check-actor.outputs.is_code_owner == 'true'
         run: python -m build --sdist -o dist
 
       - name: Upload wheel artifact
-        if: steps.check-actor.outputs.is_code_owner == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wheel-artifact-${{ github.run_id }}
@@ -67,7 +63,6 @@ jobs:
           retention-days: 7
 
       - name: Upload sdist
-        if: steps.check-actor.outputs.is_code_owner == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: sdist-artifact-${{ github.run_id }}
