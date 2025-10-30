@@ -25,8 +25,10 @@ jobs:
           echo "Actor: $actor"
           if echo "${{ steps.owners.outputs.owners }}" | grep -qw "@$actor"; then
             echo "is_code_owner=true" >> $GITHUB_OUTPUT
+            echo "is_code_owner true"
           else
             echo "is_code_owner=false" >> $GITHUB_OUTPUT
+            echo "is_code_owner false"
           fi
 
   build-and-publish:
