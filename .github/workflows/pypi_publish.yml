@@ -12,120 +12,105 @@ jobs:
   check-if-codeowner:
     runs-on: ubuntu-latest
     outputs:
-      is_code_owner: ${{ steps.check.outputs.is_owner }}
+      is_owner: ${{ steps.check.outputs.is_owner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Load CODEOWNERS
-        id: owners
-        run: |
-          {
-            echo "owners<<EOF"
-            grep -o '@[A-Za-z0-9_/-]*' .github/CODEOWNERS | sort -u
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
-          echo "$GITHUB_OUTPUT"
-
       - name: Check actor
+        id: check
         run: |
           actor=${{ github.actor }}
-          echo "Actor: $actor"
-          echo "Owners: ${{ steps.owners.outputs.owners }}"
-          if echo "${{ steps.owners.outputs.owners }}" | grep -qw "@$actor"; then
-            echo "is_code_owner=true" >> $GITHUB_OUTPUT
-            echo "is_code_owner true"
+          if grep -qE "(^|[[:space:]])@$actor([[:space:]]|$)" .github/CODEOWNERS; then
+            echo "is_owner=true" >> $GITHUB_OUTPUT
+            echo "Actor is code owner"
           else
-            echo "is_code_owner=false" >> $GITHUB_OUTPUT
-            echo "is_code_owner false"
+            echo "is_owner=false" >> $GITHUB_OUTPUT
+            echo "Actor is not a code owner"
           fi
 
   build-and-publish:
     runs-on: ubuntu-latest
     needs: check-if-codeowner
-    if: needs.check-if-codeowner.outputs.is_code_owner == 'true'
+    if: needs.check-if-codeowner.outputs.is_owner == 'true'
 
     steps:
-      - name: Test output
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+        cache: pip
+
+    - name: Install build
+      if: steps.check-actor.outputs.is_code_owner == 'true'
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade build
+
+    - name: Build wheel
+      if: steps.check-actor.outputs.is_code_owner == 'true'
+      run: python -m build --wheel --outdir wheelhouse
+
+    - name: Build source distribution
+      if: steps.check-actor.outputs.is_code_owner == 'true'
+      run: python -m build --sdist -o dist
+
+    - name: Upload wheel artifact
+      if: steps.check-actor.outputs.is_code_owner == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheel-artifact-${{ github.run_id }}
+        path: wheelhouse/*.whl
+        retention-days: 7
+
+    - name: Upload sdist
+      if: steps.check-actor.outputs.is_code_owner == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: sdist-artifact-${{ github.run_id }}
+        path: dist/*.tar.gz
+        retention-days: 7
+
+  publish:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: wheel-artifact-${{ github.run_id }}
+          path: wheelhouse
+
+      - name: Download sdist artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: sdist-artifact-${{ github.run_id }}
+          path: dist
+
+      - name: Set up Python and cache twine
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install twine
+        run: pip install --upgrade twine
+
+      - name: Verify package metadata
         run: |
-          echo "${{ needs.check-if-codeowner.outputs.is_code_owner }}"
+          twine check $(find . -name "*.whl") $(find . -name "*.tar.gz")
 
-    # - name: Checkout code
-    #   uses: actions/checkout@v5
-
-    # - name: Set up Python
-    #   uses: actions/setup-python@v6
-    #   with:
-    #     python-version: '3.13'
-    #     cache: pip
-
-  #     - name: Install build
-  #       if: steps.check-actor.outputs.is_code_owner == 'true'
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         python -m pip install --upgrade build
-
-  #     - name: Build wheel
-  #       if: steps.check-actor.outputs.is_code_owner == 'true'
-  #       run: python -m build --wheel --outdir wheelhouse
-
-  #     - name: Build source distribution
-  #       if: steps.check-actor.outputs.is_code_owner == 'true'
-  #       run: python -m build --sdist -o dist
-
-  #     - name: Upload wheel artifact
-  #       if: steps.check-actor.outputs.is_code_owner == 'true'
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wheel-artifact-${{ github.run_id }}
-  #         path: wheelhouse/*.whl
-  #         retention-days: 7
-
-  #     - name: Upload sdist
-  #       if: steps.check-actor.outputs.is_code_owner == 'true'
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: sdist-artifact-${{ github.run_id }}
-  #         path: dist/*.tar.gz
-  #         retention-days: 7
-
-  # publish:
-  #   needs: build-and-publish
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     id-token: write
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v5
-
-  #     - name: Download wheel artifact
-  #       uses: actions/download-artifact@v5
-  #       with:
-  #         name: wheel-artifact-${{ github.run_id }}
-  #         path: wheelhouse
-
-  #     - name: Download sdist artifact
-  #       uses: actions/download-artifact@v5
-  #       with:
-  #         name: sdist-artifact-${{ github.run_id }}
-  #         path: dist
-
-  #     - name: Set up Python and cache twine
-  #       uses: actions/setup-python@v6
-  #       with:
-  #         python-version: '3.13'
-  #         cache: 'pip'
-
-  #     - name: Install twine
-  #       run: pip install --upgrade twine
-
-  #     - name: Verify package metadata
-  #       run: |
-  #         twine check $(find . -name "*.whl") $(find . -name "*.tar.gz")
-
-  #     - name: Publish to PyPI
-  #       uses: pypa/gh-action-pypi-publish@release/v1
-  #       with:
-  #         skip-existing: true
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
