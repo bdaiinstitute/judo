@@ -24,6 +24,7 @@ jobs:
             grep -o '@[A-Za-z0-9_/-]*' .github/CODEOWNERS | sort -u
             echo "EOF"
           } >> $GITHUB_OUTPUT
+          echo "${{ GITHUB_OUTPUT }}"
 
       - name: Check actor
         run: |
