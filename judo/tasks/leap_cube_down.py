@@ -4,12 +4,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from judo import MODEL_PATH
 from judo.gui import slider
 from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
+from judo.utils.assets import retrieve_model_from_remote
 
-XML_PATH = str(MODEL_PATH / "xml/leap_cube_palm_down.xml")
-SIM_XML_PATH = str(MODEL_PATH / "xml/leap_cube_palm_down_sim.xml")
 QPOS_HOME = np.array(
     [
         -0.04, -0.035, -0.065, 1.0, 0.0, 0.0, 0.0,  # cube
@@ -36,8 +34,13 @@ class LeapCubeDown(LeapCube):
     name: str = "leap_cube_down"
     config_t: type[LeapCubeDownConfig] = LeapCubeDownConfig
 
-    def __init__(self, model_path: str = XML_PATH, sim_model_path: str = SIM_XML_PATH) -> None:
+    def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the LEAP cube rotation task."""
+        default_model_path, default_sim_model_path = retrieve_model_from_remote("leap_cube_palm_down", force=False)
+        if model_path is None:
+            model_path = default_model_path
+        if sim_model_path is None:
+            sim_model_path = default_sim_model_path
         super(LeapCube, self).__init__(model_path=model_path, sim_model_path=sim_model_path)
         self.goal_pos = np.array([-0.04, -0.035, -0.065])
         self.goal_quat = np.array([1.0, 0.0, 0.0, 0.0])

@@ -6,14 +6,12 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from judo import MODEL_PATH
 from judo.tasks.base import Task, TaskConfig
 from judo.tasks.cost_functions import (
     quadratic_norm,
     smooth_l1_norm,
 )
-
-XML_PATH = str(MODEL_PATH / "xml/cartpole.xml")
+from judo.utils.assets import retrieve_model_from_remote
 
 
 @dataclass
@@ -34,8 +32,11 @@ class Cartpole(Task[CartpoleConfig]):
     name: str = "cartpole"
     config_t: type[CartpoleConfig] = CartpoleConfig
 
-    def __init__(self, model_path: str = XML_PATH, sim_model_path: str | None = None) -> None:
+    def __init__(self, model_path: str | None = None, sim_model_path: str | None = None) -> None:
         """Initializes the cartpole task."""
+        default_model_path, _ = retrieve_model_from_remote(self.name, force=False)
+        if model_path is None:
+            model_path = default_model_path
         super().__init__(model_path=model_path, sim_model_path=sim_model_path)
         self.reset()
 

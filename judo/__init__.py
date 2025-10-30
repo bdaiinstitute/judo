@@ -3,4 +3,4 @@
 from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
-MODEL_PATH = PACKAGE_ROOT / "models"
+DESCRIPTION_CACHE_DIR = "~/.cache/judo_descriptions_cache"

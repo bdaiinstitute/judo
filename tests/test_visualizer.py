@@ -7,7 +7,7 @@ from trimesh.creation import box
 from trimesh.visual import TextureVisuals
 from viser import ViserServer
 
-from judo import MODEL_PATH
+from judo.utils.assets import retrieve_model_from_remote
 from judo.visualizers.model import (
     ViserMjModel,
     add_box,
@@ -27,7 +27,7 @@ from judo.visualizers.utils import rgba_float_to_int, rgba_int_to_float
 
 # Create a global ViserServer instance for use by the tests.
 viser_server = ViserServer()
-model_path = str(MODEL_PATH / "xml/cylinder_push.xml")
+model_path, _ = retrieve_model_from_remote("cylinder_push", force=False)
 spec = mujoco.MjSpec.from_file(model_path)
 model = spec.compile()
 
