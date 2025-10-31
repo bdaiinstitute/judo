@@ -15,6 +15,11 @@ from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
 from judo.tasks import Task, TaskConfig, get_registered_tasks
 from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
+
+try:
+    from judo.utils.mujoco_cpp import RolloutBackend as CppRolloutBackend
+except ImportError:
+    CppRolloutBackend = None  # type: ignore
 from judo.utils.normalization import (
     IdentityNormalizer,
     Normalizer,
@@ -37,6 +42,7 @@ class ControllerConfig(OverridableConfig):
     max_opt_iters: int = 1
     max_num_traces: int = 5
     action_normalizer: Literal["none", "min_max", "running"] = "none"
+    rollout_backend: Literal["mujoco", "mujoco_cpp"] | None = None
 
 
 class Controller:
@@ -47,7 +53,7 @@ class Controller:
         controller_config: ControllerConfig,
         task: Task,
         optimizer: Optimizer,
-        rollout_backend: Literal["mujoco"] = "mujoco",
+        rollout_backend: Literal["mujoco", "mujoco_cpp"] | None = None,
     ) -> None:
         """Initialize the controller.
 
@@ -55,7 +61,7 @@ class Controller:
             controller_config: The controller configuration.
             task: The task to use.
             optimizer: The optimizer to use.
-            rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
+            rollout_backend: The backend to use for rollouts. If None, uses config value or "mujoco".
         """
         self._controller_cfg = controller_config
         self.task = task
@@ -67,7 +73,17 @@ class Controller:
         self.model = self.task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        # Determine backend: config override > parameter > "mujoco"
+        backend: Literal["mujoco", "mujoco_cpp"] = controller_config.rollout_backend or rollout_backend or "mujoco"
+
+        if backend == "mujoco_cpp":
+            if CppRolloutBackend is None:
+                raise ImportError(
+                    "judo_cpp module is not available. Please build the C++ extensions or use 'mujoco' backend."
+                )
+            self.rollout_backend = CppRolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=backend)
+        else:
+            self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=backend)
         self.action_normalizer = self._init_action_normalizer()
 
         # a container for any metadata from the system that we want to pass to the task
@@ -380,7 +396,7 @@ def make_controller(
     init_optimizer: str,
     task_registration_cfg: DictConfig | None = None,
     optimizer_registration_cfg: DictConfig | None = None,
-    rollout_backend: Literal["mujoco"] = "mujoco",
+    rollout_backend: Literal["mujoco", "mujoco_cpp"] | None = None,
 ) -> Controller:
     """Make a controller."""
     available_optimizers = get_registered_optimizers()

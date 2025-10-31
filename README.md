@@ -58,6 +58,9 @@ To create our environment (and activate it each time later), run the following i
 # every time you want to activate
 pixi shell -e dev
 
+# build judo cpp bindings
+pixi run build
+
 # first time only
 pre-commit install
 pybind11-stubgen mujoco -o typings/
