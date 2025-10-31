@@ -67,7 +67,11 @@ class Controller:
         self.model = self.task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        self.rollout_backend = RolloutBackend(
+            num_threads=self.optimizer_cfg.num_rollouts,
+            backend=rollout_backend,
+            task_to_sim_ctrl=self.task.task_to_sim_ctrl,
+        )
         self.action_normalizer = self._init_action_normalizer()
 
         # a container for any metadata from the system that we want to pass to the task

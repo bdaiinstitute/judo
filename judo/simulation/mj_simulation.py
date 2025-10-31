@@ -28,7 +28,9 @@ class MJSimulation(Simulation):
         """Step the simulation forward by one timestep."""
         if self.control is not None and not self.paused:
             try:
-                self.task.data.ctrl[:] = self.control(self.task.data.time)
+                control_input = self.control(self.task.data.time)
+                processed_control = self.task.task_to_sim_ctrl(control_input)
+                self.task.data.ctrl[:] = processed_control
                 self.task.pre_sim_step()
                 mj_step(self.task.sim_model, self.task.data)
                 self.task.post_sim_step()

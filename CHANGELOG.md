@@ -1,3 +1,12 @@
+# v0.0.6
+
+## Added
+* Separation between task-space controls and MuJoCo simulation controls
+  * Added `task_to_sim_ctrl()` method to `Task` base class (default identity mapping)
+  * Updated `RolloutBackend` to accept and use `task_to_sim_ctrl` function for control mapping
+  * Updated `MJSimulation` to use `task_to_sim_ctrl` when setting controls
+  * Tasks can now override `task_to_sim_ctrl()` to map between different control spaces
+
 # v0.0.5
 
 ## Added
