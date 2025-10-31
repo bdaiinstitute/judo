@@ -1,0 +1,46 @@
+judo.simulation.mj_simulation
+=============================
+
+.. py:module:: judo.simulation.mj_simulation
+
+
+
+
+Module Contents
+---------------
+
+.. py:class:: MJSimulation(init_task: str = 'cylinder_push', task_registration_cfg: omegaconf.DictConfig | None = None)
+
+   Bases: :py:obj:`judo.simulation.base.Simulation`
+
+
+   
+   Mujoco simulation object.
+
+   This class contains the data required to run a Mujoco simulation. This includes configurations, a control spline,
+   and task information.
+
+   Middleware nodes should instantiate this class and implement methods to send, process, and receive data.
+
+   .. py:method:: step() -> None
+
+      
+      Step the simulation forward by one timestep.
+
+
+   .. py:property:: sim_state
+      :type: judo.app.structs.MujocoState
+
+
+      
+      Returns the current simulation state.
+
+
+   .. py:property:: timestep
+      :type: float
+
+
+      
+      Returns the simulation timestep.
+
+
