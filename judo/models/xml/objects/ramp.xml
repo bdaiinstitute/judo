@@ -1,0 +1,28 @@
+<mujoco model="ramp">
+<!-- Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved. -->
+    <worldbody>
+        <!-- Code to generate the ramp geometry
+        import numpy as np
+        ramp_width = 2.43
+        ramp_length = 1.90
+        ramp_height = 0.25
+        ramp_lip = 0.01
+        platform_length = 1.22
+
+        euler_x = - np.arcsin((ramp_height - ramp_lip) / ramp_length)
+        pos_y = platform_length + ramp_length / 2 * np.cos(- euler_x) - ramp_height / 2 * np.sin(- euler_x)
+        pos_z = ramp_height - ramp_length / 2 * np.sin(- euler_x) - ramp_height / 2 * np.cos(- euler_x)
+        euler = np.array([euler_x, 0, 0])
+        pos = np.array([ramp_width / 2, pos_y, pos_z])
+        size = np.array([ramp_width, ramp_length, ramp_height]) / 2
+
+        print("size", size)
+        print("pos", pos)
+        print("euler", euler) -->
+        <body name="ramp" pos="3.090 5.412 0" quat="0 0 0 1">
+            <geom name="ramp_box1" type="box" size="1.215 0.61 0.125" pos="1.215 0.61 0.125" friction="0.6" priority="5"/>
+            <geom name="ramp_box2" type="box" size="1.215 0.95 0.125" pos="1.215 2.14685948 0.00698456" quat="0.998 -0.0628 0 0" friction="0.6" priority="5"/>
+            <geom name="ramp_cyl3" type="cylinder" size="0.05" fromto="0 1.22 0.203 2.43 1.22 0.203" friction="0.6" priority="5"/>
+        </body>
+    </worldbody>
+</mujoco>

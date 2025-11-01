@@ -1,0 +1,28 @@
+<mujoco model="fr3_pick">
+  <include file="fr3_components/assets.xml" />
+  <include file="fr3_components/params_and_default.xml" />
+
+  <!-- Override simulation parameters for stability with bouncing ball -->
+  <!-- <option integrator="implicitfast" timestep="0.001" impratio="1" cone="elliptic"/> -->
+  <option gravity='0 0 -9.806' iterations='50' solver='Newton' timestep='0.004' o_solref="0.01 1" o_solimp="0.9 0.95 0.001" integrator="implicit" noslip_iterations="1" density="1.2" viscosity="2.0e-5"/>
+  <contact>
+    <pair geom1="ball" geom2="table" solref="0.03 0.1"
+          solimp="0.9 0.95 0.001 0.95 2"
+          friction="1.0 0.3 0.3"/>
+  </contact>
+
+  <worldbody>
+    <body name="table" pos="0.0 0.0 0.0" quat="1 0 0 0">
+      <geom name="table" type="box" size="0.75 1.25 0.01" pos="0.5 0 -0.01" rgba="0.8 0.8 0.8 1"/>
+    </body>
+    <body name="object" pos="0.0 0.0 0.0" quat="1 0 0 0">
+      <freejoint name="object_joint"/>
+      <geom name="ball" type="sphere" size="0.12" pos="0 0 0" rgba="1.0 0.5 0.0 1" condim="3"/>
+      <inertial mass="0.32" pos="0 0 0" diaginertia="0.003 0.003 0.003"/>
+      <!-- updae the inertial properties -->
+    </body>
+    <body name="fr3" pos="0.0 0.0 0.0" quat="1 0 0 0">
+      <include file="fr3_components/fr3.xml" />
+    </body>
+  </worldbody>
+</mujoco>

@@ -14,7 +14,7 @@ from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
 from judo.tasks import Task, TaskConfig, get_registered_tasks
-from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
+from judo.utils.mujoco import make_model_data_pairs
 from judo.utils.normalization import (
     IdentityNormalizer,
     Normalizer,
@@ -37,6 +37,7 @@ class ControllerConfig(OverridableConfig):
     max_opt_iters: int = 1
     max_num_traces: int = 5
     action_normalizer: Literal["none", "min_max", "running"] = "none"
+    rollout_backend: Literal["mujoco", "mujoco_spot", "mujoco_cpp"] | None = None
 
 
 class Controller:
@@ -47,15 +48,18 @@ class Controller:
         controller_config: ControllerConfig,
         task: Task,
         optimizer: Optimizer,
-        rollout_backend: Literal["mujoco"] = "mujoco",
+        optimizer_config: OptimizerConfig,
+        rollout_backend: Literal["mujoco", "mujoco_spot", "mujoco_cpp"] | None = None,
     ) -> None:
         """Initialize the controller.
 
         Args:
-            controller_config: The controller configuration.
-            task: The task to use.
-            optimizer: The optimizer to use.
-            rollout_backend: The backend to use for rollouts. Currently only "mujoco" is supported.
+            controller_config: The configuration for the controller.
+            task: The Task object that specifies the environment.
+            task_config: The configuration for the task.
+            optimizer: The optimizer object that will be used for optimization.
+            optimizer_config: The configuration for the optimizer.
+            rollout_backend: The backend to use for rollouts. If None, uses task's default or "mujoco".
         """
         self._controller_cfg = controller_config
         self.task = task
@@ -67,7 +71,18 @@ class Controller:
         self.model = self.task.model
         self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        # Determine backend: config override > task default > "mujoco"
+        backend: Literal["mujoco", "mujoco_spot", "mujoco_cpp"] = (
+            controller_config.rollout_backend or rollout_backend or getattr(task, "default_backend", "mujoco")
+        )
+
+        self.rollout_backend = task.RolloutBackend(
+            num_threads=self.optimizer_cfg.num_rollouts,
+            backend=backend,
+            task_to_sim_ctrl=task.task_to_sim_ctrl,
+            cutoff_time=self.optimizer_cfg.cutoff_time,
+        )
+
         self.action_normalizer = self._init_action_normalizer()
 
         # a container for any metadata from the system that we want to pass to the task
@@ -76,7 +91,7 @@ class Controller:
         self.states = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nq + self.model.nv))
         self.current_state = np.concatenate([self.task.data.qpos, self.task.data.qvel])
         self.sensors = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nsensordata))
-        self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nu))
+        self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.task.nu))
         self.rewards = np.zeros((self.optimizer_cfg.num_rollouts,))
         self.reset()
 
@@ -205,7 +220,12 @@ class Controller:
         # resizing any variables due to changes in the GUI
         if len(self.model_data_pairs) != self.optimizer_cfg.num_rollouts:
             self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
-            self.rollout_backend.update(self.optimizer_cfg.num_rollouts)
+            self.rollout_backend.update(self.optimizer_cfg.num_rollouts, cutoff_time=self.optimizer_cfg.cutoff_time)
+
+        # Update rollout backend when cutoff_time changes
+        if self.rollout_backend.cutoff_time != self.optimizer_cfg.cutoff_time:
+            self.rollout_backend.cutoff_time = self.optimizer_cfg.cutoff_time
+            self.rollout_backend.update(self.optimizer_cfg.num_rollouts, cutoff_time=self.optimizer_cfg.cutoff_time)
 
         normalizer_cls = normalizer_registry.get(self.action_normalizer_type)
         if normalizer_cls is None:
@@ -232,8 +252,8 @@ class Controller:
             candidate_knots_normalized = self.optimizer.sample_control_knots(nominal_knots_normalized)
             candidate_knots_normalized = np.clip(
                 candidate_knots_normalized,
-                self.action_normalizer.normalize(self.task.actuator_ctrlrange[:, 0]),
-                self.action_normalizer.normalize(self.task.actuator_ctrlrange[:, 1]),
+                self.action_normalizer.normalize(self.task.ctrlrange[:, 0]),
+                self.action_normalizer.normalize(self.task.ctrlrange[:, 1]),
             )
             self.candidate_knots = self.action_normalizer.denormalize(candidate_knots_normalized)
 
@@ -346,11 +366,11 @@ class Controller:
         """Initialize the action normalizer."""
         action_normalizer_kwargs = {}
         if self.action_normalizer_type == "min_max":
-            action_normalizer_kwargs["min"] = self.task.actuator_ctrlrange[:, 0]
-            action_normalizer_kwargs["max"] = self.task.actuator_ctrlrange[:, 1]
+            action_normalizer_kwargs["min"] = self.task.ctrlrange[:, 0]
+            action_normalizer_kwargs["max"] = self.task.ctrlrange[:, 1]
         elif self.action_normalizer_type == "running":
             action_normalizer_kwargs["init_std"] = 1.0  # TODO(yunhai): make this configurable
-        return make_normalizer(self.action_normalizer_type, self.model.nu, **action_normalizer_kwargs)
+        return make_normalizer(self.action_normalizer_type, self.task.nu, **action_normalizer_kwargs)
 
 
 def make_spline(times: np.ndarray, controls: np.ndarray, spline_order: str) -> interp1d:
@@ -401,7 +421,8 @@ def make_controller(
     task = task_cls()
 
     optimizer_cls, optimizer_config_cls = optimizer_entry
-    optimizer = optimizer_cls(optimizer_config_cls(), task.nu)
+    optimizer_config = optimizer_config_cls()
+    optimizer = optimizer_cls(optimizer_config, task.nu)
 
     controller_cfg = ControllerConfig()
     controller_cfg.set_override(init_task)
@@ -410,5 +431,6 @@ def make_controller(
         controller_config=controller_cfg,
         task=task,
         optimizer=optimizer,
+        optimizer_config=optimizer_config,
         rollout_backend=rollout_backend,
     )

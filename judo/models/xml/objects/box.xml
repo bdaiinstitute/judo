@@ -1,0 +1,11 @@
+<mujoco model="box">
+<!-- Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved. -->
+  <body name="box" pos="0 0 0.275">
+    <joint name="box_joint" type="free"/>
+    <inertial pos="0 0 0" mass="1.5" diaginertia="0.1445 0.1445 0.1445"/>
+    <geom name="box_collision" type="box" size="0.275 0.275 0.275" class="collision"/>
+    <geom name="box_visual" type="box" size="0.275 0.275 0.275" class="visual"/>
+    <site name="trace_box" pos="0 0 0" size="0.01"/>
+    <site name="site_object" pos="0 0 0" size="0.01"/>
+  </body>
+</mujoco>

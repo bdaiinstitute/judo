@@ -79,3 +79,25 @@ def set_default_fr3_pick_overrides() -> None:
             "control_freq": 20.0,
         },
     )
+
+
+def set_default_spot_yellow_chair_overrides() -> None:
+    """Sets the default task-specific controller config overrides for the spot locomotion task."""
+    set_config_overrides(
+        "spot_yellow_chair",
+        ControllerConfig,
+        {
+            "horizon": 3.0,
+        },
+    )
+
+
+def set_default_spot_yellow_chair_ramp_overrides() -> None:
+    """Sets the default task-specific controller config overrides for the spot yellow chair ramp task."""
+    set_config_overrides(
+        "spot_yellow_chair_ramp",
+        ControllerConfig,
+        {
+            "horizon": 3.0,
+        },
+    )
