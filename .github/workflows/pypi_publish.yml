@@ -56,14 +56,14 @@ jobs:
         run: python -m build --sdist -o dist
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: wheel-artifact-${{ github.run_id }}
           path: wheelhouse/*.whl
           retention-days: 7
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sdist-artifact-${{ github.run_id }}
           path: dist/*.tar.gz
@@ -81,13 +81,13 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Download wheel artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: wheel-artifact-${{ github.run_id }}
           path: wheelhouse
 
       - name: Download sdist artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: sdist-artifact-${{ github.run_id }}
           path: dist
