@@ -1,0 +1,17 @@
+<mujoco model="sensor">
+<!-- Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved. -->
+<!-- NOTE: These sensors are not included in the model if using dexterity/scene_generation. -->
+<!-- Additional sensors should be added to dexterity/sene_generation/__init__.py -->
+  <sensor>
+    <framepos name="sensor_body" objtype="site" objname="site_body" reftype="site" refname="site_object" />
+    <frameyaxis name="object_y_axis" objtype="site" objname="site_object"/>
+    <framezaxis name="object_z_axis" objtype="site" objname="site_object"/>
+    <framepos name="sensor_arm_link_sh0" objtype="site" objname="site_arm_link_sh0" reftype="site" refname="site_object" />
+    <framepos name="sensor_arm_link_sh1" objtype="site" objname="site_arm_link_sh1" reftype="site" refname="site_object" />
+    <framepos name="sensor_arm_link_el0" objtype="site" objname="site_arm_link_el0" reftype="site" refname="site_object" />
+    <framepos name="sensor_arm_link_el1" objtype="site" objname="site_arm_link_el1" reftype="site" refname="site_object" />
+    <framepos name="sensor_arm_link_wr0" objtype="site" objname="site_arm_link_wr0" reftype="site" refname="site_object" />
+    <framepos name="sensor_arm_link_wr1" objtype="site" objname="site_arm_link_wr1" reftype="site" refname="site_object" />
+    <framepos name="sensor_arm_link_fngr" objtype="site" objname="site_arm_link_fngr" reftype="site" refname="site_object" />
+  </sensor>
+</mujoco>

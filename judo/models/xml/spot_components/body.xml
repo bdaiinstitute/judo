@@ -1,0 +1,9 @@
+<mujoco model="spot_body">
+<!-- Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved. -->
+    <joint name="base" type="free"/>
+    <inertial mass="16.70765207" pos="0 0 -0.00496172" fullinertia="0.081543792 0.549231154 0.569454373 0 0 0"/>
+    <geom name="body_0_visual" class="visual" mesh="body_0_visual" material="black"/>
+    <geom name="body_1_visual" class="visual" mesh="body_1_visual" material="yellow"/>
+    <geom name="body_collision" class="collision" type="mesh" mesh="body_collision"/>
+    <site name="site_body" pos="0 0 0.1" size="0.01"/>
+</mujoco>

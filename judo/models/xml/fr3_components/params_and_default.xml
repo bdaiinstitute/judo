@@ -52,7 +52,7 @@
     <position class="fr3" name="fr3_joint5" joint="fr3_joint5" kp="2000" kv="200"/>
     <position class="fr3" name="fr3_joint6" joint="fr3_joint6" kp="2000" kv="200"/>
     <position class="fr3" name="fr3_joint7" joint="fr3_joint7" kp="2000" kv="200"/>
-    <position class="fr3" name="fr3_hand" joint="finger_joint1" ctrllimited="true" kp="500" kv="10" inheritrange="2.0"/>
+    <!-- <position class="fr3" name="fr3_hand" joint="finger_joint1" ctrllimited="true" kp="500" kv="10" inheritrange="2.0"/> -->
   </actuator>
 
   <sensor>

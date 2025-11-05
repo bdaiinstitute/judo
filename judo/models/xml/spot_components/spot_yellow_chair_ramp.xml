@@ -1,0 +1,35 @@
+<mujoco model="spot_yellow_chair_ramp">
+<!-- Copyright (c) 2024 Boston Dynamics AI Institute LLC. All rights reserved. -->
+  <include file="default.xml" />
+  <include file="assets.xml" />
+  <include file="../objects/yellow_chair_defs.xml" />
+  <include file="../objects/ramp.xml" />
+
+  <worldbody>
+    <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
+    <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>
+
+    <geom name="ground" type="plane" size="10 10 0.01" class="collision" priority="5" friction="0.7" material="blue_grid"/>
+
+    <body>
+      <geom mass="0" name="floor" pos="0 0 0" condim="3" size="10.0 10.0 0.10" rgba="0 1 1 1" type="box" material="blue_grid"/>
+    </body>
+
+    <body name="body" pos="0 0 0.7">
+      <include file="body.xml" />
+      <include file="legs.xml" />
+      <include file="arm.xml" />
+    </body>
+
+    <include file="../objects/yellow_chair.xml" />
+  </worldbody>
+
+  <include file="actuator.xml" />
+  <include file="sensor.xml" />
+  <include file="contact.xml" />
+  <sensor>
+    <framepos name="trace_body" objtype="site" objname="site_body"/>
+    <framepos name="trace_fngr_site" objtype="site" objname="site_arm_link_fngr"/>
+    <framepos name="trace_chair" objtype="site" objname="trace_yellow_chair"/>
+  </sensor>
+</mujoco>

@@ -1,0 +1,18 @@
+<mujoco model="yellow_chair">
+<!-- Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved. -->
+<!-- Reference: https://feizdesign.com/cesto -->
+
+  <body name="yellow_chair" pos="0 0 0">
+    <joint name="yellow_chair_joint" type="free"/>
+    <inertial pos="0 0.06 0.26" mass="16.58" diaginertia="0.25 0.25 0.25"/>
+
+    <geom name="yellow_chair_visual" class="visual" type="mesh" mesh="yellow_chair_mesh"/>
+    <geom name="yellow_chair_back" type="mesh" class="collision" priority="6" mesh="yellow_chair_back" friction="0.3 0.2 0.2"/>
+    <geom name="yellow_chair_seat" type="mesh" class="collision" priority="6" mesh="yellow_chair_seat" friction="0.3 0.2 0.2"/>
+    <geom name="yellow_chair_rollers" type="cylinder" size="0.20 0.1" pos="0 0 0.09" class="collision" priority="8" friction="0.05 0.2 0.2"/>
+    <site name="trace_yellow_chair" pos="0 0 0" size="0.01"/>
+    <site name="site_object" pos="0 0.06 0.4" size="0.01"/>
+  </body>
+
+
+</mujoco>
