@@ -1,0 +1,44 @@
+judo.utils.mujoco
+=================
+
+.. py:module:: judo.utils.mujoco
+
+
+
+
+
+
+Module Contents
+---------------
+
+.. py:function:: make_model_data_pairs(model: mujoco.MjModel, num_pairs: int) -> list[tuple[mujoco.MjModel, mujoco.MjData]]
+
+   
+   Create model/data pairs for mujoco threaded rollout.
+
+.. py:class:: RolloutBackend(num_threads: int, backend: Literal['mujoco'])
+
+   
+   The backend for conducting multithreaded rollouts.
+
+   .. py:attribute:: backend
+
+
+   .. py:method:: setup_mujoco_backend(num_threads: int) -> None
+
+      
+      Setup the mujoco backend.
+
+
+   .. py:method:: rollout(model_data_pairs: list[tuple[mujoco.MjModel, mujoco.MjData]], x0: numpy.ndarray, controls: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray]
+
+      
+      Conduct a rollout depending on the backend.
+
+
+   .. py:method:: update(num_threads: int) -> None
+
+      
+      Update the backend with a new number of threads.
+
+
