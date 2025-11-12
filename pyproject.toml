@@ -178,4 +178,31 @@ judo-rai = { path = ".", editable = true }
 [tool.pixi.environments]
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
-dev = { features = ["dev", "docs"], solve-group = "default" }
+dev = { features = ["dev", "docs", "cpp"], solve-group = "default" }
+
+[tool.pixi.feature.cpp.dependencies]
+cmake = "*"
+ninja = "*"
+pybind11 = "*"
+cxx-compiler = "*"
+c-compiler = "*"
+eigen = "*"
+
+[tool.pixi.tasks.configure]
+cmd = """
+sh -c 'mkdir -p judo_cpp/build && \
+cmake -S judo_cpp -B judo_cpp/build \
+  -G Ninja \
+  -DPython_ROOT_DIR=$CONDA_PREFIX \
+  -DPython_EXECUTABLE=$CONDA_PREFIX/bin/python \
+  -Dpybind11_DIR=$(python -m pybind11 --cmakedir)'
+"""
+
+[tool.pixi.tasks.build]
+depends-on = ["configure"]
+cwd = "judo_cpp/build"
+cmd = "ninja _judo_cpp && pybind11-stubgen judo_cpp --numpy-array-use-type-var -o ../../typings/"
+
+[tool.pixi.tasks.clean]
+cwd = "judo_cpp"
+cmd = "rm -rf build/"

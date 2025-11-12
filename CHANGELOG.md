@@ -1,3 +1,12 @@
+# v0.0.6
+
+## Added
+* C++ rollout backend for improved performance (`mujoco_cpp` backend option)
+  * Added `rollout()` and `sim()` C++ functions with Python bindings
+  * Added `RolloutBackend` class in `judo.utils.mujoco_cpp` module
+  * Added `rollout_backend` config option to `ControllerConfig` to select between `"mujoco"` (default) and `"mujoco_cpp"` backends
+  * Requires building C++ extensions with `pixi run build` or manual CMake build
+
 # v0.0.5
 
 ## Added
