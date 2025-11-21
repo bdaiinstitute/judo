@@ -5,6 +5,7 @@ from typing import Any
 
 import mujoco
 import numpy as np
+from mujoco import MjData, MjModel
 
 from judo import MODEL_PATH
 from judo.tasks.base import Task, TaskConfig
@@ -82,3 +83,26 @@ class Cartpole(Task[CartpoleConfig]):
         self.data.qpos = np.array([1.0, np.pi]) + np.random.randn(2)
         self.data.qvel = 1e-1 * np.random.randn(2)
         mujoco.mj_forward(self.model, self.data)
+
+    def success(
+        self, model: MjModel, data: MjData, config: CartpoleConfig, metadata: dict[str, Any] | None = None
+    ) -> bool:
+        """Returns success when the cartpole is balanced upright within a small tolerance.
+
+        Args:
+            model: The Mujoco model.
+            data: The Mujoco data.
+            config: The current task config (passed in from the top-level controller).
+            metadata: Any additional information that might be helpful for determining success.
+
+        Returns:
+            success: Whether the task was successful.
+        """
+        x = data.qpos[0]
+        theta = data.qpos[1]
+        if theta > np.pi:
+            theta -= 2 * np.pi
+        vx = data.qvel[0]
+        vtheta = data.qvel[1]
+        stable = (abs(x) < 1e-1) and (abs(theta) < 1e-1) and (abs(vx) < 1e-1) and (abs(vtheta) < 1e-1)
+        return stable

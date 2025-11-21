@@ -1,0 +1,23 @@
+<mujoco model="spot_fast">
+<!-- Copyright (c) 2024 Boston Dynamics AI Institute LLC. All rights reserved. -->
+  <include file="default.xml" />
+  <include file="assets.xml" />
+
+  <worldbody>
+    <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
+    <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>
+
+    <geom name="ground" type="plane" size="10 10 0.01" class="collision" priority="5" friction="0.7" material="blue_grid"/>
+
+    <body name="body" pos="0 0 0.7">
+      <include file="body.xml" />
+      <include file="legs.xml" />
+      <include file="arm.xml" />
+    </body>
+    <site name="site_object" pos="0 0 0" size="0.01"/>
+  </worldbody>
+
+  <include file="actuator.xml" />
+  <include file="sensor.xml" />
+  <include file="contact.xml" />
+</mujoco>

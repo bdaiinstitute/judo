@@ -1,3 +1,34 @@
+# Unreleased
+
+## Added
+* C++ rollout implementations for MuJoCo simulations (@johnzhang3, @jbruedigam-bdai, #95)
+    * Implemented high-performance C++ backend for MuJoCo rollouts with significant speedup
+    * Added custom C++ rollout functions for Spot robot tasks with ONNX policy inference
+    * Separated task-space control dimensions from simulation control dimensions for better flexibility
+* Added `cutoff_time` parameter to `OptimizerConfig` (@johnzhang3, #95)
+    * Allows specifying maximum wall-clock time (in seconds) per rollout thread before termination
+    * Prevents single threads from blocking optimization when rollouts take too long
+    * Default value: 0.2 seconds
+* New Spot robot tasks (@johnzhang3, #95)
+    * `spot_yellow_chair`: Manipulation task for pushing a yellow office chair
+    * `spot_yellow_chair_ramp`: Chair manipulation with ramp navigation
+    * `spot_box`: Box manipulation task for Spot
+* CMAES (Covariance Matrix Adaptation Evolution Strategy) optimizer (@alberthli, #95)
+
+## Fixed
+* Fixed reward sign in `spot_yellow_chair_ramp` task where torso proximity was incorrectly penalizing closeness (@johnzhang-rai, #95)
+* Updated `Task.success()` and `Task.failure()` methods to raise `NotImplementedError` instead of returning `False` for clearer API expectations (@johnzhang-rai, #95)
+
+## Changed
+* Renamed policy file from `xinghao_policy_v1.onnx` to `spot_relic_policy.onnx` for better clarity (@johnzhang-rai, #95)
+
+## Documentation
+* Added detailed documentation for `cutoff_time` parameter in optimizer configuration (@johnzhang-rai, #95)
+
+## Dev
+* Removed commented-out code and cleaned up task implementations (@johnzhang-rai, #95)
+* Added C++ build instructions to README for development setup (@johnzhang-rai, #95)
+
 # v0.0.5
 
 ## Added

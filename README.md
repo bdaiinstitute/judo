@@ -35,6 +35,8 @@ We recommend installing `judo` using `pip` as follows:
 pip install judo-rai  # if you want dev dependencies, use judo-rai[dev]
 ```
 
+Prebuilt wheels with C++ extensions are provided for Linux and macOS (both Intel and Apple Silicon) for Python 3.10+.
+
 ### Developers
 #### Conda
 For developers, run the following commands from this folder after cloning:
@@ -58,6 +60,9 @@ To create our environment (and activate it each time later), run the following i
 # every time you want to activate
 pixi shell -e dev
 
+# build judo cpp bindings
+pixi run build
+
 # first time only
 pre-commit install
 pybind11-stubgen mujoco -o typings/
@@ -68,6 +73,12 @@ To start the simulator, you can simply run:
 ```bash
 judo
 ```
+
+To start with a specific config file
+```bash
+pixi run -e dev judo --config-name judo_default
+```
+
 This will start the stack and print a link in the terminal that will open the app in your browser, e.g.,
 ```
 http://localhost:8080

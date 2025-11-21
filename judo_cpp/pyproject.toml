@@ -1,0 +1,20 @@
+[build-system]
+requires = ["scikit-build-core[pyproject]", "pybind11", "mujoco"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "judo-cpp"
+version = "0.0.1"
+
+[project.optional-dependencies]
+dev = [
+    "ninja",
+    "pybind11",
+]
+
+[tool.scikit-build]
+cmake.source-dir = "."
+wheel.packages = ["judo_cpp"]
+cmake.build-type = "Release"
+build-dir = "build"  # for manual rebuilding during dev
+cmake.args = ["-DEigen3_DIR=$ENV{CONDA_PREFIX}/lib/cmake/eigen3"]

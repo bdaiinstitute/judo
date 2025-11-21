@@ -9,8 +9,14 @@ from judo.tasks.cylinder_push import CylinderPush, CylinderPushConfig
 from judo.tasks.fr3_pick import FR3Pick, FR3PickConfig
 from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
 from judo.tasks.leap_cube_down import LeapCubeDown, LeapCubeDownConfig
+from judo.tasks.spot.spot_box import SpotBox, SpotBoxConfig
+from judo.tasks.spot.spot_yellow_chair import SpotYellowChair, SpotYellowChairConfig
+from judo.tasks.spot.spot_yellow_chair_ramp import SpotYellowChairRamp, SpotYellowChairRampConfig
 
 _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
+    SpotBox.name: (SpotBox, SpotBoxConfig),
+    SpotYellowChair.name: (SpotYellowChair, SpotYellowChairConfig),
+    SpotYellowChairRamp.name: (SpotYellowChairRamp, SpotYellowChairRampConfig),
     CylinderPush.name: (CylinderPush, CylinderPushConfig),
     Cartpole.name: (Cartpole, CartpoleConfig),
     FR3Pick.name: (FR3Pick, FR3PickConfig),
@@ -47,4 +53,10 @@ __all__ = [
     "LeapCubeConfig",
     "LeapCubeDown",
     "LeapCubeDownConfig",
+    "SpotBox",
+    "SpotBoxConfig",
+    "SpotYellowChair",
+    "SpotYellowChairConfig",
+    "SpotYellowChairRamp",
+    "SpotYellowChairRampConfig",
 ]

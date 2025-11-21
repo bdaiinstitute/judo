@@ -2,6 +2,7 @@
 
 from judo.config import set_config_overrides
 from judo.optimizers.cem import CrossEntropyMethodConfig
+from judo.optimizers.cmaes import CMAESConfig
 from judo.optimizers.mppi import MPPIConfig
 from judo.optimizers.ps import PredictiveSamplingConfig
 
@@ -220,5 +221,78 @@ def set_default_fr3_pick_overrides() -> None:
             "noise_ramp": 4.0,
             "sigma": 0.01,
             "temperature": 0.002,
+        },
+    )
+
+
+def set_default_spot_yellow_chair_overrides() -> None:
+    """Sets the default task-specific optimizer config overrides for the spot yellow chair task."""
+    set_config_overrides(
+        "spot_yellow_chair",
+        PredictiveSamplingConfig,
+        {
+            "num_rollouts": 16,
+        },
+    )
+    set_config_overrides(
+        "spot_yellow_chair",
+        CrossEntropyMethodConfig,
+        {
+            "num_nodes": 4,
+            "num_rollouts": 17,
+        },
+    )
+    set_config_overrides(
+        "spot_yellow_chair",
+        MPPIConfig,
+        {
+            "num_nodes": 4,
+            # "num_rollouts": 16,
+        },
+    )
+    set_config_overrides(
+        "spot_yellow_chair",
+        CMAESConfig,
+        {
+            "num_nodes": 4,
+            # "num_rollouts": 16,
+        },
+    )
+
+
+def set_default_spot_yellow_chair_ramp_overrides() -> None:
+    """Sets the default task-specific optimizer config overrides for the spot yellow chair task."""
+    set_config_overrides(
+        "spot_yellow_chair_ramp",
+        PredictiveSamplingConfig,
+        {
+            # "num_nodes": 4,
+            "num_rollouts": 16,
+            # "use_noise_ramp": False,
+        },
+    )
+    set_config_overrides(
+        "spot_yellow_chair_ramp",
+        CrossEntropyMethodConfig,
+        {
+            "num_nodes": 4,
+            "num_rollouts": 17,
+        },
+    )
+    set_config_overrides(
+        "spot_yellow_chair_ramp",
+        MPPIConfig,
+        {
+            "num_nodes": 4,
+            "num_rollouts": 16,
+        },
+    )
+    set_config_overrides(
+        "spot_yellow_chair_ramp",
+        CMAESConfig,
+        {
+            "num_nodes": 4,
+            "num_rollouts": 16,
+            "min_std": 0.2,
         },
     )

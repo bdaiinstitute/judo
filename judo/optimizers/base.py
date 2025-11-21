@@ -11,6 +11,7 @@ from judo.gui import slider
 
 
 @slider("num_nodes", 3, 12, 1)
+@slider("cutoff_time", 0.05, 1.0, 0.01)
 @dataclass
 class OptimizerConfig(OverridableConfig):
     """Base class for all optimizer configurations."""
@@ -19,6 +20,7 @@ class OptimizerConfig(OverridableConfig):
     num_nodes: int = 4
     use_noise_ramp: bool = False
     noise_ramp: float = 2.5
+    cutoff_time: float = 0.2  # Maximum wall-clock time (in seconds) allowed per rollout thread before termination
 
 
 OptimizerConfigT = TypeVar("OptimizerConfigT", bound=OptimizerConfig)

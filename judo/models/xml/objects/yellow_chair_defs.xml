@@ -1,0 +1,8 @@
+<mujoco model="yellow_chair_defs">
+<!-- Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved. -->
+  <asset>
+      <mesh name="yellow_chair_mesh" file="../../meshes/yellow_chair/meshes/visual/visual_v2.obj"/>
+      <mesh name="yellow_chair_back" file="../../meshes/yellow_chair/meshes/collision/yellow_chair_back_v2.obj"/>
+      <mesh name="yellow_chair_seat" file="../../meshes/yellow_chair/meshes/collision/yellow_chair_seat_v2.obj"/>
+  </asset>
+</mujoco>
