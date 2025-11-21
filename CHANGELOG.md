@@ -12,6 +12,7 @@
 * Fixed bug that would allow certain sliders to be set to arbitrary values that could crash the app
 * Fixed bug that would allow NaN as a valid entry into the slider text box
 * Fixed bug that caused the ControllerConfig to not be recreated when the `TaskConfig` was reset.
+* Fixed viser 1.0.16 compatibility issue with line segment color API in `ViserMjModel.add_traces()` (@johnzhang3, #105)
 
 ## Documentation
 * Added specification between different slider types.
