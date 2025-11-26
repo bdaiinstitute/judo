@@ -1,3 +1,11 @@
+# v0.0.6
+
+## Added
+* New copyrights
+
+## Fixed
+* Fixed bug that caused Viser and Mujoco to crash on visualization due to different API
+
 # v0.0.5
 
 ## Added
