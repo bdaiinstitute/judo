@@ -33,6 +33,7 @@ dependencies = [
     "mujoco",
     "numpy",
     "pillow",  # for displaying app logo
+    "pycparser",
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
     "scipy",
