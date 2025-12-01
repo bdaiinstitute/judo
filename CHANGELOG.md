@@ -5,6 +5,8 @@
 
 ## Fixed
 * Fixed bug that caused Viser and Mujoco to crash on visualization due to different API
+* Added pycparser deps
+* Fixed a new mujoco API compatibility
 
 # v0.0.5
 
