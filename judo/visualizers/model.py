@@ -211,7 +211,17 @@ class ViserMjModel:
                 rgb=DEFAULT_BEST_SPLINE_COLOR,
             )
         )
-        self._traces[0].colors = np.tile(self._traces[0].colors[0, :, :], (all_traces_rollout_size, 1, 1))
+
+        # In viser 1.0.16+, colors can be shape (3,) if a single color was passed, or (N, 2, 3) if array was passed
+        # We need to handle both cases
+        if all_traces_rollout_size > 0:
+            if self._traces[0].colors.ndim == 1:
+                # Single color was stored, expand to (N, 2, 3) shape
+                self._traces[0].colors = np.tile(self._traces[0].colors, (all_traces_rollout_size, 2, 1))
+            else:
+                # Already (N, 2, 3), just tile the first segment
+                self._traces[0].colors = np.tile(self._traces[0].colors[:1, :, :], (all_traces_rollout_size, 1, 1))
+
         if (rest_trace_size := num_traces - all_traces_rollout_size) > 0:
             self._traces.append(
                 add_segments(
@@ -221,7 +231,12 @@ class ViserMjModel:
                     rgb=DEFAULT_SPLINE_COLOR,
                 )
             )
-            self._traces[1].colors = np.tile(self._traces[1].colors[0, :, :], (rest_trace_size, 1, 1))
+            if self._traces[1].colors.ndim == 1:
+                # Single color was stored, expand to (N, 2, 3) shape
+                self._traces[1].colors = np.tile(self._traces[1].colors, (rest_trace_size, 2, 1))
+            else:
+                # Already (N, 2, 3), just tile the first segment
+                self._traces[1].colors = np.tile(self._traces[1].colors[:1, :, :], (rest_trace_size, 1, 1))
 
     def remove_traces(self) -> None:
         """Remove traces."""
@@ -236,7 +251,7 @@ class ViserMjModel:
             # Use atomic to update both position/orientation synchronously.
             with self._target.atomic():
                 # Line up order of bodies in spec with order of bodies in model.
-                data_idx = self._spec.bodies[i].id
+                data_idx = self._model.body(self._spec.bodies[i].name).id
                 self._bodies[i].position = tuple(data.xpos[data_idx])
                 self._bodies[i].wxyz = tuple(data.xquat[data_idx])
 

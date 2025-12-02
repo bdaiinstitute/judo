@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "judo-rai"
 description = "Judo: a hackable sampling-based MPC toolbox"
-version = "0.0.5"
+version = "0.0.6"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
@@ -33,6 +33,7 @@ dependencies = [
     "mujoco",
     "numpy",
     "pillow",  # for displaying app logo
+    "pycparser",
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
     "scipy",
