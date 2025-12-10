@@ -56,8 +56,23 @@ class Visualizer:
         self.task_name = ""
         self.optimizer_name = ""
 
+        # Initializes the locks and events in the constructor to avoid recreating them each time the task is set.
         self.task_lock = threading.Lock()
         self.task_updated = threading.Event()
+
+        self.controller_config_lock = threading.Lock()
+        self.controller_config_updated = threading.Event()
+
+        self.optimizer_lock = threading.Lock()
+        self.optimizer_updated = threading.Event()
+
+        self.optimizer_config_lock = threading.Lock()
+        self.optimizer_config_updated = threading.Event()
+
+        self.task_config_lock = threading.Lock()
+        self.task_config_updated = threading.Event()
+
+        self.task_reset_updated = threading.Event()
 
         self.sim_pause_button = sim_pause_button
         if self.sim_pause_button:
@@ -120,23 +135,11 @@ class Visualizer:
             raise ValueError(f"Optimizer {optimizer_name} not found in optimizer registry.")
         _, optimizer_config_cls = optimizer_entry
 
-        self.controller_config_lock = threading.Lock()
-        self.controller_config_updated = threading.Event()
         self.controller_config = ControllerConfig()
         self.controller_config.set_override(task_name)
 
-        self.optimizer_lock = threading.Lock()
-        self.optimizer_updated = threading.Event()
-
-        self.optimizer_config_lock = threading.Lock()
-        self.optimizer_config_updated = threading.Event()
         self.optimizer_config = optimizer_config_cls()
         self.optimizer_config.set_override(task_name)
-
-        self.task_config_lock = threading.Lock()
-        self.task_config_updated = threading.Event()
-
-        self.task_reset_updated = threading.Event()
 
         self.setup_gui()
 
