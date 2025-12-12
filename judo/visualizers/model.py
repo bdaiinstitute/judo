@@ -295,9 +295,9 @@ class ViserMjModel:
 
     def remove(self) -> None:
         """Wrapper function to remove all geometries from Viser."""
+        self.remove_traces()
         for geom in self._geoms:
             geom.remove()
-        self.remove_traces()
 
 
 def add_plane(
