@@ -1,3 +1,10 @@
+# v0.0.7
+
+## Fixed
+* Fixed bug that caused traces to linger when switching from a trace task to a traceless task
+* Fixed bug where task and optimizer events were cleared before the Visualizer finished rendering
+* Fixed bug where events and locks are getting recreated when a task is made, causing the references to them to break
+
 # v0.0.6
 
 ## Added
