@@ -1,34 +1,44 @@
+# v0.0.7
+
+## Fixed
+* Fixed bug that caused traces to linger when switching from a trace task to a traceless task (@bhung, #108)
+* Fixed bug where task and optimizer events were cleared before the Visualizer finished rendering (@bhung, #108)
+* Fixed bug where events and locks are getting recreated when a task is made, causing bad references (@bhung, #108)
+
+## Dev
+* Updated changelog with instructions on package updates (@bhung, #108)
+
 # v0.0.6
 
 ## Added
-* New copyrights
+* New copyrights (@baxelrod, #103)
 
 ## Fixed
-* Fixed bug that caused Viser and Mujoco to crash on visualization due to different API
-* Added pycparser deps
-* Fixed a new mujoco API compatibility
+* Fixed bug that caused Viser and Mujoco to crash on visualization due to different API (@bhung, #107)
+* Added pycparser deps (@bhung, #107)
+* Fixed a new mujoco API compatibility (@bhung, #107)
 
 # v0.0.5
 
 ## Added
-* Separation between middleware implementation and core functionality
-* Support for different middleware implementations
-* Sliders with enforced bounds to errors caused by unintended values
-* Interface to create controllers from registered tasks and optimizers
-* Abstract interface to implement different simulation backends
-* Removed duplication of objects inside a node to ensure that all references to data point to the same object
+* Separation between middleware implementation and core functionality (@bhung, #93)
+* Support for different middleware implementations (@bhung, #93)
+* Sliders with enforced bounds to errors caused by unintended values (@bhung, #93)
+* Interface to create controllers from registered tasks and optimizers (@bhung, #93)
+* Abstract interface to implement different simulation backends (@bhung, #93)
+* Removed duplication of objects inside a node to ensure that all references to data point to the same object (@bhung, #93)
 
 ## Fixed
-* Fixed bug that would allow certain sliders to be set to arbitrary values that could crash the app
-* Fixed bug that would allow NaN as a valid entry into the slider text box
-* Fixed bug that caused the ControllerConfig to not be recreated when the `TaskConfig` was reset.
+* Fixed bug that would allow certain sliders to be set to arbitrary values that could crash the app (@bhung, #93)
+* Fixed bug that would allow NaN as a valid entry into the slider text box (@bhung, #93)
+* Fixed bug that caused the ControllerConfig to not be recreated when the `TaskConfig` was reset. (@bhung, #93)
 
 ## Documentation
-* Added specification between different slider types.
-* Added guidelines on how to use the `Controller`. `Visualizer`, and `Simulation` objects
+* Added specification between different slider types. (@bhung, #93)
+* Added guidelines on how to use the `Controller`. `Visualizer`, and `Simulation` objects (@bhung, #93)
 
 ## Dev
-* Modified release process so that any CODEOWNER can publish to pypi
+* Modified release process so that any CODEOWNER can publish to pypi (@bhung, #99)
 
 # v0.0.4
 

@@ -88,6 +88,15 @@ feat(task): add fr3_stack task with novel constraints
 fix(mppi): guard against div-by-zero in cost calculation
 ```
 
+## 📦 Package updates and versioning
+
+If you are adding a significant change and would like it to be reviewed as a new package release, you will need to
+update a few things:
+
+1. `CHANGELOG.md`: Following the format in the file, add your changes to the changelog with the proper PR references
+2. `pyproject.toml`: Update the version of `judo_rai` appropriately
+3. `pixi.lock`: Update the `pixi.lock` file. You can do this by running `pixi shell` and exiting after it's done.
+
 ## 💬 Discussions
 
 Have questions or ideas?

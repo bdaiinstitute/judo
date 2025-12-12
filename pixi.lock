@@ -2179,8 +2179,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: judo-rai
-  version: 0.0.6
-  sha256: e34c8db0eeda71610d7a90dd94d8a7726f392f2cbe8709d8279c8611080065f0
+  version: 0.0.7
+  sha256: 647aa3ce262a995a2cf97eb9657ec07492dd4dd5c478e7f33e62867855f559a5
   requires_dist:
   - dora-utils
   - mujoco
