@@ -56,8 +56,23 @@ class Visualizer:
         self.task_name = ""
         self.optimizer_name = ""
 
+        # Initializes the locks and events in the constructor to avoid recreating them each time the task is set.
         self.task_lock = threading.Lock()
         self.task_updated = threading.Event()
+
+        self.controller_config_lock = threading.Lock()
+        self.controller_config_updated = threading.Event()
+
+        self.optimizer_lock = threading.Lock()
+        self.optimizer_updated = threading.Event()
+
+        self.optimizer_config_lock = threading.Lock()
+        self.optimizer_config_updated = threading.Event()
+
+        self.task_config_lock = threading.Lock()
+        self.task_config_updated = threading.Event()
+
+        self.task_reset_updated = threading.Event()
 
         self.sim_pause_button = sim_pause_button
         if self.sim_pause_button:
@@ -120,23 +135,11 @@ class Visualizer:
             raise ValueError(f"Optimizer {optimizer_name} not found in optimizer registry.")
         _, optimizer_config_cls = optimizer_entry
 
-        self.controller_config_lock = threading.Lock()
-        self.controller_config_updated = threading.Event()
         self.controller_config = ControllerConfig()
         self.controller_config.set_override(task_name)
 
-        self.optimizer_lock = threading.Lock()
-        self.optimizer_updated = threading.Event()
-
-        self.optimizer_config_lock = threading.Lock()
-        self.optimizer_config_updated = threading.Event()
         self.optimizer_config = optimizer_config_cls()
         self.optimizer_config.set_override(task_name)
-
-        self.task_config_lock = threading.Lock()
-        self.task_config_updated = threading.Event()
-
-        self.task_reset_updated = threading.Event()
 
         self.setup_gui()
 
@@ -235,10 +238,9 @@ class Visualizer:
                 """Callback for when the pause button is clicked."""
                 if sim_pause_button.label == "Pause Simulation":
                     sim_pause_button.label = "Resume Simulation"
-                    self.sim_pause_updated.set()
                 else:
                     sim_pause_button.label = "Pause Simulation"
-                    self.sim_pause_updated.set()
+                self.sim_pause_updated.set()
 
         # create a display for plan time
         self.gui_elements["plan_time_display"] = self.server.gui.add_number(
@@ -292,7 +294,6 @@ class Visualizer:
         def _(_: viser.GuiEvent) -> None:
             """Callback for when the optimizer dropdown is updated."""
             # first, send the name of the new optimizer
-            self.optimizer_updated.set()
             self.optimizer_name = optimizer_dropdown.value
 
             # update config
@@ -301,7 +302,6 @@ class Visualizer:
             optimizer_config_cls = optimizer_entry[1]
             self.optimizer_config = optimizer_config_cls()
             self.optimizer_config.set_override(self.task_name)
-            self.optimizer_config_updated.set()
 
             # replace optimizer param gui elements
             for v in self.gui_elements["optimizer_params"]:
@@ -316,6 +316,8 @@ class Visualizer:
 
             # because the optimizer will be updated, we need to sent the task parameters back to it so it doesn't start
             # with defaults
+            self.optimizer_updated.set()
+            self.optimizer_config_updated.set()
             self.task_config_updated.set()
 
         @task_dropdown.on_update
@@ -323,7 +325,6 @@ class Visualizer:
             """Callback for when the task dropdown is updated."""
             # first, send the name of the new task
             self.task_name = task_dropdown.value
-            self.task_updated.set()
 
             # replace gui elements
             self._remove_gui_elements()
@@ -331,6 +332,7 @@ class Visualizer:
             # set up the entire visualizer from scratch
             with self.task_lock:
                 self.set_task(self.task_name, self.optimizer_name)
+            self.task_updated.set()
 
     def remove_handles(self, handles: list[ElementType] | ElementType) -> None:
         """Remove GUI handles from the visualization node."""
