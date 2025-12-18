@@ -15,7 +15,7 @@ jobs:
       is_owner: ${{ steps.check.outputs.is_owner }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check actor
         id: check
@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -56,14 +56,14 @@ jobs:
         run: python -m build --sdist -o dist
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: wheel-artifact-${{ github.run_id }}
           path: wheelhouse/*.whl
           retention-days: 7
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sdist-artifact-${{ github.run_id }}
           path: dist/*.tar.gz
@@ -78,16 +78,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download wheel artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: wheel-artifact-${{ github.run_id }}
           path: wheelhouse
 
       - name: Download sdist artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: sdist-artifact-${{ github.run_id }}
           path: dist
