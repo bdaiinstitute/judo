@@ -9,7 +9,18 @@ from judo.tasks.cylinder_push import CylinderPush, CylinderPushConfig
 from judo.tasks.fr3_pick import FR3Pick, FR3PickConfig
 from judo.tasks.leap_cube import LeapCube, LeapCubeConfig
 from judo.tasks.leap_cube_down import LeapCubeDown, LeapCubeDownConfig
-from judo.tasks.spot import SpotBase, SpotBaseConfig, SpotTireUpright, SpotTireUprightConfig
+from judo.tasks.spot import (
+    SpotBase,
+    SpotBaseConfig,
+    SpotBoxPush,
+    SpotBoxPushConfig,
+    SpotNavigate,
+    SpotNavigateConfig,
+    SpotTireRoll,
+    SpotTireRollConfig,
+    SpotTireUpright,
+    SpotTireUprightConfig,
+)
 
 _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
     CylinderPush.name: (CylinderPush, CylinderPushConfig),
@@ -19,6 +30,9 @@ _registered_tasks: Dict[str, Tuple[Type[Task], Type[TaskConfig]]] = {
     LeapCubeDown.name: (LeapCubeDown, LeapCubeDownConfig),
     CaltechLeapCube.name: (CaltechLeapCube, CaltechLeapCubeConfig),
     SpotBase.name: (SpotBase, SpotBaseConfig),
+    SpotBoxPush.name: (SpotBoxPush, SpotBoxPushConfig),
+    SpotNavigate.name: (SpotNavigate, SpotNavigateConfig),
+    SpotTireRoll.name: (SpotTireRoll, SpotTireRollConfig),
     SpotTireUpright.name: (SpotTireUpright, SpotTireUprightConfig),
 }
 
@@ -52,6 +66,12 @@ __all__ = [
     "LeapCubeDownConfig",
     "SpotBase",
     "SpotBaseConfig",
+    "SpotBoxPush",
+    "SpotBoxPushConfig",
+    "SpotNavigate",
+    "SpotNavigateConfig",
+    "SpotTireRoll",
+    "SpotTireRollConfig",
     "SpotTireUpright",
     "SpotTireUprightConfig",
 ]
