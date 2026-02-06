@@ -128,6 +128,7 @@ exclude=[
     "site-packages",
     "venv",
     "docs",
+    "mujoco_extensions",
 ]
 
 [tool.ruff.lint]
@@ -173,8 +174,31 @@ ignore = [
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
 
+[tool.pixi.dependencies]
+cmake = ">=3.15"
+dvc = ">=3.0"
+dvc-s3 = ">=3.0"
+eigen = ">=3.4"
+pybind11 = ">=2.11"
+onnxruntime-cpp = ">=1.16"
+
+[tool.pixi.target.linux-64.dependencies]
+libgomp = ">=13"  # OpenMP runtime for Linux
+
 [tool.pixi.pypi-dependencies]
 judo-rai = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+# Download model assets via DVC
+pull-models = { cmd = "dvc pull judo/models/meshes.dvc judo/models/policies.dvc", description = "Download meshes and policies via DVC" }
+
+# Build mujoco_extensions C++ module
+configure-mujoco-ext = { cmd = "cmake -B mujoco_extensions/build -S mujoco_extensions", description = "Configure mujoco_extensions cmake build" }
+build-mujoco-ext = { cmd = "cmake --build mujoco_extensions/build -j8", depends-on = ["configure-mujoco-ext"], description = "Build mujoco_extensions pybind modules" }
+clean-mujoco-ext = { cmd = "rm -rf mujoco_extensions/build mujoco_extensions/policy_rollout/*.so mujoco_extensions/jacobian_smoothing/*.so", description = "Clean mujoco_extensions build artifacts" }
+
+[tool.pixi.activation.env]
+LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }

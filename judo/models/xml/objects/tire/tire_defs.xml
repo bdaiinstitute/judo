@@ -1,0 +1,100 @@
+<mujoco>
+  <!-- Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved. -->
+  <compiler angle="radian" assetdir="../../../meshes/" autolimits="true"/>
+
+  <default>
+    <default class="tire_visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="tire_collision">
+      <geom friction="1.15 1.0" priority="6" material="tire_semi_transparent"/>
+    </default>
+  </default>
+
+  <asset>
+      <material name="tire_black" rgba="0.25 0.25 0.25 1" metallic="0.0" roughness="1.0"/>
+      <material name="tire_semi_transparent" rgba="1 1 1 0.5" metallic="0.0" roughness="1.0"/>
+      <mesh name="tire_visual" file="objects/tire/meshes/visual/tire.obj"/>
+      <mesh name="tire_0_collision" file="objects/tire/meshes/collision/part_0.obj"/>
+      <mesh name="tire_1_collision" file="objects/tire/meshes/collision/part_1.obj"/>
+      <mesh name="tire_2_collision" file="objects/tire/meshes/collision/part_2.obj"/>
+      <mesh name="tire_3_collision" file="objects/tire/meshes/collision/part_3.obj"/>
+      <mesh name="tire_4_collision" file="objects/tire/meshes/collision/part_4.obj"/>
+      <mesh name="tire_5_collision" file="objects/tire/meshes/collision/part_5.obj"/>
+      <mesh name="tire_6_collision" file="objects/tire/meshes/collision/part_6.obj"/>
+      <mesh name="tire_7_collision" file="objects/tire/meshes/collision/part_7.obj"/>
+      <mesh name="tire_8_collision" file="objects/tire/meshes/collision/part_8.obj"/>
+      <mesh name="tire_9_collision" file="objects/tire/meshes/collision/part_9.obj"/>
+      <mesh name="tire_10_collision" file="objects/tire/meshes/collision/part_10.obj"/>
+      <mesh name="tire_11_collision" file="objects/tire/meshes/collision/part_11.obj"/>
+      <mesh name="tire_12_collision" file="objects/tire/meshes/collision/part_12.obj"/>
+      <mesh name="tire_13_collision" file="objects/tire/meshes/collision/part_13.obj"/>
+      <mesh name="tire_14_collision" file="objects/tire/meshes/collision/part_14.obj"/>
+      <mesh name="tire_15_collision" file="objects/tire/meshes/collision/part_15.obj"/>
+      <mesh name="tire_16_collision" file="objects/tire/meshes/collision/part_16.obj"/>
+      <mesh name="tire_17_collision" file="objects/tire/meshes/collision/part_17.obj"/>
+      <mesh name="tire_18_collision" file="objects/tire/meshes/collision/part_18.obj"/>
+      <mesh name="tire_19_collision" file="objects/tire/meshes/collision/part_19.obj"/>
+      <mesh name="tire_20_collision" file="objects/tire/meshes/collision/part_20.obj"/>
+      <mesh name="tire_21_collision" file="objects/tire/meshes/collision/part_21.obj"/>
+      <mesh name="tire_22_collision" file="objects/tire/meshes/collision/part_22.obj"/>
+      <mesh name="tire_23_collision" file="objects/tire/meshes/collision/part_23.obj"/>
+      <mesh name="tire_24_collision" file="objects/tire/meshes/collision/part_24.obj"/>
+      <mesh name="tire_25_collision" file="objects/tire/meshes/collision/part_25.obj"/>
+      <mesh name="tire_26_collision" file="objects/tire/meshes/collision/part_26.obj"/>
+      <mesh name="tire_27_collision" file="objects/tire/meshes/collision/part_27.obj"/>
+      <mesh name="tire_28_collision" file="objects/tire/meshes/collision/part_28.obj"/>
+      <mesh name="tire_29_collision" file="objects/tire/meshes/collision/part_29.obj"/>
+      <mesh name="tire_30_collision" file="objects/tire/meshes/collision/part_30.obj"/>
+      <mesh name="tire_31_collision" file="objects/tire/meshes/collision/part_31.obj"/>
+      <mesh name="tire_32_collision" file="objects/tire/meshes/collision/part_32.obj"/>
+      <mesh name="tire_33_collision" file="objects/tire/meshes/collision/part_33.obj"/>
+      <mesh name="tire_34_collision" file="objects/tire/meshes/collision/part_34.obj"/>
+      <mesh name="tire_35_collision" file="objects/tire/meshes/collision/part_35.obj"/>
+      <mesh name="tire_36_collision" file="objects/tire/meshes/collision/part_36.obj"/>
+      <mesh name="tire_37_collision" file="objects/tire/meshes/collision/part_37.obj"/>
+      <mesh name="tire_38_collision" file="objects/tire/meshes/collision/part_38.obj"/>
+      <mesh name="tire_39_collision" file="objects/tire/meshes/collision/part_39.obj"/>
+      <mesh name="tire_40_collision" file="objects/tire/meshes/collision/part_40.obj"/>
+      <mesh name="tire_41_collision" file="objects/tire/meshes/collision/part_41.obj"/>
+      <mesh name="tire_42_collision" file="objects/tire/meshes/collision/part_42.obj"/>
+      <mesh name="tire_43_collision" file="objects/tire/meshes/collision/part_43.obj"/>
+      <mesh name="tire_44_collision" file="objects/tire/meshes/collision/part_44.obj"/>
+      <mesh name="tire_45_collision" file="objects/tire/meshes/collision/part_45.obj"/>
+      <mesh name="tire_46_collision" file="objects/tire/meshes/collision/part_46.obj"/>
+      <mesh name="tire_47_collision" file="objects/tire/meshes/collision/part_47.obj"/>
+      <mesh name="tire_48_collision" file="objects/tire/meshes/collision/part_48.obj"/>
+      <mesh name="tire_49_collision" file="objects/tire/meshes/collision/part_49.obj"/>
+      <mesh name="tire_50_collision" file="objects/tire/meshes/collision/part_50.obj"/>
+      <mesh name="tire_51_collision" file="objects/tire/meshes/collision/part_51.obj"/>
+      <mesh name="tire_52_collision" file="objects/tire/meshes/collision/part_52.obj"/>
+      <mesh name="tire_53_collision" file="objects/tire/meshes/collision/part_53.obj"/>
+      <mesh name="tire_54_collision" file="objects/tire/meshes/collision/part_54.obj"/>
+      <mesh name="tire_55_collision" file="objects/tire/meshes/collision/part_55.obj"/>
+      <mesh name="tire_56_collision" file="objects/tire/meshes/collision/part_56.obj"/>
+      <mesh name="tire_57_collision" file="objects/tire/meshes/collision/part_57.obj"/>
+      <mesh name="tire_58_collision" file="objects/tire/meshes/collision/part_58.obj"/>
+      <mesh name="tire_59_collision" file="objects/tire/meshes/collision/part_59.obj"/>
+      <mesh name="tire_60_collision" file="objects/tire/meshes/collision/part_60.obj"/>
+      <mesh name="tire_61_collision" file="objects/tire/meshes/collision/part_61.obj"/>
+      <mesh name="tire_62_collision" file="objects/tire/meshes/collision/part_62.obj"/>
+      <mesh name="tire_63_collision" file="objects/tire/meshes/collision/part_63.obj"/>
+      <mesh name="tire_64_collision" file="objects/tire/meshes/collision/part_64.obj"/>
+      <mesh name="tire_65_collision" file="objects/tire/meshes/collision/part_65.obj"/>
+      <mesh name="tire_66_collision" file="objects/tire/meshes/collision/part_66.obj"/>
+      <mesh name="tire_67_collision" file="objects/tire/meshes/collision/part_67.obj"/>
+      <mesh name="tire_68_collision" file="objects/tire/meshes/collision/part_68.obj"/>
+      <mesh name="tire_69_collision" file="objects/tire/meshes/collision/part_69.obj"/>
+      <mesh name="tire_70_collision" file="objects/tire/meshes/collision/part_70.obj"/>
+      <mesh name="tire_71_collision" file="objects/tire/meshes/collision/part_71.obj"/>
+      <mesh name="tire_72_collision" file="objects/tire/meshes/collision/part_72.obj"/>
+      <mesh name="tire_73_collision" file="objects/tire/meshes/collision/part_73.obj"/>
+      <mesh name="tire_74_collision" file="objects/tire/meshes/collision/part_74.obj"/>
+      <mesh name="tire_75_collision" file="objects/tire/meshes/collision/part_75.obj"/>
+      <mesh name="tire_76_collision" file="objects/tire/meshes/collision/part_76.obj"/>
+      <mesh name="tire_77_collision" file="objects/tire/meshes/collision/part_77.obj"/>
+      <mesh name="tire_78_collision" file="objects/tire/meshes/collision/part_78.obj"/>
+      <mesh name="tire_79_collision" file="objects/tire/meshes/collision/part_79.obj"/>
+      <mesh name="tire_80_collision" file="objects/tire/meshes/collision/part_80.obj"/>
+  </asset>
+</mujoco>

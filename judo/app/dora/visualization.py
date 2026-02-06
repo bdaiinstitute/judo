@@ -120,7 +120,9 @@ class VisualizationNode(DoraNode):
     def update_plan_time(self, event: dict) -> None:
         """Callback to update plan time on receiving a new plan time measurement."""
         plan_time_s = event["value"].to_numpy(zero_copy_only=False)[0]
-        self.visualizer.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
+        # GUI element might not exist during task switch
+        if "plan_time_display" in self.visualizer.gui_elements:
+            self.visualizer.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
 
     def spin(self) -> None:
         """Spin logic for the visualization node."""

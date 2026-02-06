@@ -2,6 +2,7 @@
 
 import time
 import warnings
+from typing import Callable
 
 from dora_utils.dataclasses import from_arrow, to_arrow
 from dora_utils.node import DoraNode, on_event
@@ -26,6 +27,7 @@ class SimulationNode(DoraNode):
         super().__init__(node_id=node_id, max_workers=max_workers)
         _sim_backend = get_simulation_backend(simulation_backend)
         self.sim = _sim_backend(init_task=init_task, task_registration_cfg=task_registration_cfg)
+        self.control_spline: Callable | None = None
         self.write_states()
 
     @on_event("INPUT", "task")
@@ -33,13 +35,24 @@ class SimulationNode(DoraNode):
         """Event handler for processing task updates."""
         new_task = event["value"].to_numpy(zero_copy_only=False)[0]
         self.sim.set_task(new_task)
+        self.control_spline = None  # Clear stale spline
 
     def spin(self) -> None:
         """Spin logic for the simulation node."""
         while True:
             start_time = time.time()
             self.parse_messages()
-            self.sim.step()
+
+            if self.control_spline is not None:
+                command = self.control_spline(self.sim.task.data.time)
+                if command.shape[-1] == self.sim.task.nu:
+                    self.sim.step(command)
+                else:
+                    warnings.warn(
+                        f"Control command has wrong number of dimensions! Expected {self.sim.task.nu}, got {command.shape[-1]}",
+                        stacklevel=2,
+                    )
+
             self.write_states()
 
             # Force simulation node to run at fixed rate specified by simulation timestep (specified in the model).
@@ -72,5 +85,4 @@ class SimulationNode(DoraNode):
     def update_control(self, event: dict) -> None:
         """Event handler for processing controls received from controller node."""
         spline_data = from_arrow(event["value"], event["metadata"], SplineData)
-        control = spline_data.spline()
-        self.sim.update_control(control)
+        self.control_spline = spline_data.spline()

@@ -114,16 +114,30 @@ class ControllerNode(DoraNode):
     def update_states(self, event: dict) -> None:
         """Callback to update states on receiving a new state measurement."""
         state_msg = from_event(event, MujocoState)
-        self.controller.update_states(state_msg)
+        # Validate state dimensions match current model (handles task switch race)
+        expected_nq = self.controller.model.nq
+        expected_nv = self.controller.model.nv
+        if len(state_msg.qpos) != expected_nq or len(state_msg.qvel) != expected_nv:
+            # Stale state from previous task, ignore
+            return
+        with self.lock:
+            self.controller.update_states(state_msg)
 
     def step(self) -> None:
         """Updates the controls state internally."""
         if self._paused:
             return
 
-        start = time.perf_counter()
-        self.controller.update_action()
-        end = time.perf_counter()
+        with self.lock:
+            # Validate state dimensions before update (handles task switch race)
+            expected_size = self.controller.model.nq + self.controller.model.nv
+            if self.controller.current_state.shape[0] != expected_size:
+                # State dimensions don't match, skip this step
+                return
+
+            start = time.perf_counter()
+            self.controller.update_action()
+            end = time.perf_counter()
 
         self.node.send_output("plan_time", pa.array([end - start]))
         self.write_controls()

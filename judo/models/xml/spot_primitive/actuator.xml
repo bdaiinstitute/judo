@@ -1,0 +1,25 @@
+<mujoco model="actuator">
+<!-- Copyright (c) 2023 Boston Dynamics AI Institute LLC. All rights reserved. -->
+  <actuator>
+    <position name="act_fl1" joint="fl_hx" class="hip_x"/>
+    <position name="act_fl2" joint="fl_hy" class="hip_y"/>
+    <position name="act_fl3" joint="fl_kn" class="knee"/>
+    <position name="act_fr1" joint="fr_hx" class="hip_x"/>
+    <position name="act_fr2" joint="fr_hy" class="hip_y"/>
+    <position name="act_fr3" joint="fr_kn" class="knee"/>
+    <position name="act_rl1" joint="hl_hx" class="hip_x"/>
+    <position name="act_rl2" joint="hl_hy" class="hip_y"/>
+    <position name="act_rl3" joint="hl_kn" class="knee"/>
+    <position name="act_rr1" joint="hr_hx" class="hip_x"/>
+    <position name="act_rr2" joint="hr_hy" class="hip_y"/>
+    <position name="act_rr3" joint="hr_kn" class="knee"/>
+
+    <position name="act_0" joint="arm_sh0" class="arm_sh0"/>
+    <position name="act_1" joint="arm_sh1" class="arm_sh1"/>
+    <position name="act_2" joint="arm_el0" class="arm_el0"/>
+    <position name="act_3" joint="arm_el1" class="arm_el1"/>
+    <position name="act_4" joint="arm_wr0" class="arm_wr0"/>
+    <position name="act_5" joint="arm_wr1" class="arm_wr1"/>
+    <position name="act_6" joint="arm_f1x" class="arm_f1x"/>
+  </actuator>
+</mujoco>
