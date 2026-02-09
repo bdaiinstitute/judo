@@ -38,3 +38,21 @@ def test_simulation_data_step(temp_np_seed: Callable) -> None:
         simulation_data.step(command)
         assert not np.allclose(simulation_data.task.data.ctrl, original_ctrl)
         assert simulation_data.sim_state is not None
+
+
+def test_spot_simulation_init() -> None:
+    """Test MJSimulation initializes with a Spot task and C++ systems."""
+    sim = MJSimulation(init_task="spot_base")
+    assert sim._systems is not None
+    assert sim.task.locomotion_policy_path is not None
+
+
+def test_spot_simulation_step() -> None:
+    """Test MJSimulation steps correctly with Spot locomotion policy."""
+    sim = MJSimulation(init_task="spot_base")
+    qpos_before = sim.task.data.qpos.copy()
+    command = np.zeros(sim.task.nu)
+    sim.step(command)
+    # State should change after stepping
+    assert not np.allclose(sim.task.data.qpos, qpos_before)
+    assert sim.sim_state is not None

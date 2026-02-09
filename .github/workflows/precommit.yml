@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v6
 
@@ -24,22 +23,34 @@ jobs:
           pixi-version: latest
           cache: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      # ── mujoco_extensions build (needed for pyright) ────────────────
+      - name: Restore mujoco_extensions build cache
+        id: ext-cache
+        uses: actions/cache@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          path: |
+            mujoco_extensions/build
+            mujoco_extensions/policy_rollout/*.so
+            mujoco_extensions/jacobian_smoothing/*.so
+          key: mujoco-ext-${{ matrix.os }}-${{ hashFiles('mujoco_extensions/**/*.cpp', 'mujoco_extensions/**/*.h', 'mujoco_extensions/**/CMakeLists.txt') }}
 
+      - name: Build mujoco_extensions (cache miss)
+        if: steps.ext-cache.outputs.cache-hit != 'true'
+        run: pixi run -e dev build-mujoco-ext
+
+      # ── Stubs cache ────────────────────────────────────────────────
       - name: Restore typings cache
         uses: actions/cache@v5
         id: typings-cache
         with:
           path: typings
-          key: typings-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          key: typings-${{ matrix.os }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Generate stubs if cache miss
         if: steps.typings-cache.outputs.cache-hit != 'true'
         run: pixi run -e dev pybind11-stubgen mujoco -o typings/
 
+      # ── Linting & type checking ────────────────────────────────────
       - name: Run Ruff Linter
         run: pixi run -e dev ruff check judo/ tests/ --output-format=github
 
