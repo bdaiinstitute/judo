@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v6
 
@@ -22,6 +23,11 @@ jobs:
         with:
           pixi-version: latest
           cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
 
       # ── mujoco_extensions build (needed for pyright) ────────────────
       - name: Restore mujoco_extensions build cache
@@ -32,7 +38,7 @@ jobs:
             mujoco_extensions/build
             mujoco_extensions/policy_rollout/*.so
             mujoco_extensions/jacobian_smoothing/*.so
-          key: mujoco-ext-${{ matrix.os }}-${{ hashFiles('mujoco_extensions/**/*.cpp', 'mujoco_extensions/**/*.h', 'mujoco_extensions/**/CMakeLists.txt') }}
+          key: mujoco-ext-${{ matrix.os }}-${{ hashFiles('pixi.lock', 'mujoco_extensions/**/*.cpp', 'mujoco_extensions/**/*.h', 'mujoco_extensions/**/CMakeLists.txt') }}
 
       - name: Build mujoco_extensions (cache miss)
         if: steps.ext-cache.outputs.cache-hit != 'true'
@@ -44,7 +50,7 @@ jobs:
         id: typings-cache
         with:
           path: typings
-          key: typings-${{ matrix.os }}-${{ hashFiles('pyproject.toml') }}
+          key: typings-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Generate stubs if cache miss
         if: steps.typings-cache.outputs.cache-hit != 'true'
