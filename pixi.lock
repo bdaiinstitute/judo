@@ -2515,7 +2515,7 @@ packages:
 - pypi: ./
   name: judo-rai
   version: 0.0.6
-  sha256: d8da648f33066a2b544d170b8550b438620a4055c0dfdc9732cb1724e12010c8
+  sha256: 72a6c99c0b2d43b404fc8ec6d7d99e0eedc85cfc4a6ad22fe3031c8101f742e6
   requires_dist:
   - dora-utils
   - mujoco

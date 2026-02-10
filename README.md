@@ -139,6 +139,20 @@ sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```
 
+# Updating Mesh Assets
+Mesh files (`.obj`, `.stl`, `.mtl`) are not stored in git. They are hosted as `meshes.zip` on the [latest GitHub release](https://github.com/bdaiinstitute/judo/releases) and downloaded automatically at runtime when missing.
+
+To update the meshes after modifying files in `judo/models/meshes/`:
+```bash
+# using pixi
+pixi run upload-meshes
+
+# or directly
+./scripts/upload_meshes.sh          # uploads to latest release
+./scripts/upload_meshes.sh 0.0.7    # uploads to a specific release tag
+```
+This requires the [GitHub CLI](https://cli.github.com) (`gh`) authenticated via `gh auth login`.
+
 # 🤝 Contributing
 We welcome contributions! See our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
 

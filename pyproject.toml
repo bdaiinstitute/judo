@@ -193,6 +193,7 @@ judo-rai = { path = ".", editable = true }
 configure-mujoco-ext = { cmd = "cmake -B mujoco_extensions/build -S mujoco_extensions", description = "Configure mujoco_extensions cmake build" }
 build-mujoco-ext = { cmd = "cmake --build mujoco_extensions/build -j8", depends-on = ["configure-mujoco-ext"], description = "Build mujoco_extensions pybind modules" }
 clean-mujoco-ext = { cmd = "rm -rf mujoco_extensions/build mujoco_extensions/policy_rollout/*.so", description = "Clean mujoco_extensions build artifacts" }
+upload-meshes = { cmd = "bash scripts/upload_meshes.sh", description = "Zip and upload meshes to latest GitHub release" }
 
 [tool.pixi.activation.env]
 LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"

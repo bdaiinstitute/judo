@@ -44,6 +44,10 @@ jobs:
         if: steps.ext-cache.outputs.cache-hit != 'true'
         run: pixi run -e dev build-mujoco-ext
 
+      # ── Download mesh assets (avoid xdist race) ────────────────────
+      - name: Download meshes from release
+        run: pixi run -e dev python -c "from judo.utils.assets import download_and_extract_meshes; from judo import MODEL_PATH; download_and_extract_meshes(str(MODEL_PATH))"
+
       # ── Pre-warm robot_descriptions cache (avoid xdist race) ───────
       - name: Cache mujoco_menagerie meshes
         run: pixi run -e dev python -c "from robot_descriptions import spot_mj_description"

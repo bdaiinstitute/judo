@@ -190,3 +190,5 @@ MUJOCO_LOG.TXT
 # assets
 *.obj
 *.stl
+*.mtl
+*.png
