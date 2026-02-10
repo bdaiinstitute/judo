@@ -1,7 +1,0 @@
-[core]
-    remote = dagshub
-['remote "dagshub"']
-    url = s3://dvc
-    endpointurl = https://dagshub.com/dta/judo-dvc.s3
-    access_key_id = b16a4e77e99235768e4676ab46c33167207db765
-    secret_access_key = b16a4e77e99235768e4676ab46c33167207db765

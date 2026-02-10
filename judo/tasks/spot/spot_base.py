@@ -7,6 +7,7 @@ but adapted for judo's standalone simulation framework.
 """
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Generic, TypeVar
 
 import mujoco
@@ -85,6 +86,20 @@ class SpotBase(Task[ConfigT], Generic[ConfigT]):
 
     name: str = "spot_base"
     config_t: type[SpotBaseConfig] = SpotBaseConfig  # type: ignore[assignment]
+
+    def _process_spec(self) -> None:
+        """Replace Spot mesh and texture paths with mujoco_menagerie assets."""
+        from robot_descriptions import spot_mj_description  # noqa: PLC0415
+
+        menagerie_dir = Path(spot_mj_description.PACKAGE_PATH)
+        menagerie_assets = menagerie_dir / "assets"
+        for mesh in self.spec.meshes:
+            if "spot/meshes/" in mesh.file:
+                basename = Path(mesh.file).name
+                mesh.file = str(menagerie_assets / basename)
+        for texture in self.spec.textures:
+            if "spot/textures/" in texture.file:
+                texture.file = str(menagerie_dir / "spot.png")
 
     @property
     def physics_substeps(self) -> int:  # type: ignore[override]

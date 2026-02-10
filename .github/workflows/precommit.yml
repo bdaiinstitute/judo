@@ -29,22 +29,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # ── mujoco_extensions build (needed for pyright) ────────────────
-      - name: Restore mujoco_extensions build cache
-        id: ext-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            mujoco_extensions/build
-            mujoco_extensions/policy_rollout/*.so
-            mujoco_extensions/jacobian_smoothing/*.so
-          key: mujoco-ext-${{ matrix.os }}-${{ hashFiles('pixi.lock', 'mujoco_extensions/**/*.cpp', 'mujoco_extensions/**/*.h', 'mujoco_extensions/**/CMakeLists.txt') }}
-
-      - name: Build mujoco_extensions (cache miss)
-        if: steps.ext-cache.outputs.cache-hit != 'true'
-        run: pixi run -e dev build-mujoco-ext
-
-      # ── Stubs cache ────────────────────────────────────────────────
       - name: Restore typings cache
         uses: actions/cache@v5
         id: typings-cache
@@ -56,7 +40,6 @@ jobs:
         if: steps.typings-cache.outputs.cache-hit != 'true'
         run: pixi run -e dev pybind11-stubgen mujoco -o typings/
 
-      # ── Linting & type checking ────────────────────────────────────
       - name: Run Ruff Linter
         run: pixi run -e dev ruff check judo/ tests/ --output-format=github
 

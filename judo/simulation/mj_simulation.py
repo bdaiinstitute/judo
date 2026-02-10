@@ -11,7 +11,7 @@ from omegaconf import DictConfig
 from judo.app.structs import MujocoState
 from judo.simulation.base import Simulation
 from judo.tasks.spot.spot_constants import DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME
-from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore[attr-defined]
+from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore
 
 
 class MJSimulation(Simulation):

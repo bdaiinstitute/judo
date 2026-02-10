@@ -29,10 +29,14 @@ class Task(ABC, Generic[ConfigT]):
             raise ValueError("Model path must be provided.")
         self.config = self.config_t()
         self.spec = MjSpec.from_file(str(model_path))
+        self._process_spec()
         self.model = self.spec.compile()
         self.data = MjData(self.model)
         self.model_path = model_path
         self.sim_model = self.model if sim_model_path is None else MjModel.from_xml_path(str(sim_model_path))
+
+    def _process_spec(self) -> None:
+        """Hook for subclasses to modify spec before compile. No-op by default."""
 
     @property
     def time(self) -> float:

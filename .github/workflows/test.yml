@@ -17,27 +17,18 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
         python-version: ['3.10', '3.11', '3.12', '3.13']
+
     steps:
       - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - uses: prefix-dev/setup-pixi@v0.9.3
         with:
           pixi-version: latest
           cache: true
-
-      # ── DVC data cache ──────────────────────────────────────────────
-      - name: Restore DVC data cache
-        id: dvc-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            judo/models/meshes
-            judo/models/policies
-          key: dvc-${{ hashFiles('judo/models/meshes.dvc', 'judo/models/policies.dvc') }}
-
-      - name: Pull DVC data (cache miss)
-        if: steps.dvc-cache.outputs.cache-hit != 'true'
-        run: pixi run pull-models
 
       # ── mujoco_extensions build cache ───────────────────────────────
       - name: Restore mujoco_extensions build cache
@@ -53,6 +44,10 @@ jobs:
       - name: Build mujoco_extensions (cache miss)
         if: steps.ext-cache.outputs.cache-hit != 'true'
         run: pixi run -e dev build-mujoco-ext
+
+      # ── Pre-warm robot_descriptions cache (avoid xdist race) ───────
+      - name: Cache mujoco_menagerie meshes
+        run: pixi run -e dev python -c "from robot_descriptions import spot_mj_description"
 
       # ── Tests ───────────────────────────────────────────────────────
       - name: Run tests

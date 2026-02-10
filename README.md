@@ -63,34 +63,6 @@ pre-commit install
 pybind11-stubgen mujoco -o typings/
 ```
 
-### Downloading Model Assets (Meshes & Policies)
-Some tasks (e.g., Spot robot) require mesh files and trained policies that are stored using [DVC](https://dvc.org/) with a [DagsHub](https://dagshub.com/) remote.
-
-To download these assets:
-
-1. **Create a DagsHub account** at https://dagshub.com/ (you can sign up with GitHub)
-
-2. **Get your DagsHub credentials**:
-   - Go to https://dagshub.com/user/settings/tokens
-   - Create a new token or use your existing credentials
-
-3. **Configure DVC authentication**:
-   ```bash
-   dvc remote modify dagshub --local access_key_id <your-dagshub-username>
-   dvc remote modify dagshub --local secret_access_key <your-dagshub-token>
-   ```
-
-4. **Pull the model assets**:
-   ```bash
-   # Using pixi
-   pixi run -e dev pull-models
-
-   # Or directly with dvc
-   dvc pull judo/models/meshes.dvc judo/models/policies.dvc
-   ```
-
-This will download the mesh files (~120MB) and policy files (~1MB) to `judo/models/`.
-
 ## 2. Run the `judo` app!
 To start the simulator, you can simply run:
 ```bash

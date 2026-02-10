@@ -36,6 +36,7 @@ dependencies = [
     "pycparser",
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
+    "robot_descriptions",  # for loading mujoco_menagerie Spot meshes
     "scipy",
     "viser>=1.0.0",
 ]
@@ -176,8 +177,6 @@ platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
 cmake = ">=3.15"
-dvc = ">=3.0"
-dvc-s3 = ">=3.0"
 eigen = ">=3.4"
 pybind11 = ">=2.11"
 onnxruntime-cpp = ">=1.16"
@@ -189,9 +188,6 @@ libgomp = ">=13"  # OpenMP runtime for Linux
 judo-rai = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-# Download model assets via DVC
-pull-models = { cmd = "dvc pull judo/models/meshes.dvc judo/models/policies.dvc", description = "Download meshes and policies via DVC" }
-
 # Build mujoco_extensions C++ module
 configure-mujoco-ext = { cmd = "cmake -B mujoco_extensions/build -S mujoco_extensions", description = "Configure mujoco_extensions cmake build" }
 build-mujoco-ext = { cmd = "cmake --build mujoco_extensions/build -j8", depends-on = ["configure-mujoco-ext"], description = "Build mujoco_extensions pybind modules" }
