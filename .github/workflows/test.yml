@@ -17,17 +17,23 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
         python-version: ['3.10', '3.11', '3.12', '3.13']
+        include:
+          - python-version: '3.10'
+            pixi-env: test-py310
+          - python-version: '3.11'
+            pixi-env: test-py311
+          - python-version: '3.12'
+            pixi-env: test-py312
+          - python-version: '3.13'
+            pixi-env: test-py313
 
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - uses: prefix-dev/setup-pixi@v0.9.3
         with:
           pixi-version: latest
+          environments: ${{ matrix.pixi-env }}
           cache: true
 
       # ── mujoco_extensions build cache ───────────────────────────────
@@ -38,20 +44,20 @@ jobs:
           path: |
             mujoco_extensions/build
             mujoco_extensions/policy_rollout/*.so
-          key: mujoco-ext-${{ matrix.os }}-${{ hashFiles('pixi.lock', 'mujoco_extensions/**/*.cpp', 'mujoco_extensions/**/*.h', 'mujoco_extensions/**/CMakeLists.txt') }}
+          key: mujoco-ext-${{ matrix.os }}-${{ matrix.pixi-env }}-${{ hashFiles('pixi.lock', 'mujoco_extensions/**/*.cpp', 'mujoco_extensions/**/*.h', 'mujoco_extensions/**/CMakeLists.txt') }}
 
       - name: Build mujoco_extensions (cache miss)
         if: steps.ext-cache.outputs.cache-hit != 'true'
-        run: pixi run -e dev build-mujoco-ext
+        run: pixi run -e ${{ matrix.pixi-env }} build-mujoco-ext
 
       # ── Download mesh assets (avoid xdist race) ────────────────────
       - name: Download meshes from release
-        run: pixi run -e dev python -c "from judo.utils.assets import download_and_extract_meshes; from judo import MODEL_PATH; download_and_extract_meshes(str(MODEL_PATH))"
+        run: pixi run -e ${{ matrix.pixi-env }} python -c "from judo.utils.assets import download_and_extract_meshes; from judo import MODEL_PATH; download_and_extract_meshes(str(MODEL_PATH))"
 
       # ── Pre-warm robot_descriptions cache (avoid xdist race) ───────
       - name: Cache mujoco_menagerie meshes
-        run: pixi run -e dev python -c "from robot_descriptions import spot_mj_description"
+        run: pixi run -e ${{ matrix.pixi-env }} python -c "from robot_descriptions import spot_mj_description"
 
       # ── Tests ───────────────────────────────────────────────────────
       - name: Run tests
-        run: pixi run -e dev pytest -rsx
+        run: pixi run -e ${{ matrix.pixi-env }} pytest -rsx

@@ -198,7 +198,20 @@ upload-meshes = { cmd = "bash scripts/upload_meshes.sh", description = "Zip and 
 [tool.pixi.activation.env]
 LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+
 [tool.pixi.environments]
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 dev = { features = ["dev", "docs"], solve-group = "default" }
+test-py310 = { features = ["dev", "py310"], solve-group = "py310" }
+test-py311 = { features = ["dev", "py311"], solve-group = "py311" }
+test-py312 = { features = ["dev", "py312"], solve-group = "py312" }
+test-py313 = { features = ["dev", "py313"], solve-group = "py313" }
