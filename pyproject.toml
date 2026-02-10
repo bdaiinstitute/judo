@@ -53,6 +53,7 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["judo"]
+exclude = ["judo/models/meshes"]
 
 [project.optional-dependencies]
 docs = [

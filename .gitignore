@@ -187,3 +187,6 @@ outputs/
 # mujoco
 MUJOCO_LOG.TXT
 
+# assets
+*.obj
+*.stl
