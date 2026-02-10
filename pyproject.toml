@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "judo-rai"
 description = "Judo: a hackable sampling-based MPC toolbox"
-version = "0.0.6"
+version = "0.0.7"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
@@ -52,8 +52,19 @@ benchmark = "judo.cli:benchmark"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["judo"]
-exclude = ["judo/models/meshes"]
+packages = ["judo", "mujoco_extensions"]
+artifacts = ["mujoco_extensions/**/*.so"]
+exclude = [
+    "judo/models/meshes",
+    "mujoco_extensions/build",
+    "mujoco_extensions/system",
+    "mujoco_extensions/onnx_interface",
+    "mujoco_extensions/example",
+    "mujoco_extensions/test",
+    "mujoco_extensions/CMakeLists.txt",
+    "mujoco_extensions/policy_rollout/pybind",
+    "mujoco_extensions/policy_rollout/test",
+]
 
 [project.optional-dependencies]
 docs = [
@@ -65,6 +76,7 @@ docs = [
     "sphinxcontrib-programoutput-rai",
 ]
 dev = [
+    "build",
     "judo-rai[docs]",
     "pre-commit",
     "pybind11-stubgen",
@@ -73,6 +85,8 @@ dev = [
     "pytest-cov",
     "pytest-xdist",
     "ruff",
+    "twine",
+    "wheel",
 ]
 
 [tool.coverage.run]
