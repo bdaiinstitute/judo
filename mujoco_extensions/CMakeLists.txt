@@ -123,26 +123,3 @@ set_target_properties(policy_rollout_pybind PROPERTIES
   BUILD_RPATH_USE_ORIGIN TRUE
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/policy_rollout"
 )
-
-# --- Jacobian Smoothing pybind module ---
-pybind11_add_module(jacobian_smoothing_pybind
-  jacobian_smoothing/pybind/pybind.cpp
-  jacobian_smoothing/pybind/jacobian_smoothing.cpp
-)
-target_compile_options(jacobian_smoothing_pybind PRIVATE
-  -fopenmp
-  -march=native
-)
-target_link_libraries(jacobian_smoothing_pybind PRIVATE
-  Eigen3::Eigen
-  OpenMP::OpenMP_CXX
-  ${MUJOCO_LIB}
-)
-set_target_properties(jacobian_smoothing_pybind PROPERTIES
-  CXX_STANDARD 20
-  CXX_STANDARD_REQUIRED ON
-  BUILD_RPATH "$ORIGIN/../mujoco"
-  INSTALL_RPATH "$ORIGIN/../mujoco"
-  BUILD_RPATH_USE_ORIGIN TRUE
-  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/jacobian_smoothing"
-)
