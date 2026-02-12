@@ -13,6 +13,9 @@ from judo.tasks.base import Task
 class Simulation(ABC):
     """Base class for a simulation object.
 
+    This class contains the data required to run a simulation. This includes configurations and task information.
+    It can be inherited from to implement specific simulation backends.
+
     Middleware nodes should instantiate this class and implement methods to send, process, and receive data.
     """
 

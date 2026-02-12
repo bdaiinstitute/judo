@@ -65,22 +65,17 @@ jobs:
       - name: Build wheel
         run: pixi run -e ${{ matrix.pixi-env }} python -m build --wheel --outdir dist
 
-      - name: Tag wheel as platform-specific
-        run: |
-          pixi run -e ${{ matrix.pixi-env }} wheel tags \
-            --python-tag ${{ matrix.python-tag }} \
-            --abi-tag ${{ matrix.python-tag }} \
-            --platform-tag manylinux_2_35_x86_64 \
-            --remove dist/*.whl
+      - name: Repair wheel with auditwheel
+        run: pixi run -e ${{ matrix.pixi-env }} bash scripts/repair_wheel.sh dist wheelhouse manylinux_2_35_x86_64
 
       - name: Verify package
-        run: pixi run -e ${{ matrix.pixi-env }} twine check dist/*.whl
+        run: pixi run -e ${{ matrix.pixi-env }} twine check wheelhouse/*.whl
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v6
         with:
           name: wheel-${{ matrix.python-version }}
-          path: dist/*.whl
+          path: wheelhouse/*.whl
           retention-days: 7
 
   publish:

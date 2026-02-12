@@ -104,7 +104,6 @@ VectorT Policy::policyInference(VectorT* input_vector) {
 std::shared_ptr<Ort::Session> allocateOrtSession(const std::string& policy_filepath) {
   Ort::Env env;
   Ort::SessionOptions session_options;
-  // TODO(@bhung) explain why you need to restrict threads
   session_options.SetIntraOpNumThreads(1);
   return std::make_shared<Ort::Session>(env, policy_filepath.c_str(), session_options);
 }

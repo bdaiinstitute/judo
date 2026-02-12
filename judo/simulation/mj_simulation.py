@@ -127,63 +127,6 @@ class MJSimulation(Simulation):
         # Update last policy output for continuity
         self._last_policy_output = np.array(policy_outputs[0])
 
-    def rollout_trajectory(
-        self,
-        commands: np.ndarray,
-        initial_state: np.ndarray | None = None,
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Roll out a trajectory of commands.
-
-        Args:
-            commands: Array of commands, shape (T, 25) or (T, task.nu) for Spot tasks.
-            initial_state: Optional initial state (nq+nv). Uses current state if None.
-
-        Returns:
-            Tuple of (states, sensors, policy_outputs) from the rollout.
-        """
-        if self._systems is None:
-            raise RuntimeError("C++ systems not initialized. Task must have locomotion_policy_path.")
-
-        # Convert task controls to simulation format
-        commands = self.task.task_to_sim_ctrl(commands)
-
-        # Get initial state
-        if initial_state is None:
-            initial_state = np.concatenate([self.task.data.qpos, self.task.data.qvel])
-
-        # Ensure commands is 2D (T, 25)
-        commands = np.asarray(commands, dtype=np.float64)
-        if commands.ndim == 1:
-            commands = commands.reshape(1, -1)
-
-        # Reshape for threaded rollout:
-        # states: (num_threads, nq+nv)
-        # commands_batch: (num_threads, T, 25)
-        # last_outputs: (num_threads, 12)
-        states = np.array([initial_state], dtype=np.float64)  # (1, nq+nv)
-        commands_batch = np.array([commands], dtype=np.float64)  # (1, T, 25)
-        last_outputs = np.array([self._last_policy_output], dtype=np.float64)  # (1, 12)
-
-        # Run rollout
-        out_states, out_sensors, policy_outputs = threaded_rollout(
-            self._systems,
-            states,
-            commands_batch,
-            last_outputs,
-            1,  # num_threads
-            self.task.physics_substeps,
-            DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME,
-        )
-
-        # Update last policy output
-        self._last_policy_output = np.array(policy_outputs[0])
-
-        return (
-            np.array(out_states[0]),
-            np.array(out_sensors[0]),
-            np.array(policy_outputs[0]),
-        )
-
     def reset_policy_state(self) -> None:
         """Reset the internal policy state to zeros."""
         self._last_policy_output = np.zeros(12)

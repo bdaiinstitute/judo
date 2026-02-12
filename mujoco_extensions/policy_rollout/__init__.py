@@ -7,7 +7,6 @@ from mujoco_extensions.policy_rollout.policy_rollout_pybind.policy_rollout impor
     set_state,
     threaded_physics_rollout,
     threaded_rollout,
-    threaded_rollout_feedback_world_frame,
 )
 
 __all__ = [
@@ -17,5 +16,4 @@ __all__ = [
     "set_state",
     "threaded_physics_rollout",
     "threaded_rollout",
-    "threaded_rollout_feedback_world_frame",
 ]

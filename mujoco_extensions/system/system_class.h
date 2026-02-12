@@ -131,41 +131,6 @@ class System {
   std::tuple<MatrixT, MatrixT> rollout(const VectorT& state, const MatrixT& command, const int physics_substeps = 2,
                                        const bool reset_last_output = true, const double cutoff_time = kInfiniteTime);
 
-  /** @brief Rolls out a simulation of a system, given a state and command defined in the world frame
-   *
-   * @param state a vector containing the initial state
-   * @param command a vector containing the command in the world frame as input to the system
-   * @param physics_substeps how many substeps to take along the rollout
-   * @param reset_last_output whether or not to store the last output value
-   * @param cutoff_time the time at which we chose to stop running mujoco steps
-   *
-   * @returns A vector of {states, sensors, reward}
-   */
-  std::tuple<MatrixT, MatrixT> rollout_world_frame(const VectorT& state, const MatrixT& command,
-                                                   const int physics_substeps);
-
-  /** @brief Rolls out a simulation of a system, given a state and command defined in the world frame
-   *
-   * @param state a vector containing the initial state
-   * @param command a vector containing the command in the world frame as input to the system
-   * @param posref a matrix containing the position reference for each physic_substep along the rollout
-   * @param p_gains a vector of proportional gains, applied to the control error
-   * @param physics_substeps how many substeps to take along the rollout
-   *
-   * @returns A vector of {states, sensors, commands_in_world_frame}
-   */
-  std::tuple<MatrixT, MatrixT, MatrixT> rollout_world_frame_feedback(const VectorT& state, const MatrixT& command,
-                                                                     const MatrixT& posref, const VectorT& p_gains,
-                                                                     const int physics_substeps);
-
-  /** @brief Converts the state vector to a pose representation in SE(2)
-   *
-   * @param state a vector containing the initial state
-   *
-   * @returns A vector containing the (x, y, theta) SE(2) pose
-   */
-  VectorT stateToXYTheta(const VectorT& state);
-
  private:
   VectorT policy_input_;
 
@@ -205,21 +170,4 @@ std::tuple<MatrixTList, MatrixTList, VectorTList> threadedRollout(const std::vec
                                                                   const VectorTList& last_policy_output,
                                                                   const int num_threads, const int physics_substeps,
                                                                   const double cutoff_time = kInfiniteTime);
-
-/** @brief Rolls out a simulation of a system, given a state and command defined in the world frame
- *
- * @param systems a vector of shared pointers to different systems
- * @param states the initial starting state of each system
- * @param command a vector containing a command input for each system
- * @param last_policy_output a vector of the outputs from the policy  rollout
- * @param num_threads the number of threads we allocate for the rollout
- * @param physics_substeps how many substeps to take along the rollout
- * @param cutoff_time the amount of time to wait until cutting off the rollouts
- *
- * @returns A vector of {states, sensors, commands_in_world_frame}
- */
-std::tuple<MatrixTList, MatrixTList, MatrixTList, VectorTList> threadedRolloutFeedbackWorldFrame(
-    const std::vector<std::shared_ptr<System>>& systems, const VectorTList& states, const MatrixTList& command,
-    const MatrixTList& posref, const VectorT& p_gains, const VectorTList& last_policy_output,
-    const int physics_substeps, const int num_threads);
 }  // namespace SystemClass

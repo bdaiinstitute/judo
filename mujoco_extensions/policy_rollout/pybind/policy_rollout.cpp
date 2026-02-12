@@ -151,19 +151,12 @@ void bindPolicyRollout(const std::reference_wrapper<py::module>& root) {
       .def("get_control", &SystemClass::System::getControl)
       .def("get_state", &SystemClass::System::getState)
       .def("rollout", &SystemClass::System::rollout, "state"_a, "command"_a, "physics_substeps"_a = 2,
-           "reset_last_output"_a = true, "cutoff_time"_a = SystemClass::kInfiniteTime)  // Match C++
-      .def("rollout_world_frame", &SystemClass::System::rollout_world_frame)
-      .def("rollout_world_frame_feedback", &SystemClass::System::rollout_world_frame_feedback);
+           "reset_last_output"_a = true, "cutoff_time"_a = SystemClass::kInfiniteTime);  // Match C++
 
   python_module.def("threaded_rollout", &SystemClass::threadedRollout,
                     "Threaded policy rollout with shared pointers to System objects.", "systems"_a, "states"_a,
                     "command"_a, "last_policy_output"_a, "num_threads"_a, "physics_substeps"_a,
                     "cutoff_time"_a = SystemClass::kInfiniteTime);
-
-  python_module.def("threaded_rollout_feedback_world_frame", &SystemClass::threadedRolloutFeedbackWorldFrame,
-                    "Threaded policy rollout with proportional gain on control error in world frame.", "systems"_a,
-                    "states"_a, "command"_a, "posref"_a, "p_gains"_a, "last_policy_output"_a, "physics_substeps"_a,
-                    "num_threads"_a);
 
   python_module.def(
       "create_systems_vector",
