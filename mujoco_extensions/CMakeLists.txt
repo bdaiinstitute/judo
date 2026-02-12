@@ -23,6 +23,10 @@ find_package(OpenMP REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 # Find Python FIRST (before pybind11) to avoid deprecated FindPythonInterp
+# Use CONDA_PREFIX to avoid picking up venv/system Python headers
+if(DEFINED ENV{CONDA_PREFIX})
+  set(Python_ROOT_DIR $ENV{CONDA_PREFIX})
+endif()
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 
 # Tell pybind11 to use modern FindPython
