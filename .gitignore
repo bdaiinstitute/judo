@@ -196,3 +196,6 @@ wheelhouse/
 *.stl
 *.mtl
 *.png
+
+# byproduct
+meshes.zip

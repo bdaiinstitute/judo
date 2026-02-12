@@ -19,13 +19,13 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13']
         include:
           - python-version: '3.10'
-            pixi-env: test-py310
+            pixi-env: py310
           - python-version: '3.11'
-            pixi-env: test-py311
+            pixi-env: py311
           - python-version: '3.12'
-            pixi-env: test-py312
+            pixi-env: py312
           - python-version: '3.13'
-            pixi-env: test-py313
+            pixi-env: py313
 
     steps:
       - uses: actions/checkout@v6

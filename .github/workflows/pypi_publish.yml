@@ -38,16 +38,16 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13']
         include:
           - python-version: '3.10'
-            pixi-env: test-py310
+            pixi-env: py310
             python-tag: cp310
           - python-version: '3.11'
-            pixi-env: test-py311
+            pixi-env: py311
             python-tag: cp311
           - python-version: '3.12'
-            pixi-env: test-py312
+            pixi-env: py312
             python-tag: cp312
           - python-version: '3.13'
-            pixi-env: test-py313
+            pixi-env: py313
             python-tag: cp313
 
     steps:
@@ -65,8 +65,8 @@ jobs:
       - name: Build wheel
         run: pixi run -e ${{ matrix.pixi-env }} python -m build --wheel --outdir dist
 
-      - name: Repair wheel with auditwheel
-        run: pixi run -e ${{ matrix.pixi-env }} bash scripts/repair_wheel.sh dist wheelhouse manylinux_2_35_x86_64
+      - name: Repair wheel
+        run: pixi run -e ${{ matrix.pixi-env }} bash scripts/repair_wheel.sh dist/*.whl wheelhouse "" ${{ matrix.python-tag }}
 
       - name: Verify package
         run: pixi run -e ${{ matrix.pixi-env }} twine check wheelhouse/*.whl
@@ -78,8 +78,66 @@ jobs:
           path: wheelhouse/*.whl
           retention-days: 7
 
-  publish:
+  test-wheel:
     needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download wheel
+        uses: actions/download-artifact@v7
+        with:
+          name: wheel-${{ matrix.python-version }}
+          path: wheelhouse
+
+      - name: Install wheel in clean venv
+        run: |
+          python -m venv /tmp/test-venv
+          source /tmp/test-venv/bin/activate
+          pip install wheelhouse/*.whl
+          pip install pytest
+
+      - name: Smoke test — imports and C++ extension
+        run: |
+          source /tmp/test-venv/bin/activate
+          python -c "
+          from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout
+          print('mujoco_extensions OK')
+          from judo.tasks.spot.spot_base import SpotBase, XML_PATH
+          from judo.tasks.spot.spot_constants import SPOT_LOCOMOTION_POLICY_PATH
+          import numpy as np
+
+          task = SpotBase(model_path=XML_PATH)
+          systems = create_systems_vector(task.model, str(SPOT_LOCOMOTION_POLICY_PATH), 1)
+          print(f'create_systems_vector OK: {len(systems)} systems')
+
+          state = np.concatenate([task.data.qpos, task.data.qvel])
+          command = np.zeros((1, 25))
+          command[0, 24] = 0.52
+          out_states, out_sensors, policy_outputs = threaded_rollout(
+              systems, [state], [command], [np.zeros(12)], 1, 2, 1.0
+          )
+          print(f'threaded_rollout OK: output shape={np.array(out_states[0]).shape}')
+          "
+
+      - name: Run Spot tests
+        run: |
+          source /tmp/test-venv/bin/activate
+          pytest tests/test_simulation/test_simulation.py::test_spot_simulation_init \
+                 tests/test_simulation/test_simulation.py::test_spot_simulation_step \
+                 tests/test_tasks/test_spot.py -v
+
+  publish:
+    needs: [build, test-wheel]
     runs-on: ubuntu-latest
     permissions:
       contents: read

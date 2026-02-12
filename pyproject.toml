@@ -53,7 +53,7 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["judo", "mujoco_extensions"]
-artifacts = ["mujoco_extensions/**/*.so"]
+artifacts = ["mujoco_extensions/**/policy_rollout_pybind*.so", "judo/app/asset/*"]
 exclude = [
     "judo/models/meshes",
     "mujoco_extensions/build",
@@ -76,6 +76,7 @@ docs = [
     "sphinxcontrib-programoutput-rai",
 ]
 dev = [
+    "auditwheel",
     "build",
     "judo-rai[docs]",
     "pre-commit",
@@ -191,13 +192,17 @@ channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
+python = ">=3.10,<3.14"  # mujoco has no 3.14 wheel yet
 cmake = ">=3.15"
 eigen = ">=3.4"
 pybind11 = ">=2.11"
-onnxruntime-cpp = ">=1.16"
+onnxruntime-cpp = "1.19.*"  # pin to match starfish (1.22+ needs CXXABI_1.3.15 / GCC 14)
 
 [tool.pixi.target.linux-64.dependencies]
 libgomp = ">=13"  # OpenMP runtime for Linux
+patchelf = ">=0.17"  # needed by auditwheel for wheel repair
+gcc_linux-64 = "13.*"  # pin GCC 13: GCC 15 emits GLIBCXX_3.4.32 → manylinux_2_39
+gxx_linux-64 = "13.*"
 
 [tool.pixi.pypi-dependencies]
 judo-rai = { path = ".", editable = true }
@@ -208,6 +213,7 @@ configure-mujoco-ext = { cmd = "cmake -B mujoco_extensions/build -S mujoco_exten
 build-mujoco-ext = { cmd = "cmake --build mujoco_extensions/build -j8", depends-on = ["configure-mujoco-ext"], description = "Build mujoco_extensions pybind modules" }
 clean-mujoco-ext = { cmd = "rm -rf mujoco_extensions/build mujoco_extensions/policy_rollout/*.so", description = "Clean mujoco_extensions build artifacts" }
 upload-meshes = { cmd = "bash scripts/upload_meshes.sh", description = "Zip and upload meshes to latest GitHub release" }
+build-wheel = { cmd = "rm -rf dist && python -m build --wheel --outdir dist && bash scripts/repair_wheel.sh dist/*.whl wheelhouse \"\" $(python -c \"import sys; print(f'cp{sys.version_info[0]}{sys.version_info[1]}')\")", depends-on = ["clean-mujoco-ext", "build-mujoco-ext"], description = "Build manylinux wheel with auditwheel" }
 
 [tool.pixi.activation.env]
 LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
@@ -225,7 +231,7 @@ python = "3.13.*"
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 dev = { features = ["dev", "docs"], solve-group = "default" }
-test-py310 = { features = ["dev", "py310"], solve-group = "py310" }
-test-py311 = { features = ["dev", "py311"], solve-group = "py311" }
-test-py312 = { features = ["dev", "py312"], solve-group = "py312" }
-test-py313 = { features = ["dev", "py313"], solve-group = "py313" }
+py310 = { features = ["dev", "py310"], solve-group = "py310" }
+py311 = { features = ["dev", "py311"], solve-group = "py311" }
+py312 = { features = ["dev", "py312"], solve-group = "py312" }
+py313 = { features = ["dev", "py313"], solve-group = "py313" }
