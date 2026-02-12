@@ -78,8 +78,60 @@ jobs:
           path: wheelhouse/*.whl
           retention-days: 7
 
-  test-wheel:
+  publish-testpypi:
     needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      dev_version: ${{ steps.reversion.outputs.dev_version }}
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download all wheel artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: wheel-*
+          path: dist
+          merge-multiple: true
+
+      - name: Add dev suffix to wheels for TestPyPI
+        id: reversion
+        run: |
+          pip install wheel
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          DEV_VERSION="${VERSION}.dev${GITHUB_RUN_NUMBER}"
+          echo "dev_version=${DEV_VERSION}" >> $GITHUB_OUTPUT
+          echo "Clean version: ${VERSION} -> TestPyPI version: ${DEV_VERSION}"
+
+          mkdir dist-dev
+          for whl in dist/*.whl; do
+            wheel unpack "$whl" -d /tmp/unpacked
+            dir="/tmp/unpacked/judo_rai-${VERSION}"
+            sed -i "s/^Version: .*/Version: ${DEV_VERSION}/" \
+              "$dir/judo_rai-${VERSION}.dist-info/METADATA"
+            mv "$dir/judo_rai-${VERSION}.dist-info" \
+               "$dir/judo_rai-${DEV_VERSION}.dist-info"
+            wheel pack "$dir" -d dist-dev/
+            rm -rf "$dir"
+          done
+          echo "Dev wheels:"
+          ls -la dist-dev/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist-dev/
+
+  test-testpypi:
+    needs: publish-testpypi
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -93,17 +145,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Download wheel
-        uses: actions/download-artifact@v7
-        with:
-          name: wheel-${{ matrix.python-version }}
-          path: wheelhouse
-
-      - name: Install wheel in clean venv
+      - name: Install from TestPyPI
         run: |
           python -m venv /tmp/test-venv
           source /tmp/test-venv/bin/activate
-          pip install wheelhouse/*.whl
+          pip install --index-url https://test.pypi.org/simple/ \
+                      --extra-index-url https://pypi.org/simple/ \
+                      judo-rai==${{ needs.publish-testpypi.outputs.dev_version }}
           pip install pytest
 
       - name: Smoke test — imports and C++ extension
@@ -137,7 +185,7 @@ jobs:
                  tests/test_tasks/test_spot.py -v
 
   publish:
-    needs: [build, test-wheel]
+    needs: [build, test-testpypi]
     runs-on: ubuntu-latest
     permissions:
       contents: read
