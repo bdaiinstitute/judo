@@ -9,6 +9,9 @@ import mujoco
 import numpy as np
 from mujoco import MjData, MjModel, MjSpec
 
+from judo import MODEL_PATH
+from judo.utils.assets import download_and_extract_meshes
+
 
 @dataclass
 class TaskConfig:
@@ -27,6 +30,7 @@ class Task(ABC, Generic[ConfigT]):
         """Initialize the Mujoco task."""
         if not model_path:
             raise ValueError("Model path must be provided.")
+        download_and_extract_meshes(extract_root=str(MODEL_PATH), repo="bdaiinstitute/judo", asset_name="meshes.zip")
         self.config = self.config_t()
         self.spec = MjSpec.from_file(str(model_path))
         self._process_spec()
