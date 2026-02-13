@@ -52,7 +52,7 @@ _sigint_count = 0
 class _TrackingPopen(_OriginalPopen):  # type: ignore[misc]
     """Popen wrapper that records process group IDs of new-session children."""
 
-    def __init__(self, *args, **kwargs):  # noqa: ANN002, ANN003
+    def __init__(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
         super().__init__(*args, **kwargs)
         if kwargs.get("start_new_session"):
             _spawned_pgids.append(self.pid)
@@ -85,7 +85,7 @@ def _force_cleanup() -> None:
 
 def _sigint_handler(signum: int, frame: object) -> None:
     """Handle Ctrl+C: graceful on first press, force-kill on second."""
-    global _sigint_count
+    global _sigint_count  # noqa: PLW0603
     _sigint_count += 1
     if _sigint_count >= 2:
         # Second Ctrl+C: uninterruptible force cleanup, then exit immediately.
@@ -130,13 +130,13 @@ def _warm_caches() -> None:
     cross-process locking, so we must do it here in the single parent
     process to avoid races between Dora nodes.
     """
-    from judo import MODEL_PATH
-    from judo.utils.assets import download_and_extract_meshes
+    from judo import MODEL_PATH  # noqa: PLC0415
+    from judo.utils.assets import download_and_extract_meshes  # noqa: PLC0415
 
     download_and_extract_meshes(extract_root=str(MODEL_PATH), repo="bdaiinstitute/judo", asset_name="meshes.zip")
 
     try:
-        from robot_descriptions import spot_mj_description  # noqa: F401
+        from robot_descriptions import spot_mj_description  # noqa: F401, PLC0415
     except Exception:
         pass  # non-Spot tasks don't need this
 
