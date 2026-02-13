@@ -39,32 +39,35 @@ class SimulationNode(DoraNode):
 
     def spin(self) -> None:
         """Spin logic for the simulation node."""
-        while True:
-            start_time = time.time()
-            self.parse_messages()
+        try:
+            while True:
+                start_time = time.time()
+                self.parse_messages()
 
-            if self.control_spline is not None:
-                command = self.control_spline(self.sim.task.data.time)
-                if command.shape[-1] == self.sim.task.nu:
-                    self.sim.step(command)
+                if self.control_spline is not None:
+                    command = self.control_spline(self.sim.task.data.time)
+                    if command.shape[-1] == self.sim.task.nu:
+                        self.sim.step(command)
+                    else:
+                        warnings.warn(
+                            f"Control command has wrong number of dimensions! Expected {self.sim.task.nu}, got {command.shape[-1]}",
+                            stacklevel=2,
+                        )
+
+                self.write_states()
+
+                # Force simulation node to run at fixed rate specified by simulation timestep (specified in the model).
+                dt_des = self.sim.timestep
+                dt_elapsed = time.time() - start_time
+                if dt_elapsed < dt_des:
+                    time.sleep(dt_des - dt_elapsed)
                 else:
                     warnings.warn(
-                        f"Control command has wrong number of dimensions! Expected {self.sim.task.nu}, got {command.shape[-1]}",
+                        f"Sim step {dt_elapsed:.3f} longer than desired step {dt_des:.3f}!",
                         stacklevel=2,
                     )
-
-            self.write_states()
-
-            # Force simulation node to run at fixed rate specified by simulation timestep (specified in the model).
-            dt_des = self.sim.timestep
-            dt_elapsed = time.time() - start_time
-            if dt_elapsed < dt_des:
-                time.sleep(dt_des - dt_elapsed)
-            else:
-                warnings.warn(
-                    f"Sim step {dt_elapsed:.3f} longer than desired step {dt_des:.3f}!",
-                    stacklevel=2,
-                )
+        except KeyboardInterrupt:
+            pass
 
     def write_states(self) -> None:
         """Reads data from simulation and writes to output topic."""

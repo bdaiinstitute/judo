@@ -144,11 +144,14 @@ class ControllerNode(DoraNode):
 
     def spin(self) -> None:
         """Spin logic for the controller node."""
-        while True:
-            start_time = time.time()
-            self.parse_messages()
-            self.step()
+        try:
+            while True:
+                start_time = time.time()
+                self.parse_messages()
+                self.step()
 
-            # Force controller to run at fixed rate specified by control_freq.
-            sleep_dt = 1 / self.controller.controller_cfg.control_freq - (time.time() - start_time)
-            time.sleep(max(0, sleep_dt))
+                # Force controller to run at fixed rate specified by control_freq.
+                sleep_dt = 1 / self.controller.controller_cfg.control_freq - (time.time() - start_time)
+                time.sleep(max(0, sleep_dt))
+        except KeyboardInterrupt:
+            pass
