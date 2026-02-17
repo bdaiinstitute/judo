@@ -2,9 +2,11 @@
 
 from judo.simulation.base import Simulation
 from judo.simulation.mj_simulation import MJSimulation
+from judo.simulation.policy_mj_simulation import PolicyMJSimulation
 
 simulation_registry = {
     "mujoco": MJSimulation,
+    "mujoco_policy": PolicyMJSimulation,
 }
 
 
@@ -16,4 +18,5 @@ def get_simulation_backend(simulation_backend: str) -> type:
 __all__ = [
     "Simulation",
     "MJSimulation",
+    "PolicyMJSimulation",
 ]

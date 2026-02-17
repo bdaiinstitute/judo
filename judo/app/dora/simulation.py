@@ -25,16 +25,28 @@ class SimulationNode(DoraNode):
     ) -> None:
         """Initialize the simulation node."""
         super().__init__(node_id=node_id, max_workers=max_workers)
-        _sim_backend = get_simulation_backend(simulation_backend)
-        self.sim = _sim_backend(init_task=init_task, task_registration_cfg=task_registration_cfg)
+        self._simulation_backend = simulation_backend
+        self._task_registration_cfg = task_registration_cfg
+        self._init_sim(init_task)
         self.control_spline: Callable | None = None
         self.write_states()
+
+    def _init_sim(self, task_name: str) -> None:
+        """Initialize simulation, auto-upgrading to policy backend if needed."""
+        backend = self._simulation_backend
+        _sim_backend = get_simulation_backend(backend)
+        self.sim = _sim_backend(init_task=task_name, task_registration_cfg=self._task_registration_cfg)
+
+        # Auto-upgrade to policy backend if task requires locomotion policy
+        if backend == "mujoco" and self.sim.task.uses_locomotion_policy:
+            _sim_backend = get_simulation_backend("mujoco_policy")
+            self.sim = _sim_backend(init_task=task_name, task_registration_cfg=self._task_registration_cfg)
 
     @on_event("INPUT", "task")
     def update_task(self, event: dict) -> None:
         """Event handler for processing task updates."""
         new_task = event["value"].to_numpy(zero_copy_only=False)[0]
-        self.sim.set_task(new_task)
+        self._init_sim(new_task)
         self.control_spline = None  # Clear stale spline
 
     def spin(self) -> None:

@@ -15,7 +15,7 @@ from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
 from judo.tasks import Task, TaskConfig, get_registered_tasks
 from judo.tasks.spot.spot_constants import POLICY_OUTPUT_DIM
-from judo.utils.mujoco import RolloutBackend
+from judo.utils.mj_rollout_backend import MJRolloutBackend
 from judo.utils.normalization import (
     IdentityNormalizer,
     Normalizer,
@@ -23,6 +23,8 @@ from judo.utils.normalization import (
     make_normalizer,
     normalizer_registry,
 )
+from judo.utils.policy_mj_rollout_backend import PolicyMJRolloutBackend
+from judo.utils.rollout_backend import RolloutBackend
 from judo.visualizers.utils import get_trace_sensors
 
 
@@ -67,13 +69,19 @@ class Controller:
 
         self.model = self.task.model
 
-        # Initialize rollout backend (uses policy if task provides one)
-        self.rollout_backend = RolloutBackend(
-            model=self.model,
-            num_threads=self.optimizer_cfg.num_rollouts,
-            policy_path=self.task.locomotion_policy_path,
-            physics_substeps=self.task.physics_substeps,
-        )
+        # Initialize rollout backend (auto-select policy backend if task requires it)
+        if self.task.uses_locomotion_policy:
+            self.rollout_backend: RolloutBackend = PolicyMJRolloutBackend(
+                model=self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+                policy_path=self.task.locomotion_policy_path,
+                physics_substeps=self.task.physics_substeps,
+            )
+        else:
+            self.rollout_backend = MJRolloutBackend(
+                model=self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+            )
         self._last_policy_output = (
             np.zeros((self.optimizer_cfg.num_rollouts, POLICY_OUTPUT_DIM)) if self.task.uses_locomotion_policy else None
         )
