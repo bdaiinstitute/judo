@@ -14,7 +14,7 @@ class CrossEntropyMethodConfig(OptimizerConfig):
 
     sigma_min: float = 0.1
     sigma_max: float = 1.0
-    num_elites: int = 3
+    num_elites: int = 2
 
 
 class CrossEntropyMethod(Optimizer[CrossEntropyMethodConfig]):

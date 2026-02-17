@@ -17,6 +17,9 @@ SPOT_LOCOMOTION_POLICY_PATH = MODEL_PATH / "policies" / "spot_locomotion.onnx"
 # Default rollout cutoff time (125ms for 8Hz MPC)
 DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME: float = 0.125
 
+# Number of locomotion policy outputs (leg actions)
+POLICY_OUTPUT_DIM = 12
+
 # Number of legs
 N_LEGS = 4
 

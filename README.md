@@ -36,24 +36,13 @@ pip install judo-rai  # if you want dev dependencies, use judo-rai[dev]
 ```
 
 ### Developers
-#### Conda
-For developers, run the following commands from this folder after cloning:
-```bash
-conda create -n judo python=3.13
-conda activate judo
-pip install -e .[dev]  # includes docs dependencies
-pre-commit install
-pybind11-stubgen mujoco -o typings/  # stops type checkers from complaining
-```
-
-#### Pixi
-You can also use [`pixi`](https://pixi.sh/dev/) instead of `conda`, which has the added benefit of having an associated lock file that ensures complete reproducibility.
+We use [`pixi`](https://pixi.sh/) for development, which provides a reproducible environment via a lock file.
 
 To install `pixi`, run the following:
 ```bash
 curl -fsSL https://pixi.sh/install.sh | sh
 ```
-To create our environment (and activate it each time later), run the following in the repo root:
+To create the environment (and activate it each time later), run the following in the repo root:
 ```bash
 # every time you want to activate
 pixi shell -e dev
@@ -63,10 +52,25 @@ pre-commit install
 pybind11-stubgen mujoco -o typings/
 ```
 
+#### Building `mujoco_extensions` (required for Spot tasks)
+Spot locomotion tasks use a C++ pybind11 module for threaded policy rollout with ONNX inference. From within the pixi shell:
+```bash
+pixi run build-mujoco-ext
+```
+To clean and rebuild from scratch:
+```bash
+pixi run clean-mujoco-ext
+pixi run build-mujoco-ext
+```
+
 ## 2. Run the `judo` app!
-To start the simulator, you can simply run:
+To start the simulator, from within the pixi shell, you can simply run:
 ```bash
 judo
+```
+Or without activating the shell:
+```bash
+pixi run -e dev judo
 ```
 This will start the stack and print a link in the terminal that will open the app in your browser, e.g.,
 ```
@@ -86,6 +90,7 @@ fr3_pick
 leap_cube
 leap_cube_down
 caltech_leap_cube
+spot_tire_upright
 ```
 and `optimizer_name` is one of the following:
 ```
@@ -128,13 +133,7 @@ Note that the benchmarking program runs the default task and optimizer parameter
 # Docs
 For developers, to build docs locally, run the following in your environment from the repo root. Note that asset paths will be broken locally that work correctly on Github Pages.
 ```bash
-# using conda
-pip install -e .[docs]  # dev also includes docs
-
-# using pixi
-pixi shell -e docs  # dev also includes docs
-
-# building the docs (both conda and pixi)
+pixi shell -e docs  # dev also includes docs deps
 sphinx-build docs/source docs/build -b dirhtml
 python -m http.server --directory docs/build 8000
 ```

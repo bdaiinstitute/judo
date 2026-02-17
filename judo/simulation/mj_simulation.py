@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 from judo.app.structs import MujocoState
 from judo.simulation.base import Simulation
-from judo.tasks.spot.spot_constants import DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME
+from judo.tasks.spot.spot_constants import DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME, POLICY_OUTPUT_DIM
 from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore
 
 
@@ -39,7 +39,7 @@ class MJSimulation(Simulation):
         super().__init__(init_task=init_task, task_registration_cfg=task_registration_cfg)
 
         self._systems = None
-        self._last_policy_output = np.zeros(12)
+        self._last_policy_output = np.zeros(POLICY_OUTPUT_DIM)
 
         # Initialize C++ systems if task uses locomotion policy
         if self.task.locomotion_policy_path is not None:
@@ -129,7 +129,7 @@ class MJSimulation(Simulation):
 
     def reset_policy_state(self) -> None:
         """Reset the internal policy state to zeros."""
-        self._last_policy_output = np.zeros(12)
+        self._last_policy_output = np.zeros(POLICY_OUTPUT_DIM)
 
     def set_task(self, task_name: str) -> None:
         """Set the current task and reinitialize if needed.
@@ -144,7 +144,7 @@ class MJSimulation(Simulation):
         # Reinitialize systems based on new task's policy
         if self.task.locomotion_policy_path is not None:
             self._init_cpp_systems(self.task.locomotion_policy_path)
-            self._last_policy_output = np.zeros(12)
+            self._last_policy_output = np.zeros(POLICY_OUTPUT_DIM)
         else:
             self._systems = None
 

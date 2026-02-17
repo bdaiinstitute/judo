@@ -92,7 +92,6 @@ target_link_libraries(onnx_interface PUBLIC
 
 # --- System Library ---
 add_library(system STATIC
-  system/eigen_types.cpp
   system/system_class.cpp
   system/system_utils.cpp
 )
