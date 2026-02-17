@@ -151,9 +151,13 @@ jobs:
         run: |
           python -m venv /tmp/test-venv
           source /tmp/test-venv/bin/activate
-          pip install --index-url https://test.pypi.org/simple/ \
-                      --extra-index-url https://pypi.org/simple/ \
-                      judo-rai==${{ needs.publish-testpypi.outputs.dev_version }}
+          for i in 1 2 3 4 5; do
+            pip install --index-url https://test.pypi.org/simple/ \
+                        --extra-index-url https://pypi.org/simple/ \
+                        judo-rai==${{ needs.publish-testpypi.outputs.dev_version }} && break
+            echo "Attempt $i failed, waiting 30s for TestPyPI index to update..."
+            sleep 30
+          done
           pip install pytest
 
       - name: Smoke test — imports and C++ extension
