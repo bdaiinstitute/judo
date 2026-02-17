@@ -71,6 +71,7 @@ class Controller:
 
         # Initialize rollout backend (auto-select policy backend if task requires it)
         if self.task.uses_locomotion_policy:
+            assert self.task.locomotion_policy_path is not None
             self.rollout_backend: RolloutBackend = PolicyMJRolloutBackend(
                 model=self.model,
                 num_threads=self.optimizer_cfg.num_rollouts,
