@@ -158,7 +158,7 @@ jobs:
             echo "Attempt $i failed, waiting 30s for TestPyPI index to update..."
             sleep 30
           done
-          pip install pytest
+          pip install pytest pytest-xdist
 
       - name: Smoke test — imports and C++ extension
         run: |
