@@ -9,7 +9,7 @@ import trimesh
 from mujoco import MjData, MjsMaterial, MjSpec
 from trimesh.creation import box, capsule, cylinder, icosphere
 from trimesh.transformations import scale_and_translate
-from trimesh.visual import ColorVisuals, TextureVisuals
+from trimesh.visual import TextureVisuals
 from trimesh.visual.material import PBRMaterial
 from viser import (
     ClientHandle,
@@ -24,6 +24,7 @@ from judo.visualizers.utils import (
     count_trace_sensors,
     get_mesh_file,
     get_mesh_scale,
+    has_material,
     rgba_float_to_int,
 )
 
@@ -183,6 +184,7 @@ class ViserMjModel:
                     quat=geom.quat,
                     mesh_scale=mesh_scale,
                     mjs_material=mjs_material,
+                    spec=self._spec,
                 )
                 self._geoms.append(handle)
             case mujoco.mjtGeom.mjGEOM_SDF:
@@ -436,6 +438,7 @@ def add_mesh_from_file(
     quat: np.ndarray,
     mesh_scale: np.ndarray | None = None,
     mjs_material: MjsMaterial | None = None,
+    spec: MjSpec | None = None,
 ) -> SceneNodeHandle:
     """Add a triangle mesh from file, via trimesh."""
     if not mesh_file.exists():
@@ -445,9 +448,8 @@ def add_mesh_from_file(
     if mesh_scale is not None:
         mesh.apply_scale(mesh_scale)
 
-    # If mesh does not have a good texture, apply MuJoCo one.
-    if isinstance(mesh.visual, ColorVisuals) and mjs_material is not None:
-        apply_mujoco_material(mesh, mjs_material)
+    if mjs_material is not None and has_material(mesh):
+        apply_mujoco_material(mesh, mjs_material, spec, mesh_file)
 
     return target.scene.add_mesh_trimesh(name, mesh, position=pos, wxyz=quat)
 

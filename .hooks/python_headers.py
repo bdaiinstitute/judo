@@ -36,7 +36,7 @@ def add_header_to_file(file_path: str) -> int:
     existing_year = get_header_year(content)
     if existing_year is not None:
         # header exists, check if year is wrong
-        if existing_year != current_year:
+        if existing_year not in range(2025, current_year + 1):
             # find the exact header line index and replace it
             for idx, line in enumerate(content[:5]):
                 if re.match(HEADER_REGEX, line):

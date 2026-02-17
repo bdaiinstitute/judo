@@ -9,6 +9,9 @@ import mujoco
 import numpy as np
 from mujoco import MjData, MjModel, MjSpec
 
+from judo import MODEL_PATH
+from judo.utils.assets import download_and_extract_meshes
+
 
 @dataclass
 class TaskConfig:
@@ -27,12 +30,17 @@ class Task(ABC, Generic[ConfigT]):
         """Initialize the Mujoco task."""
         if not model_path:
             raise ValueError("Model path must be provided.")
+        download_and_extract_meshes(extract_root=str(MODEL_PATH), repo="bdaiinstitute/judo", asset_name="meshes.zip")
         self.config = self.config_t()
         self.spec = MjSpec.from_file(str(model_path))
+        self._process_spec()
         self.model = self.spec.compile()
         self.data = MjData(self.model)
         self.model_path = model_path
         self.sim_model = self.model if sim_model_path is None else MjModel.from_xml_path(str(sim_model_path))
+
+    def _process_spec(self) -> None:
+        """Hook for subclasses to modify spec before compile. No-op by default."""
 
     @property
     def time(self) -> float:
@@ -73,6 +81,20 @@ class Task(ABC, Generic[ConfigT]):
         return self.model.nu
 
     @property
+    def locomotion_policy_path(self) -> str | None:
+        """Path to locomotion policy for this task, or None if not used.
+
+        Override in tasks that use a learned locomotion policy
+        (e.g., Spot tasks that run an ONNX policy at 50Hz).
+        """
+        return None
+
+    @property
+    def uses_locomotion_policy(self) -> bool:
+        """Whether this task uses a locomotion policy for simulation."""
+        return self.locomotion_policy_path is not None
+
+    @property
     def actuator_ctrlrange(self) -> np.ndarray:
         """Mujoco actuator limits for this task."""
         limits = self.model.actuator_ctrlrange
@@ -87,9 +109,14 @@ class Task(ABC, Generic[ConfigT]):
         mujoco.mj_forward(self.model, self.data)
 
     @property
+    def physics_substeps(self) -> int:
+        """Number of physics steps per control step."""
+        return 1
+
+    @property
     def dt(self) -> float:
-        """Returns Mujoco physics timestep for default physics task."""
-        return self.model.opt.timestep
+        """Effective timestep (physics_substeps * model timestep)."""
+        return self.model.opt.timestep * self.physics_substeps
 
     def pre_rollout(self, curr_state: np.ndarray) -> None:
         """Pre-rollout behavior for task (does nothing by default).
@@ -135,6 +162,20 @@ class Task(ABC, Generic[ConfigT]):
         This is used to provide an initial guess for the optimizer when optimizing the task before any iterations.
         """
         return np.zeros(self.nu)
+
+    def task_to_sim_ctrl(self, controls: np.ndarray) -> np.ndarray:
+        """Convert task control format to simulation control format.
+
+        Override in subclasses that use a different control format than the simulator
+        (e.g., Spot tasks that convert to 25-dim locomotion policy commands).
+
+        Args:
+            controls: Controls in task format, shape (..., nu).
+
+        Returns:
+            Controls in simulation format (same as input by default).
+        """
+        return controls
 
     def get_sensor_start_index(self, sensor_name: str) -> int:
         """Returns the starting index of a sensor in the 'sensors' array given the sensor's name.

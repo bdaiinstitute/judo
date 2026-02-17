@@ -1,0 +1,112 @@
+<mujoco model="spot_tire">
+<!-- Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved. -->
+<!-- Scene: Spot robot with tire object for manipulation tasks -->
+
+  <!-- Compiler settings - assetdir is relative to THIS file's location (spot_tire/)
+       Path ../../meshes/ resolves to judo/models/meshes/ from judo/models/xml/spot_tire/
+       Assets then use paths like spot/meshes/base/visual/body_0.obj -->
+  <compiler angle="radian" meshdir="../../meshes/" assetdir="../../meshes/" autolimits="true"/>
+
+  <option timestep="0.01" solver="Newton" integrator="implicitfast" density="1"/>
+
+  <!-- Include default classes (from spot_primitive, but no compiler override) -->
+  <default>
+    <default class="visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="collision">
+      <geom group="3" friction="0.15" priority="4" rgba="1 1 1 1"/>
+    </default>
+
+    <default class="arm">
+      <default class="arm_sh0">
+        <joint frictionloss="0.5" damping="0.25" armature="0.17953760" range="-2.61799387799149441136 3.14159265358979311599"/>
+        <position kp="120" kv="2.0" ctrlrange="-2.61799387799149441136 3.14159265358979311599" forcerange="-90.9 90.9"/>
+      </default>
+      <default class="arm_sh1">
+        <joint frictionloss="0.5" damping="0.25" armature="0.71815040" range="-3.14159265358979311599 0.52359877559829881565"/>
+        <position kp="120" kv="2.0" ctrlrange="-3.14159265358979311599 0.52359877559829881565" forcerange="-181.8 181.8"/>
+      </default>
+      <default class="arm_el0">
+        <joint frictionloss="0.5" damping="0.25" armature="0.17953760" range="0 3.14159265358979311599"/>
+        <position kp="120" kv="2.0" ctrlrange="0 3.14159265358979311599" forcerange="-90.9 90.9"/>
+      </default>
+      <default class="arm_el1">
+        <joint frictionloss="0.5" damping="0.25" armature="0.05477937" range="-2.79252680319092716487 2.79252680319092716487"/>
+        <position kp="120" kv="2.0" ctrlrange="-2.79252680319092716487 2.79252680319092716487" forcerange="-30.3 30.3"/>
+      </default>
+      <default class="arm_wr0">
+        <joint frictionloss="0.5" damping="0.25" armature="0.05477937" range="-1.83259571459404613236 1.83259571459404613236"/>
+        <position kp="120" kv="2.0" ctrlrange="-1.83259571459404613236 1.83259571459404613236" forcerange="-30.3 30.3"/>
+      </default>
+      <default class="arm_wr1">
+        <joint frictionloss="0.5" damping="0.25" armature="0.07997584" range="-2.87979326579064354163 2.87979326579064354163"/>
+        <position kp="120" kv="2.0" ctrlrange="-2.87979326579064354163 2.87979326579064354163" forcerange="-30.3 30.3"/>
+      </default>
+      <default class="arm_f1x">
+        <joint frictionloss="0.5" damping="0.25" armature="0.01717273" range="-1.57 0"/>
+        <position kp="16.0" kv="0.32" ctrlrange="-1.57 0" forcerange="-15.32 15.32"/>
+      </default>
+    </default>
+
+    <default class="leg">
+      <default class="hip_x">
+        <joint frictionloss="0.5" damping="0.25" armature="0.0403155" range="-0.785398 0.785398"/>
+        <position kp="60" kv="1.5" ctrlrange="-0.785398 0.785398" forcerange="-45 45"/>
+      </default>
+      <default class="hip_y">
+        <joint frictionloss="0.5" damping="0.25" armature="0.0403155" range="-0.898845 2.29511"/>
+        <position kp="60" kv="1.5" ctrlrange="-0.898845 2.29511" forcerange="-45 45"/>
+      </default>
+      <default class="knee">
+        <joint frictionloss="0.5" damping="0.25" armature="0.073125" range="-2.7929 -0.2471"/>
+        <position kp="60" kv="1.5" ctrlrange="-2.7929 -0.2471" forcerange="-115 115"/>
+      </default>
+    </default>
+
+  </default>
+
+  <!-- Spot assets -->
+  <include file="../spot_primitive/assets.xml" />
+
+  <worldbody>
+    <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
+    <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>
+
+    <geom name="ground" type="plane" size="10 10 0.01" class="collision" priority="5" friction="0.7" material="blue_grid"/>
+
+    <!-- Spot robot body at standing height -->
+    <body name="body" pos="0 0 0.52">
+      <include file="../spot_primitive/body.xml" />
+      <include file="../spot_primitive/legs.xml" />
+      <include file="../spot_primitive/arm.xml" />
+    </body>
+  </worldbody>
+
+  <!-- Tire object (includes its own defaults, assets, and worldbody).
+       Included after spot worldbody so tire body merges after robot body,
+       preserving the qpos ordering that reset_pose expects. -->
+  <include file="../objects/tire/tire.xml" />
+
+  <include file="../spot_primitive/actuator.xml" />
+  <include file="../spot_primitive/contact.xml" />
+
+  <!-- Sensors for task rewards -->
+  <sensor>
+    <framepos name="sensor_body" objtype="site" objname="site_body"/>
+    <frameyaxis name="object_y_axis" objtype="site" objname="site_object"/>
+    <framezaxis name="object_z_axis" objtype="site" objname="site_object"/>
+    <framepos name="trace_fngr_site" objtype="site" objname="site_arm_link_fngr"/>
+    <framepos name="fl_pos" objtype="site" objname="site_front_left"/>
+    <framepos name="fr_pos" objtype="site" objname="site_front_right"/>
+    <framepos name="hl_pos" objtype="site" objname="site_rear_left"/>
+    <framepos name="hr_pos" objtype="site" objname="site_rear_right"/>
+    <framepos name="sensor_arm_link_sh0" objtype="site" objname="site_arm_link_sh0"/>
+    <framepos name="sensor_arm_link_sh1" objtype="site" objname="site_arm_link_sh1"/>
+    <framepos name="sensor_arm_link_el0" objtype="site" objname="site_arm_link_el0"/>
+    <framepos name="sensor_arm_link_el1" objtype="site" objname="site_arm_link_el1"/>
+    <framepos name="sensor_arm_link_wr0" objtype="site" objname="site_arm_link_wr0"/>
+    <framepos name="sensor_arm_link_wr1" objtype="site" objname="site_arm_link_wr1"/>
+    <framepos name="sensor_arm_link_fngr" objtype="site" objname="site_arm_link_fngr"/>
+  </sensor>
+</mujoco>

@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
+build*/
 develop-eggs/
 dist/
 downloads/
@@ -187,6 +187,15 @@ outputs/
 # mujoco
 MUJOCO_LOG.TXT
 
+# bundled shared libraries (auditwheel handles bundling into wheel)
+mujoco_extensions/policy_rollout/libonnxruntime*
+wheelhouse/
+
 # assets
 *.obj
 *.stl
+*.mtl
+*.png
+
+# byproduct
+meshes.zip

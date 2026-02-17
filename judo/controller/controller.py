@@ -14,7 +14,8 @@ from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
 from judo.tasks import Task, TaskConfig, get_registered_tasks
-from judo.utils.mujoco import RolloutBackend, make_model_data_pairs
+from judo.tasks.spot.spot_constants import POLICY_OUTPUT_DIM
+from judo.utils.mj_rollout_backend import MJRolloutBackend
 from judo.utils.normalization import (
     IdentityNormalizer,
     Normalizer,
@@ -22,6 +23,8 @@ from judo.utils.normalization import (
     make_normalizer,
     normalizer_registry,
 )
+from judo.utils.policy_mj_rollout_backend import PolicyMJRolloutBackend
+from judo.utils.rollout_backend import RolloutBackend
 from judo.visualizers.utils import get_trace_sensors
 
 
@@ -65,9 +68,24 @@ class Controller:
         self.available_tasks = get_registered_tasks()
 
         self.model = self.task.model
-        self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
 
-        self.rollout_backend = RolloutBackend(num_threads=self.optimizer_cfg.num_rollouts, backend=rollout_backend)
+        # Initialize rollout backend (auto-select policy backend if task requires it)
+        if self.task.uses_locomotion_policy:
+            assert self.task.locomotion_policy_path is not None
+            self.rollout_backend: RolloutBackend = PolicyMJRolloutBackend(
+                model=self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+                policy_path=self.task.locomotion_policy_path,
+                physics_substeps=self.task.physics_substeps,
+            )
+        else:
+            self.rollout_backend = MJRolloutBackend(
+                model=self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+            )
+        self._last_policy_output = (
+            np.zeros((self.optimizer_cfg.num_rollouts, POLICY_OUTPUT_DIM)) if self.task.uses_locomotion_policy else None
+        )
         self.action_normalizer = self._init_action_normalizer()
 
         # a container for any metadata from the system that we want to pass to the task
@@ -76,7 +94,8 @@ class Controller:
         self.states = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nq + self.model.nv))
         self.current_state = np.concatenate([self.task.data.qpos, self.task.data.qvel])
         self.sensors = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nsensordata))
-        self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.model.nu))
+        # Use task.nu for control dimensions (may differ from model.nu for Spot tasks)
+        self.rollout_controls = np.zeros((self.optimizer_cfg.num_rollouts, self.num_timesteps, self.task.nu))
         self.rewards = np.zeros((self.optimizer_cfg.num_rollouts,))
         self.reset()
 
@@ -203,9 +222,10 @@ class Controller:
         nominal_knots_normalized = self.action_normalizer.normalize(nominal_knots)
 
         # resizing any variables due to changes in the GUI
-        if len(self.model_data_pairs) != self.optimizer_cfg.num_rollouts:
-            self.model_data_pairs = make_model_data_pairs(self.model, self.optimizer_cfg.num_rollouts)
+        if self.rollout_backend.num_threads != self.optimizer_cfg.num_rollouts:
             self.rollout_backend.update(self.optimizer_cfg.num_rollouts)
+            if self._last_policy_output is not None:
+                self._last_policy_output = np.zeros((self.optimizer_cfg.num_rollouts, POLICY_OUTPUT_DIM))
 
         normalizer_cls = normalizer_registry.get(self.action_normalizer_type)
         if normalizer_cls is None:
@@ -243,11 +263,14 @@ class Controller:
 
             # Roll out dynamics with action sequences.
             self.task.pre_rollout(self.current_state)
-            self.states, self.sensors = self.rollout_backend.rollout(
-                self.model_data_pairs,
+            sim_controls = self.task.task_to_sim_ctrl(self.rollout_controls)
+            self.states, self.sensors, policy_output = self.rollout_backend.rollout(
                 self.current_state,
-                self.rollout_controls,
+                sim_controls,
+                self._last_policy_output,
             )
+            if policy_output is not None:
+                self._last_policy_output = policy_output
             self.task.post_rollout(
                 self.states,
                 self.sensors,
@@ -293,6 +316,9 @@ class Controller:
         self.candidate_knots = np.tile(self.nominal_knots, (self.optimizer_cfg.num_rollouts, 1, 1))
         self.times = self.task.data.time + self.spline_timesteps
         self.update_spline(self.times, self.nominal_knots)
+        # Reset policy output state for locomotion policy tasks
+        if self.task.uses_locomotion_policy:
+            self._last_policy_output = np.zeros((self.optimizer_cfg.num_rollouts, POLICY_OUTPUT_DIM))
 
     def update_traces(self) -> None:
         """Update traces by extracting data from sensors readings.
@@ -401,7 +427,9 @@ def make_controller(
     task = task_cls()
 
     optimizer_cls, optimizer_config_cls = optimizer_entry
-    optimizer = optimizer_cls(optimizer_config_cls(), task.nu)
+    optimizer_cfg = optimizer_config_cls()
+    optimizer_cfg.set_override(init_task)
+    optimizer = optimizer_cls(optimizer_cfg, task.nu)
 
     controller_cfg = ControllerConfig()
     controller_cfg.set_override(init_task)

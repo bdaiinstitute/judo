@@ -120,27 +120,32 @@ class VisualizationNode(DoraNode):
     def update_plan_time(self, event: dict) -> None:
         """Callback to update plan time on receiving a new plan time measurement."""
         plan_time_s = event["value"].to_numpy(zero_copy_only=False)[0]
-        self.visualizer.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
+        # GUI element might not exist during task switch
+        if "plan_time_display" in self.visualizer.gui_elements:
+            self.visualizer.gui_elements["plan_time_display"].value = plan_time_s * 1000  # ms
 
     def spin(self) -> None:
         """Spin logic for the visualization node."""
-        for event in self.node:
-            if self.visualizer.sim_pause_updated.is_set():
-                self.write_sim_pause()
-            if self.visualizer.task_updated.is_set():
-                self.write_task()
-            if self.visualizer.task_reset_updated.is_set():
-                self.write_task_reset()
-            if self.visualizer.optimizer_updated.is_set():
-                self.write_optimizer()
-            if self.visualizer.controller_config_updated.is_set():
-                self.write_controller_config()
-            if self.visualizer.optimizer_config_updated.is_set():
-                self.write_optimizer_config()
-            if self.visualizer.task_config_updated.is_set():
-                self.write_task_config()
+        try:
+            for event in self.node:
+                if self.visualizer.sim_pause_updated.is_set():
+                    self.write_sim_pause()
+                if self.visualizer.task_updated.is_set():
+                    self.write_task()
+                if self.visualizer.task_reset_updated.is_set():
+                    self.write_task_reset()
+                if self.visualizer.optimizer_updated.is_set():
+                    self.write_optimizer()
+                if self.visualizer.controller_config_updated.is_set():
+                    self.write_controller_config()
+                if self.visualizer.optimizer_config_updated.is_set():
+                    self.write_optimizer_config()
+                if self.visualizer.task_config_updated.is_set():
+                    self.write_task_config()
 
-            self.handle(event)
+                self.handle(event)
+        except KeyboardInterrupt:
+            pass
 
     def cleanup(self) -> None:
         """Cleanup the visualization node."""

@@ -9,7 +9,7 @@ import numpy as np
 import trimesh
 from mujoco import MjModel, MjsGeom, MjsMaterial, MjSpec
 from PIL import Image
-from trimesh.visual import TextureVisuals
+from trimesh.visual import ColorVisuals, TextureVisuals
 from trimesh.visual.material import PBRMaterial
 
 
@@ -67,46 +67,103 @@ def get_mesh_scale(spec: MjSpec, geom: MjsGeom) -> np.ndarray:
     return mesh.scale  # type: ignore
 
 
+def has_material(mesh: trimesh.Trimesh) -> bool:
+    """Check if mesh needs MuJoCo material applied (no texture or has placeholder)."""
+    if isinstance(mesh.visual, ColorVisuals):
+        return True
+
+    # Check if mesh has a tiny placeholder texture (< 100px) from failed trimesh load
+    if not isinstance(mesh.visual, TextureVisuals):
+        return False
+    img = getattr(getattr(mesh.visual, "material", None), "image", None)
+    return img is not None and img.size[0] < 100
+
+
 def apply_mujoco_material(
     mesh: trimesh.Trimesh,
     material: MjsMaterial,
+    spec: MjSpec | None = None,
+    mesh_file: Path | None = None,
 ) -> None:
     """Applies a MuJoCo material to a trimesh mesh.
 
-    This sets up PBR parameters and handles RGBA conversion.
+    Tries to load texture from: 1) MuJoCo spec, 2) MTL file, 3) solid color fallback.
 
     Args:
         mesh: the trimesh.Trimesh to modify
-        model: the Mujoco MjModel to read textures (spec.texturedir if available)
         material: an object matching the mjsMaterial struct
-        texture_dir: optional override of the directory for texture files
+        spec: optional MjSpec to look up texture files
+        mesh_file: optional mesh file path to find MTL texture
     """
-    # prepare PBR material
     pbr = PBRMaterial()
 
-    # get RGBA, convert if needed
+    # Get RGBA color
     rgba = np.array(material.rgba)
     if np.issubdtype(rgba.dtype, np.floating):
         rgba = rgba_float_to_int(rgba)
     color = tuple(int(x) for x in rgba.tolist())
     pbr.alphaMode = "BLEND" if rgba[3] < 255 else "OPAQUE"
 
-    # set PBR values
+    # Set PBR values
     pbr.metallicFactor = float(material.metallic)
     pbr.roughnessFactor = float(material.roughness)
     pbr.emissiveFactor = [material.emission] * 3
     if material.roughness == 0.0 and getattr(material, "shininess", 0) > 0:
         pbr.roughnessFactor = np.sqrt(2.0 / (material.shininess + 2.0)).item()
 
-    dummy = Image.new("RGBA", (1, 1), color)
-    pbr.baseColorTexture = dummy
+    # Get existing UV coordinates
     uv = getattr(mesh.visual, "uv", None)
+
+    # Try to load texture from MuJoCo spec
+    texture_loaded = False
+    if spec is not None and getattr(material, "textures", None):
+        texture_name = material.textures[1] if len(material.textures) > 1 else None
+        if texture_name:
+            try:
+                texture = spec.texture(texture_name)
+                if texture.file:
+                    texture_path = Path(spec.modelfiledir) / spec.texturedir / texture.file
+                    if texture_path.exists():
+                        pbr.baseColorTexture = Image.open(texture_path)
+                        texture_loaded = True
+            except Exception:
+                warnings.warn(f"Failed to load texture '{texture_name}' for material '{material.name}'", stacklevel=2)
+
+    # Try to load texture from MTL file
+    if not texture_loaded and mesh_file is not None:
+        texture_loaded = _load_texture_from_mtl(pbr, mesh_file)
+
+    # Fall back to solid color
+    if not texture_loaded:
+        pbr.baseColorTexture = Image.new("RGBA", (1, 1), color)
+        uv = None
+
     mesh.visual = TextureVisuals(material=pbr, uv=uv)
 
-    if getattr(material, "textures", None):
-        warnings.warn("Textured meshes are currently unsupported. Loading with RGBA color instead.", stacklevel=2)
 
-    mesh.visual = TextureVisuals(material=pbr, uv=None)
+def _load_texture_from_mtl(pbr: PBRMaterial, mesh_file: Path) -> bool:
+    """Try to load texture from MTL file. Returns True if successful."""
+    # Find MTL file: same name, or base name for split meshes (body_0.obj -> body.mtl)
+    mtl_file = mesh_file.with_suffix(".mtl")
+    if not mtl_file.exists():
+        stem = mesh_file.stem
+        if stem[-1].isdigit() and "_" in stem:
+            mtl_file = mesh_file.parent / f"{stem.rsplit('_', 1)[0]}.mtl"
+    if not mtl_file.exists():
+        return False
+
+    try:
+        for line in mtl_file.read_text().split("\n"):
+            if line.strip().startswith("map_Kd"):
+                tex_path = (mtl_file.parent / line.split()[-1]).resolve()
+                if tex_path.exists():
+                    pbr.baseColorTexture = Image.open(tex_path)
+                    return True
+                else:
+                    warnings.warn(f"Texture not found: {tex_path}", stacklevel=3)
+    except Exception as e:
+        warnings.warn(f"Failed to load texture from {mtl_file}: {e}", stacklevel=3)
+    return False
 
 
 def is_trace_sensor(model: MjModel, sensorid: int) -> bool:

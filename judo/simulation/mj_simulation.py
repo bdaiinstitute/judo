@@ -1,5 +1,8 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved.
 
+"""MuJoCo Simulation with direct actuator control."""
+
+import numpy as np
 from mujoco import mj_step
 from omegaconf import DictConfig
 
@@ -8,33 +11,47 @@ from judo.simulation.base import Simulation
 
 
 class MJSimulation(Simulation):
-    """Mujoco simulation object.
+    """MuJoCo simulation with direct actuator control.
 
-    This class contains the data required to run a Mujoco simulation. This includes configurations, a control spline,
-    and task information.
-
-    Middleware nodes should instantiate this class and implement methods to send, process, and receive data.
+    Applies controls directly to MuJoCo actuators and steps
+    the physics simulation forward.
     """
 
     def __init__(
         self,
-        init_task: str = "cylinder_push",
+        init_task: str = "spot_base",
         task_registration_cfg: DictConfig | None = None,
     ) -> None:
-        """Initialize the simulation node."""
+        """Initialize the MuJoCo simulation.
+
+        Args:
+            init_task: Name of the task to initialize.
+            task_registration_cfg: Optional task registration configuration.
+        """
         super().__init__(init_task=init_task, task_registration_cfg=task_registration_cfg)
 
-    def step(self) -> None:
-        """Step the simulation forward by one timestep."""
-        if self.control is not None and not self.paused:
-            try:
-                self.task.data.ctrl[:] = self.control(self.task.data.time)
-                self.task.pre_sim_step()
-                mj_step(self.task.sim_model, self.task.data)
-                self.task.post_sim_step()
-            except ValueError:
-                # we're switching tasks and the new task has a different number of actuators
-                pass
+    def step(self, command: np.ndarray) -> None:
+        """Step the simulation forward.
+
+        Args:
+            command: Control array in task format (task.nu dimensions).
+        """
+        if self.paused:
+            return
+
+        command = self.task.task_to_sim_ctrl(command)
+        self.task.data.ctrl[:] = command[: self.task.model.nu]
+        self.task.pre_sim_step()
+        mj_step(self.task.sim_model, self.task.data)
+        self.task.post_sim_step()
+
+    def set_task(self, task_name: str) -> None:
+        """Set the current task.
+
+        Args:
+            task_name: Name of the task to set.
+        """
+        super().set_task(task_name)
 
     @property
     def sim_state(self) -> MujocoState:
@@ -52,5 +69,5 @@ class MJSimulation(Simulation):
 
     @property
     def timestep(self) -> float:
-        """Returns the simulation timestep."""
-        return self.task.sim_model.opt.timestep
+        """Returns the effective simulation timestep (accounting for substeps)."""
+        return self.task.dt

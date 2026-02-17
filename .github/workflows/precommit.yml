@@ -11,11 +11,7 @@ permissions:
 
 jobs:
   precommit:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
 
@@ -24,22 +20,19 @@ jobs:
           pixi-version: latest
           cache: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
+      # ── Stubs cache ────────────────────────────────────────────────
       - name: Restore typings cache
         uses: actions/cache@v5
         id: typings-cache
         with:
           path: typings
-          key: typings-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          key: typings-${{ matrix.os }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Generate stubs if cache miss
         if: steps.typings-cache.outputs.cache-hit != 'true'
         run: pixi run -e dev pybind11-stubgen mujoco -o typings/
 
+      # ── Linting & type checking ────────────────────────────────────
       - name: Run Ruff Linter
         run: pixi run -e dev ruff check judo/ tests/ --output-format=github
 

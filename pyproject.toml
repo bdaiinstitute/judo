@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "judo-rai"
 description = "Judo: a hackable sampling-based MPC toolbox"
-version = "0.0.6"
+version = "0.0.7"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
@@ -30,12 +30,13 @@ classifiers = [
 
 dependencies = [
     "dora-utils",  # dora + qol utils for writing nodes
-    "mujoco",
+    "mujoco>=3.5.0,<3.6",
     "numpy",
     "pillow",  # for displaying app logo
     "pycparser",
     "requests",  # for sharing GUI link
     "rich",  # for displaying tables in benchmarking
+    "robot_descriptions",  # for loading mujoco_menagerie Spot meshes
     "scipy",
     "viser>=1.0.0",
 ]
@@ -51,7 +52,19 @@ benchmark = "judo.cli:benchmark"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["judo"]
+packages = ["judo", "mujoco_extensions"]
+artifacts = ["mujoco_extensions/**/policy_rollout_pybind*.so", "judo/app/asset/*"]
+exclude = [
+    "judo/models/meshes",
+    "mujoco_extensions/build",
+    "mujoco_extensions/system",
+    "mujoco_extensions/onnx_interface",
+    "mujoco_extensions/example",
+    "mujoco_extensions/test",
+    "mujoco_extensions/CMakeLists.txt",
+    "mujoco_extensions/policy_rollout/pybind",
+    "mujoco_extensions/policy_rollout/test",
+]
 
 [project.optional-dependencies]
 docs = [
@@ -63,6 +76,8 @@ docs = [
     "sphinxcontrib-programoutput-rai",
 ]
 dev = [
+    "auditwheel",
+    "build",
     "judo-rai[docs]",
     "pre-commit",
     "pybind11-stubgen",
@@ -71,6 +86,8 @@ dev = [
     "pytest-cov",
     "pytest-xdist",
     "ruff",
+    "twine",
+    "wheel",
 ]
 
 [tool.coverage.run]
@@ -128,6 +145,7 @@ exclude=[
     "site-packages",
     "venv",
     "docs",
+    "mujoco_extensions",
 ]
 
 [tool.ruff.lint]
@@ -173,10 +191,47 @@ ignore = [
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
 
+[tool.pixi.dependencies]
+python = ">=3.10,<3.14"  # mujoco has no 3.14 wheel yet
+cmake = ">=3.15"
+eigen = ">=3.4"
+pybind11 = ">=2.11"
+onnxruntime-cpp = "1.19.*"  # pin to match starfish (1.22+ needs CXXABI_1.3.15 / GCC 14)
+
+[tool.pixi.target.linux-64.dependencies]
+libgomp = ">=13"  # OpenMP runtime for Linux
+patchelf = ">=0.17"  # needed by auditwheel for wheel repair
+gcc_linux-64 = "13.*"  # pin GCC 13: GCC 15 emits GLIBCXX_3.4.32 → manylinux_2_39
+gxx_linux-64 = "13.*"
+
 [tool.pixi.pypi-dependencies]
 judo-rai = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+# Build mujoco_extensions C++ module
+configure = { cmd = "cmake -B mujoco_extensions/build -S mujoco_extensions", description = "Configure mujoco_extensions cmake build" }
+build = { cmd = "cmake --build mujoco_extensions/build -j8", depends-on = ["configure"], description = "Build mujoco_extensions pybind modules" }
+clean = { cmd = "rm -rf mujoco_extensions/build mujoco_extensions/policy_rollout/*.so", description = "Clean mujoco_extensions build artifacts" }
+upload-meshes = { cmd = "bash scripts/upload_meshes.sh", description = "Zip and upload meshes to latest GitHub release" }
+build-wheel = { cmd = "rm -rf dist && python -m build --wheel --outdir dist && bash scripts/repair_wheel.sh dist/*.whl wheelhouse \"\" $(python -c \"import sys; print(f'cp{sys.version_info[0]}{sys.version_info[1]}')\")", depends-on = ["clean", "build"], description = "Build manylinux wheel with auditwheel" }
+
+[tool.pixi.activation.env]
+LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 dev = { features = ["dev", "docs"], solve-group = "default" }
+py310 = { features = ["dev", "py310"], solve-group = "py310" }
+py311 = { features = ["dev", "py311"], solve-group = "py311" }
+py312 = { features = ["dev", "py312"], solve-group = "py312" }
+py313 = { features = ["dev", "py313"], solve-group = "py313" }

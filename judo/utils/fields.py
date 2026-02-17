@@ -98,4 +98,4 @@ def np_1d_field(
         }
     }
     # copy the array to avoid mutability issues, especially when resetting the associated config
-    return field(default_factory=lambda: array.copy(), metadata=metadata)
+    return field(default_factory=array.copy, metadata=metadata)
