@@ -1,6 +1,6 @@
 <mujoco>
   <!-- Copyright (c) 2025 Boston Dynamics AI Institute LLC. All rights reserved. -->
-  <compiler angle="radian" assetdir="../../../meshes/" autolimits="true"/>
+  <!-- Tire defaults and assets. Requires parent to set assetdir to models/meshes/. -->
 
   <default>
     <default class="tire_visual">

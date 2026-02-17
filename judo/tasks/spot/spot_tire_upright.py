@@ -110,7 +110,7 @@ class SpotTireUpright(SpotBase[SpotTireUprightConfig]):
         self.body_pose_idx = self.get_joint_position_start_index("base")
 
         # Object pose index (tire joint)
-        self.object_pose_idx = self.get_joint_position_start_index("tire_rubber_joint")
+        self.object_pose_idx = self.get_joint_position_start_index("tire_joint")
 
         # Sensor indices
         self.tire_y_axis_idx = self.get_sensor_start_index("object_y_axis")

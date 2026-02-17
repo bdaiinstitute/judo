@@ -57,7 +57,11 @@ def download_and_extract_meshes(
             api_url = f"https://api.github.com/repos/{repo}/releases/latest"
         else:
             api_url = f"https://api.github.com/repos/{repo}/releases/tags/{tag}"
-        response = requests.get(api_url)
+        headers = {}
+        gh_token = os.environ.get("GITHUB_TOKEN")
+        if gh_token:
+            headers["Authorization"] = f"Bearer {gh_token}"
+        response = requests.get(api_url, headers=headers)
         response.raise_for_status()
         release_data = response.json()
 

@@ -52,6 +52,8 @@ jobs:
 
       # ── Download mesh assets (avoid xdist race) ────────────────────
       - name: Download meshes from release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pixi run -e ${{ matrix.pixi-env }} python -c "from judo.utils.assets import download_and_extract_meshes; from judo import MODEL_PATH; download_and_extract_meshes(str(MODEL_PATH))"
 
       # ── Pre-warm robot_descriptions cache (avoid xdist race) ───────
