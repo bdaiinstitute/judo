@@ -45,7 +45,7 @@ class PolicyMJRolloutBackend(RolloutBackend):
         try:
             from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore  # noqa: PLC0415, I001
         except ImportError as e:
-            raise ImportError("mujoco_extensions is required. Build with: pixi run -e dev build-mujoco-ext") from e
+            raise ImportError("mujoco_extensions is required. Build with: pixi run build") from e
 
         self._systems = create_systems_vector(
             model,

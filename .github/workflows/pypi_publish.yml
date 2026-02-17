@@ -60,7 +60,7 @@ jobs:
           cache: true
 
       - name: Build mujoco_extensions
-        run: pixi run -e ${{ matrix.pixi-env }} build-mujoco-ext
+        run: pixi run -e ${{ matrix.pixi-env }} build
 
       - name: Build wheel
         run: pixi run -e ${{ matrix.pixi-env }} python -m build --wheel --outdir dist

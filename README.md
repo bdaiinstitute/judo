@@ -35,19 +35,27 @@ We recommend installing `judo` using `pip` as follows:
 pip install judo-rai  # if you want dev dependencies, use judo-rai[dev]
 ```
 
-### Developers
-We use [`pixi`](https://pixi.sh/) for development, which provides a reproducible environment via a lock file.
+### Using `pixi`
+We use [`pixi`](https://pixi.sh/) for reproducible environments via a lock file.
 
 To install `pixi`, run the following:
 ```bash
 curl -fsSL https://pixi.sh/install.sh | sh
 ```
-To create the environment (and activate it each time later), run the following in the repo root:
-```bash
-# every time you want to activate
-pixi shell -e dev
 
-# first time only
+There are two main environments:
+- **`default`** — for users who just want to run `judo`.
+- **`dev`** — adds testing, linting, type checking, and wheel-building tools (pytest, ruff, pyright, etc.).
+
+To activate an environment, run the following in the repo root:
+```bash
+pixi shell           # default env
+pixi shell -e dev    # dev env
+```
+
+First-time setup for developers:
+```bash
+pixi shell -e dev
 pre-commit install
 pybind11-stubgen mujoco -o typings/
 ```
@@ -55,12 +63,12 @@ pybind11-stubgen mujoco -o typings/
 #### Building `mujoco_extensions` (required for Spot tasks)
 Spot locomotion tasks use a C++ pybind11 module for threaded policy rollout with ONNX inference. From within the pixi shell:
 ```bash
-pixi run build-mujoco-ext
+pixi run build
 ```
 To clean and rebuild from scratch:
 ```bash
-pixi run clean-mujoco-ext
-pixi run build-mujoco-ext
+pixi run clean
+pixi run build
 ```
 
 ## 2. Run the `judo` app!
@@ -70,13 +78,13 @@ judo
 ```
 Or without activating the shell:
 ```bash
-pixi run -e dev judo
+pixi run judo
 ```
 This will start the stack and print a link in the terminal that will open the app in your browser, e.g.,
 ```
 http://localhost:8080
 ```
-(Note: if you developer are on an Mac, we notice sometimes running `judo` for the first time after installing via `pixi shell -e dev` results in an error that goes away after running `judo` again, please open an issue if you experience further problems)
+(Note: on Mac, running `judo` for the first time after installing via `pixi shell` may result in an error that goes away after running `judo` again, please open an issue if you experience further problems)
 
 We package `judo` with a few starter tasks and optimizers. If you want to start the simulator with one of these, you can run:
 ```bash

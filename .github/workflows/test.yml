@@ -48,7 +48,7 @@ jobs:
 
       - name: Build mujoco_extensions (cache miss)
         if: steps.ext-cache.outputs.cache-hit != 'true'
-        run: pixi run -e ${{ matrix.pixi-env }} build-mujoco-ext
+        run: pixi run -e ${{ matrix.pixi-env }} build
 
       # ── Download mesh assets (avoid xdist race) ────────────────────
       - name: Download meshes from release
