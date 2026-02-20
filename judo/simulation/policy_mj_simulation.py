@@ -3,6 +3,7 @@
 """MuJoCo Simulation with locomotion policy support."""
 
 from pathlib import Path
+from typing import NoReturn
 
 import numpy as np
 from mujoco import mj_forward

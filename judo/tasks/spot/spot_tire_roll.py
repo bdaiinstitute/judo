@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+from mujoco import MjData, MjModel
 
 from judo import MODEL_PATH
 from judo.tasks.spot.spot_base import SpotBase, SpotBaseConfig
@@ -135,6 +136,14 @@ class SpotTireRoll(SpotBase[SpotTireRollConfig]):
             + tire_linear_velocity_reward
             + tire_angular_velocity_reward
         )
+
+    def success(self, model: MjModel, data: MjData, metadata: dict[str, Any] | None = None) -> bool:
+        """Check if the tire is at goal, upright, and Spot is still standing."""
+        object_pos = data.qpos[self.object_pose_idx : self.object_pose_idx + 3]
+        tire_y_axis = data.sensordata[self.object_y_axis_idx : self.object_y_axis_idx + 3]
+        at_goal = np.linalg.norm(object_pos - self.config.goal_position) <= self.config.goal_distance_threshold
+        upright = np.abs(tire_y_axis[2]) <= 0.1
+        return bool(at_goal and upright and super().success(model, data, metadata))
 
     @property
     def reset_pose(self) -> np.ndarray:
