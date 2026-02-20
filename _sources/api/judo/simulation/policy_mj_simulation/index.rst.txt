@@ -1,0 +1,64 @@
+judo.simulation.policy_mj_simulation
+====================================
+
+.. py:module:: judo.simulation.policy_mj_simulation
+
+.. autoapi-nested-parse::
+
+   
+   MuJoCo Simulation with locomotion policy support.
+
+
+
+
+Module Contents
+---------------
+
+.. py:class:: PolicyMJSimulation(init_task: str = 'spot_base', task_registration_cfg: omegaconf.DictConfig | None = None)
+
+   Bases: :py:obj:`judo.simulation.mj_simulation.MJSimulation`
+
+
+   
+   MuJoCo simulation with locomotion policy support.
+
+   For tasks with locomotion_policy_path set, uses C++ mujoco_extensions
+   threaded_rollout to run the neural network policy at 50Hz.
+
+   The simulation maintains internal state for the locomotion policy
+   (last_policy_output) to ensure smooth transitions between timesteps.
+
+   .. py:method:: step(command: numpy.ndarray) -> None
+
+      
+      Step the simulation forward.
+
+      Routes to the C++ policy rollout if systems are initialized,
+      otherwise falls back to direct actuator control.
+
+      :param command: Control array in task format (task.nu dimensions).
+                      For locomotion tasks, will be converted to policy command internally.
+
+
+   .. py:method:: reset_policy_state() -> None
+
+      
+      Reset the internal policy state to zeros.
+
+
+   .. py:method:: set_task(task_name: str) -> None
+
+      
+      Set the current task and reinitialize C++ systems if needed.
+
+      :param task_name: Name of the task to set.
+
+
+   .. py:property:: last_policy_output
+      :type: numpy.ndarray
+
+
+      
+      Returns the last policy output (12-dim leg actions).
+
+

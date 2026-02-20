@@ -1,0 +1,26 @@
+judo.app.utils
+==============
+
+.. py:module:: judo.app.utils
+
+
+
+
+Module Contents
+---------------
+
+.. py:function:: get_class_from_string(class_path: str) -> type
+
+   
+   Get a class from a string path.
+
+.. py:function:: register_tasks_from_cfg(task_registration_cfg: omegaconf.DictConfig) -> None
+
+   
+   Register custom tasks.
+
+.. py:function:: register_optimizers_from_cfg(optimizer_registration_cfg: omegaconf.DictConfig) -> None
+
+   
+   Register custom optimizers.
+
