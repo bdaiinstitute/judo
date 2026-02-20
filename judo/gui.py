@@ -19,7 +19,7 @@ from viser import (
 
 DEFAULT_SLIDER_STEP_FLOAT = 0.01
 DEFAULT_SLIDER_STEP_INT = 1
-GOAL_RADIUS = 0.05
+GOAL_RADIUS = 0.15
 
 
 def slider(
