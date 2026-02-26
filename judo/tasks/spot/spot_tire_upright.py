@@ -20,29 +20,9 @@ from judo.tasks.spot.spot_constants import (
     TIRE_HALF_WIDTH,
     TIRE_RADIUS,
 )
+from judo.tasks.spot.spot_utils import apply_quat_to_vec
 
 XML_PATH = str(MODEL_PATH / "xml" / "spot_tire" / "robot.xml")
-
-
-def apply_quat_to_vec(quat: np.ndarray, vec: np.ndarray) -> np.ndarray:
-    """Apply quaternion rotation to a vector.
-
-    This matches dexterity.utils.math.apply_quat_to_vec from starfish.
-
-    Args:
-        quat: Quaternion in (w, x, y, z) format, shape (4,) or broadcast compatible.
-        vec: Vector to rotate, shape (..., 3).
-
-    Returns:
-        Rotated vector, same shape as vec.
-    """
-    # Extract quaternion components
-    w = quat[..., 0:1]
-    xyz = quat[..., 1:4]
-
-    # Quaternion rotation: v' = v + 2*w*(xyz x v) + 2*(xyz x (xyz x v))
-    t = 2.0 * np.cross(xyz, vec)
-    return vec + w * t + np.cross(xyz, t)
 
 
 @dataclass

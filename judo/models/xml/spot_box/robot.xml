@@ -1,0 +1,51 @@
+<mujoco model="spot_box">
+<!-- Copyright (c) 2025 Robotics and AI Institute LLC. All rights reserved. -->
+<!-- Scene: Spot robot with box object for push tasks -->
+
+  <compiler angle="radian" meshdir="../../meshes/" assetdir="../../meshes/" autolimits="true"/>
+  <option timestep="0.01" solver="Newton" integrator="implicitfast" density="1"/>
+
+  <include file="../spot_primitive/default.xml" />
+  <include file="../spot_primitive/assets.xml" />
+
+  <worldbody>
+    <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
+    <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>
+
+    <geom name="ground" type="plane" size="10 10 0.01" class="collision" priority="5" friction="0.8" material="blue_grid"/>
+
+    <body name="body" pos="0 0 0.52">
+      <include file="../spot_primitive/body.xml" />
+      <include file="../spot_primitive/legs.xml" />
+      <include file="../spot_primitive/arm.xml" />
+    </body>
+
+    <!-- Box object -->
+    <body name="box_body" pos="2 0 0.254">
+      <joint name="box_joint" type="free"/>
+      <inertial pos="0 0 0" mass="1.5" diaginertia="0.1445 0.1445 0.1445"/>
+      <geom name="box_collision" type="box" size="0.254 0.254 0.254" class="collision" priority="6"/>
+      <geom name="box_visual" type="box" size="0.254 0.254 0.254" class="visual" rgba="0.6 0.3 0.1 1"/>
+      <site name="site_object" pos="0 0 0" size="0.01"/>
+    </body>
+  </worldbody>
+
+  <include file="../spot_primitive/actuator.xml" />
+  <include file="../spot_primitive/contact.xml" />
+
+  <sensor>
+    <framepos name="sensor_body" objtype="site" objname="site_body"/>
+    <framexaxis name="body_x_axis" objtype="site" objname="site_body"/>
+    <framexaxis name="object_x_axis" objtype="site" objname="site_object"/>
+    <frameyaxis name="object_y_axis" objtype="site" objname="site_object"/>
+    <framezaxis name="object_z_axis" objtype="site" objname="site_object"/>
+    <framepos name="trace_fngr_site" objtype="site" objname="site_arm_link_fngr"/>
+    <framexaxis name="gripper_x_axis" objtype="site" objname="site_arm_link_wr1"/>
+    <frameyaxis name="gripper_y_axis" objtype="site" objname="site_arm_link_wr1"/>
+    <framexaxis name="finger_x_axis" objtype="site" objname="site_arm_link_fngr"/>
+    <framepos name="fl_pos" objtype="site" objname="site_front_left"/>
+    <framepos name="fr_pos" objtype="site" objname="site_front_right"/>
+    <framepos name="hl_pos" objtype="site" objname="site_rear_left"/>
+    <framepos name="hr_pos" objtype="site" objname="site_rear_right"/>
+  </sensor>
+</mujoco>

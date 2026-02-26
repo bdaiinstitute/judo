@@ -67,15 +67,25 @@ def set_default_caltech_leap_cube_overrides() -> None:
     )
 
 
-def set_default_spot_tire_upright_overrides() -> None:
-    """Sets the default task-specific controller config overrides for the spot_tire_upright task."""
-    set_config_overrides(
-        "spot_tire_upright",
-        ControllerConfig,
-        {
-            "horizon": 2.0,
-        },
-    )
+_SPOT_TASK_NAMES = [
+    "spot_base",
+    "spot_box_push",
+    "spot_navigate",
+    "spot_tire_roll",
+    "spot_tire_upright",
+]
+
+
+def set_default_spot_overrides() -> None:
+    """Sets the default task-specific controller config overrides for all Spot tasks."""
+    for task_name in _SPOT_TASK_NAMES:
+        set_config_overrides(
+            task_name,
+            ControllerConfig,
+            {
+                "horizon": 2.0,
+            },
+        )
 
 
 def set_default_fr3_pick_overrides() -> None:

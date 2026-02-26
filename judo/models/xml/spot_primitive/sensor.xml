@@ -4,8 +4,14 @@
 <!-- Additional sensors should be added to dexterity/sene_generation/__init__.py -->
   <sensor>
     <framepos name="sensor_body" objtype="site" objname="site_body" reftype="site" refname="site_object" />
+    <framexaxis name="body_x_axis" objtype="site" objname="site_body"/>
     <frameyaxis name="object_y_axis" objtype="site" objname="site_object"/>
     <framezaxis name="object_z_axis" objtype="site" objname="site_object"/>
+    <framepos name="trace_fngr_site" objtype="site" objname="site_arm_link_fngr"/>
+    <framepos name="fl_pos" objtype="site" objname="site_front_left"/>
+    <framepos name="fr_pos" objtype="site" objname="site_front_right"/>
+    <framepos name="hl_pos" objtype="site" objname="site_rear_left"/>
+    <framepos name="hr_pos" objtype="site" objname="site_rear_right"/>
     <framepos name="sensor_arm_link_sh0" objtype="site" objname="site_arm_link_sh0" reftype="site" refname="site_object" />
     <framepos name="sensor_arm_link_sh1" objtype="site" objname="site_arm_link_sh1" reftype="site" refname="site_object" />
     <framepos name="sensor_arm_link_el0" objtype="site" objname="site_arm_link_el0" reftype="site" refname="site_object" />
