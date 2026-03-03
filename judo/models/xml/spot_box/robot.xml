@@ -12,7 +12,7 @@
     <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5" dir="0 0 -1" castshadow="false"/>
     <light directional="true" diffuse=".6 .6 .6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>
 
-    <geom name="ground" type="plane" size="10 10 0.01" class="collision" priority="5" friction="0.8" material="blue_grid"/>
+    <geom name="ground" type="plane" size="10 10 0.01" class="collision" priority="5" friction="0.7" material="blue_grid"/>
 
     <body name="body" pos="0 0 0.52">
       <include file="../spot_primitive/body.xml" />
@@ -24,7 +24,7 @@
     <body name="box_body" pos="2 0 0.254">
       <joint name="box_joint" type="free"/>
       <inertial pos="0 0 0" mass="1.5" diaginertia="0.1445 0.1445 0.1445"/>
-      <geom name="box_collision" type="box" size="0.254 0.254 0.254" class="collision" priority="6"/>
+      <geom name="box_collision" type="box" size="0.254 0.254 0.254" class="collision" priority="4"/>
       <geom name="box_visual" type="box" size="0.254 0.254 0.254" class="visual" rgba="0.6 0.3 0.1 1"/>
       <site name="site_object" pos="0 0 0" size="0.01"/>
     </body>

@@ -3,7 +3,6 @@
 """MuJoCo Simulation with locomotion policy support."""
 
 from pathlib import Path
-from typing import NoReturn
 
 import numpy as np
 from mujoco import mj_forward
@@ -15,17 +14,11 @@ from judo.tasks.spot.spot_constants import DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME, POL
 try:
     from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore
 except ImportError as e:
-    _import_error = e
-
-    def _raise(*args: object, **kwargs: object) -> NoReturn:
-        raise ImportError(
-            "mujoco_extensions is not built. Spot locomotion tasks require the C++ extension.\n"
-            "Build it with:  pixi run build\n"
-            "See README.md for details."
-        ) from _import_error
-
-    create_systems_vector = _raise  # type: ignore[assignment]
-    threaded_rollout = _raise  # type: ignore[assignment]
+    raise ImportError(
+        "mujoco_extensions is not built. Spot locomotion tasks require the C++ extension.\n"
+        "Build it with:  pixi run build\n"
+        "See README.md for details."
+    ) from e
 
 
 class PolicyMJSimulation(MJSimulation):
