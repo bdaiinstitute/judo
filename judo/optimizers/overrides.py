@@ -199,9 +199,19 @@ def _set_spot_optimizer_overrides(task_name: str) -> None:
     set_config_overrides(task_name, MPPIConfig, _spot_base)
 
 
-def set_default_spot_tire_upright_overrides() -> None:
-    """Sets the default task-specific optimizer config overrides for the spot_tire_upright task."""
-    _set_spot_optimizer_overrides("spot_tire_upright")
+_SPOT_TASK_NAMES = [
+    "spot_base",
+    "spot_box_push",
+    "spot_navigate",
+    "spot_tire_roll",
+    "spot_tire_upright",
+]
+
+
+def set_default_spot_overrides() -> None:
+    """Sets the default task-specific optimizer config overrides for all Spot tasks."""
+    for task_name in _SPOT_TASK_NAMES:
+        _set_spot_optimizer_overrides(task_name)
 
 
 def set_default_fr3_pick_overrides() -> None:

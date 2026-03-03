@@ -94,9 +94,14 @@
   <!-- Sensors for task rewards -->
   <sensor>
     <framepos name="sensor_body" objtype="site" objname="site_body"/>
+    <framexaxis name="body_x_axis" objtype="site" objname="site_body"/>
+    <framexaxis name="object_x_axis" objtype="site" objname="site_object"/>
     <frameyaxis name="object_y_axis" objtype="site" objname="site_object"/>
     <framezaxis name="object_z_axis" objtype="site" objname="site_object"/>
     <framepos name="trace_fngr_site" objtype="site" objname="site_arm_link_fngr"/>
+    <framexaxis name="gripper_x_axis" objtype="site" objname="site_arm_link_wr1"/>
+    <frameyaxis name="gripper_y_axis" objtype="site" objname="site_arm_link_wr1"/>
+    <framexaxis name="finger_x_axis" objtype="site" objname="site_arm_link_fngr"/>
     <framepos name="fl_pos" objtype="site" objname="site_front_left"/>
     <framepos name="fr_pos" objtype="site" objname="site_front_right"/>
     <framepos name="hl_pos" objtype="site" objname="site_rear_left"/>

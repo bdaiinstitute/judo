@@ -88,15 +88,25 @@ class SpotBase(Task[ConfigT], Generic[ConfigT]):
     config_t: type[SpotBaseConfig] = SpotBaseConfig  # type: ignore[assignment]
 
     def _process_spec(self) -> None:
-        """Replace Spot mesh and texture paths with mujoco_menagerie assets."""
+        """Replace mesh and texture paths with correct resolved paths.
+
+        MjSpec resolves mesh file paths relative to the included file's directory,
+        ignoring the parent model's meshdir. We fix this by rewriting:
+        - Spot robot meshes → mujoco_menagerie assets (from robot_descriptions)
+        - Object meshes (tire, wheel_rim, etc.) → MODEL_PATH/meshes/objects/...
+        """
         from robot_descriptions import spot_mj_description  # noqa: PLC0415
 
         menagerie_dir = Path(spot_mj_description.PACKAGE_PATH)
         menagerie_assets = menagerie_dir / "assets"
+        meshes_root = MODEL_PATH / "meshes"
         for mesh in self.spec.meshes:
             if "spot/meshes/" in mesh.file:
                 basename = Path(mesh.file).name
                 mesh.file = str(menagerie_assets / basename)
+            elif "objects/" in mesh.file:
+                idx = mesh.file.index("objects/")
+                mesh.file = str(meshes_root / mesh.file[idx:])
         for texture in self.spec.textures:
             if "spot/textures/" in texture.file:
                 texture.file = str(menagerie_dir / "spot.png")
@@ -341,7 +351,9 @@ class SpotBase(Task[ConfigT], Generic[ConfigT]):
             controls = controls[:, None, :]
             T = 1
 
-        out = np.zeros((controls.shape[0], controls.shape[1], 25), dtype=controls.dtype)
+        # Initialize from default_policy_command so uncontrolled dimensions
+        # keep their defaults (e.g. arm stays at ARM_STOWED_POS when use_arm=False)
+        out = np.broadcast_to(self.default_policy_command, (controls.shape[0], controls.shape[1], 25)).copy()
 
         # Index calculations after selection mask removal
         base_end = 3
@@ -351,9 +363,6 @@ class SpotBase(Task[ConfigT], Generic[ConfigT]):
 
         # Base velocity
         out[..., 0:3] = controls[..., 0:base_end]
-
-        # Default torso height
-        out[..., 24] = STANDING_HEIGHT
 
         # Arm commands
         if self.use_arm:

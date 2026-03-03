@@ -17,11 +17,10 @@ SPOT_LOCOMOTION_POLICY_PATH = MODEL_PATH / "policies" / "spot_locomotion.onnx"
 # Default rollout cutoff time (125ms for 8Hz MPC)
 DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME: float = 0.125
 
-# Number of locomotion policy outputs (leg actions)
-POLICY_OUTPUT_DIM = 12
-
 # Number of legs
 N_LEGS = 4
+N_LEG_JOINTS = 3
+POLICY_OUTPUT_DIM = N_LEGS * N_LEG_JOINTS  # 12 leg actuator commands
 
 ### Joint Names
 LEG_JOINT_NAMES_BOSDYN = [
@@ -116,6 +115,13 @@ BASE_SOFT_LIMITS = 0.7 * np.ones(3)
 TORSO_LOWER = np.array([-0.0, -1.0, 0.3])
 TORSO_UPPER = np.array([+0.0, +1.0, 1.0])
 
-### Object constants (for tire tasks)
+### Object constants
+# Synced from starfish/dexterity/spot_interface/spot/constants.py
+Z_AXIS = np.array([0.0, 0.0, 1.0])
+
+# Tire
 TIRE_RADIUS = 0.33
 TIRE_HALF_WIDTH = 0.17
+
+# Box
+BOX_HALF_LENGTH = 0.254

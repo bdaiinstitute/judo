@@ -10,7 +10,15 @@ from omegaconf import DictConfig
 
 from judo.simulation.mj_simulation import MJSimulation
 from judo.tasks.spot.spot_constants import DEFAULT_SPOT_ROLLOUT_CUTOFF_TIME, POLICY_OUTPUT_DIM
-from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore
+
+try:
+    from mujoco_extensions.policy_rollout import create_systems_vector, threaded_rollout  # type: ignore
+except ImportError as e:
+    raise ImportError(
+        "mujoco_extensions is not built. Spot locomotion tasks require the C++ extension.\n"
+        "Build it with:  pixi run build\n"
+        "See README.md for details."
+    ) from e
 
 
 class PolicyMJSimulation(MJSimulation):
