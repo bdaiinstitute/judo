@@ -18,7 +18,6 @@ from judo.config import OverridableConfig
 from judo.gui import slider
 from judo.optimizers import Optimizer, OptimizerConfig, get_registered_optimizers
 from judo.tasks import Task, TaskConfig, get_registered_tasks
-from judo.tasks.spot.spot_constants import POLICY_OUTPUT_DIM
 from judo.utils.mj_rollout_backend import MJRolloutBackend
 from judo.utils.normalization import (
     IdentityNormalizer,
@@ -82,20 +81,19 @@ class Controller:
         if not isinstance(rollout_backend, str):
             # MJWarpRolloutBackend instance (avoid isinstance check to skip mujoco_warp import)
             self.rollout_backend = rollout_backend
+        elif self.task.uses_locomotion_policy:
+            assert self.task.locomotion_policy_path is not None
+            self.rollout_backend: RolloutBackend = PolicyMJRolloutBackend(
+                model=self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+                policy_path=self.task.locomotion_policy_path,
+                physics_substeps=self.task.physics_substeps,
+            )
         else:
-            if self.task.uses_locomotion_policy:
-                assert self.task.locomotion_policy_path is not None
-                self.rollout_backend: RolloutBackend = PolicyMJRolloutBackend(
-                    model=self.model,
-                    num_threads=self.optimizer_cfg.num_rollouts,
-                    policy_path=self.task.locomotion_policy_path,
-                    physics_substeps=self.task.physics_substeps,
-                )
-            else:
-                self.rollout_backend = MJRolloutBackend(
-                    model=self.model,
-                    num_threads=self.optimizer_cfg.num_rollouts,
-                )
+            self.rollout_backend = MJRolloutBackend(
+                model=self.model,
+                num_threads=self.optimizer_cfg.num_rollouts,
+            )
 
         self._last_policy_output = None
         self.action_normalizer = self._init_action_normalizer()

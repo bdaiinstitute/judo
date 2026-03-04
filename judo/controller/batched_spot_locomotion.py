@@ -27,7 +27,7 @@ def build_observation_kernel(
     joints_offset: wp.array(dtype=wp.float32),
     mj_to_isaac: wp.array(dtype=wp.int32),
     obs: wp.array2d(dtype=wp.float32),
-):
+) -> None:
     """Build 84-dim observation from state, command, and previous actions.
 
     Per-thread (one thread per batch element):
@@ -103,7 +103,7 @@ def compute_targets_kernel(
     isaac_to_mj: wp.array(dtype=wp.int32),
     action_scale: float,
     target_q: wp.array2d(dtype=wp.float32),
-):
+) -> None:
     """Post-process policy actions into 19-dim target_q.
 
     Per-thread:

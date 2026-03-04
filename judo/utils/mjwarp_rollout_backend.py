@@ -21,7 +21,7 @@ def _copy_target_to_ctrl(
     target_q: wp.array2d(dtype=wp.float32),
     ctrl: wp.array2d(dtype=wp.float32),
     n_controlled: int,
-):
+) -> None:
     """Copy target_q into the first n_controlled columns of ctrl."""
     i = wp.tid()
     for j in range(n_controlled):
@@ -31,14 +31,23 @@ def _copy_target_to_ctrl(
 class PassThroughController:
     """Passes commands through as target joint positions (no locomotion policy)."""
 
-    def compute_batch(self, cmd, qpos, qvel, previous_actions):
+    def compute_batch(
+        self,
+        cmd: wp.array,
+        qpos: wp.array,
+        qvel: wp.array,
+        previous_actions: wp.array | None,
+    ) -> tuple[wp.array, wp.array | None]:
+        """Return commands directly as targets and preserve previous policy outputs."""
         return cmd, None
 
-    def reset(self):
+    def reset(self) -> None:
+        """Reset controller state (no-op for pass-through mode)."""
         pass
 
     @property
-    def target_frequency(self):
+    def target_frequency(self) -> float:
+        """Policy update frequency in Hz for pass-through mode."""
         return float("inf")
 
 
